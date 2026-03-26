@@ -39,6 +39,9 @@ java -jar oddtoolkit.jar --generator=java
 
 # Generate TypeScript types
 java -jar oddtoolkit.jar --generator=typescript
+
+# Generate all registered outputs
+java -jar oddtoolkit.jar --generator=all
 ```
 
 ### Available Generators
@@ -47,6 +50,7 @@ The following generators are available:
 
 | Generator | Name | Description |
 |-----------|------|-------------|
+| All generators | `all` | Executes all registered generators in one run |
 | Class Diagram | `class-diagram` | Generates Mermaid class diagram from ontology |
 | Entity-Relationship Diagram | `er-diagram` | Generates Mermaid ER diagram for database design |
 | SQL | `sql` | Generates SQL DDL statements |

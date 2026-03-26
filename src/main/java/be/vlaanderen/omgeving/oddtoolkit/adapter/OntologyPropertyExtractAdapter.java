@@ -1,5 +1,6 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
@@ -14,15 +15,12 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
-@Component("ontology-property-extract")
 @AdapterDependency({
     OntologyClassExtractAdapter.class,
     OntologyUriTemplateAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-property-extract.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-property-extract.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyPropertyExtractAdapter extends AbstractAdapter<OntologyInfo> {
 
   public static final Logger logger = LoggerFactory.getLogger(OntologyPropertyExtractAdapter.class);

@@ -2,8 +2,10 @@ ontology:
   ontology-file-path: "src/test/resources/examples/ns/riepr/riepr.ttl"
   concepts-file-path: "src/test/resources/examples/id/concept/riepr/riepr.ttl"
   enum-classes:
-    - "http://www.w3.org/ns/sosa/Procedure"
-    - "http://www.w3.org/ns/adms#Status"
+    classes:
+      - "http://www.w3.org/ns/sosa/Procedure"
+      - "http://www.w3.org/ns/adms#Status"
+    trim-class-name-from-values: true
   temporal-properties:
     - "http://purl.org/dc/terms/created"
     - "http://purl.org/dc/terms/issued"
@@ -34,12 +36,6 @@ ontology:
       cardinality:
         max: 1
         min: 1
-  metadata-classes:
-    suffix: "Metadata"
-    key: "http://purl.org/dc/terms/type"
-    value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    classes:
-      - "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissiepunt"
   override-properties:
     # Labels and comments can be available in multiple languages
     # In our application we only want one label and comment per entity
@@ -58,6 +54,9 @@ ontology:
     # By setting the datatype to rdfs:Datatype, we create a new attribute for the datatype
     - uri: "http://www.w3.org/2004/02/skos/core#notation"
       datatype: "http://www.w3.org/2000/01/rdf-schema#Datatype"
+  override-datatypes:
+    - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"
+      override: "http://www.w3.org/2001/XMLSchema#string"
 
 generators:
   class-diagram:
@@ -73,6 +72,8 @@ generators:
     output-directory: "target/test-cache/java"
   typescript-generator:
     output-directory: "target/test-cache/typescript"
+  data-frame-generator:
+    output-file: "target/test-cache/dataframe/frame.json"
 
   schema-generator:
     # Create stable identity tables for classes that have more than one primary key
@@ -85,6 +86,9 @@ generators:
     merge-join-tables:
       enabled: true
       attribute-name: "relation_type"
+      excluded-pairs:
+        - source-uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"
+          target-uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"
 
   diagram-generator:
     styles:

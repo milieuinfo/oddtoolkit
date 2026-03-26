@@ -1,6 +1,7 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,18 +11,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Resolver for multi-source configuration.
- * Loads configuration from JSON or environment variables.
- *
- * Note: YAML support requires jackson-dataformat-yaml dependency.
- * For now, use JSON files or implement custom YAML loader.
+ * Loads configuration from JSON/YAML or environment variables.
  */
 public class ConfigurationSourceResolver {
 
   private static final Logger logger = LoggerFactory.getLogger(ConfigurationSourceResolver.class);
   private static final ObjectMapper jsonMapper = new ObjectMapper();
+  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
   /**
-   * Load configuration from a JSON file.
+   * Load configuration from a JSON or YAML file.
    *
    * @param filePath path to configuration file
    * @return parsed configuration map
@@ -42,10 +41,10 @@ public class ConfigurationSourceResolver {
       if (filePath.endsWith(".json")) {
         return jsonMapper.readValue(file, Map.class);
       } else if (filePath.endsWith(".yml") || filePath.endsWith(".yaml")) {
-        logger.warn("YAML support requires jackson-dataformat-yaml dependency. Use JSON files instead.");
-        return new HashMap<>();
+        return yamlMapper.readValue(file, Map.class);
       } else {
-        logger.warn("Unsupported configuration file format: {}. Supported: .json", filePath);
+        logger.warn("Unsupported configuration file format: {}. Supported: .json, .yml, .yaml",
+            filePath);
         return new HashMap<>();
       }
     } catch (IOException e) {
@@ -83,4 +82,3 @@ public class ConfigurationSourceResolver {
     return value != null ? value : defaultValue;
   }
 }
-

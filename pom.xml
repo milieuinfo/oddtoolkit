@@ -3,82 +3,109 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.2</version>
-    <relativePath/>
-  </parent>
+
   <groupId>be.vlaanderen.omgeving</groupId>
   <artifactId>oddtoolkit</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>oddtoolkit</name>
   <description>oddtoolkit</description>
-  <url/>
-  <licenses>
-    <license/>
-  </licenses>
-  <developers>
-    <developer>
-      <id>maximvdw</id>
-      <name>Maxim Van de Wynckel</name>
-      <email>maxim.vandewynckel@vlaanderen.be</email>
-    </developer>
-  </developers>
-  <scm>
-    <connection/>
-    <developerConnection/>
-    <tag/>
-    <url/>
-  </scm>
+
   <properties>
     <java.version>21</java.version>
+    <main.class>be.vlaanderen.omgeving.oddtoolkit.OddtoolkitApplication</main.class>
+    <lombok.version>1.18.38</lombok.version>
+    <jackson.version>2.20.2</jackson.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <logback.version>1.5.20</logback.version>
+    <junit.version>5.13.4</junit.version>
+    <assertj.version>3.27.4</assertj.version>
   </properties>
+
   <dependencies>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
 
-    <!-- Apache Jena -->
+    <!-- jena-arq transitively provides jena-core (Model, Reasoner, vocabularies)
+         and RIOT parsers (TTL/RDF-XML/JSON-LD). Heavy modules not used by this
+         project are explicitly excluded. -->
     <dependency>
       <groupId>org.apache.jena</groupId>
-      <artifactId>apache-jena-libs</artifactId>
-      <version>4.8.0</version>
-      <type>pom</type>
+      <artifactId>jena-arq</artifactId>
+      <version>4.9.0</version>
+      <exclusions>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-tdb</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-tdb2</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-shacl</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-shex</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-rdfconnection</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-rdfpatch</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-dboe-base</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-dboe-index</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-dboe-storage</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-dboe-trans-data</artifactId></exclusion>
+        <exclusion><groupId>org.apache.jena</groupId><artifactId>jena-dboe-transaction</artifactId></exclusion>
+      </exclusions>
     </dependency>
 
-    <!-- Testing -->
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.27.4</version>
-    </dependency>
-
-    <!-- Mermaid export to PNG -->
     <dependency>
       <groupId>com.microsoft.playwright</groupId>
       <artifactId>playwright</artifactId>
       <version>1.50.0</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
+    <finalName>oddtoolkit</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.1</version>
         <configuration>
           <annotationProcessorPaths>
             <path>
@@ -87,25 +114,119 @@
               <version>${lombok.version}</version>
             </path>
           </annotationProcessorPaths>
-          <release>21</release>
+          <release>${java.version}</release>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.3</version>
       </plugin>
+
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
         <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-            </exclude>
-          </excludes>
+          <finalName>oddtoolkit</finalName>
+          <archive>
+            <manifest>
+              <mainClass>${main.class}</mainClass>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+            </manifest>
+          </archive>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>copy-runtime-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <!-- Hard-exclude heavy Jena sub-modules that are transitively pulled
+                   in by jena-arq but not actually used by this project. -->
+              <artifactSet>
+                <excludes>
+                  <exclude>org.apache.jena:jena-tdb</exclude>
+                  <exclude>org.apache.jena:jena-tdb2</exclude>
+                  <exclude>org.apache.jena:jena-shacl</exclude>
+                  <exclude>org.apache.jena:jena-shex</exclude>
+                  <exclude>org.apache.jena:jena-rdfconnection</exclude>
+                  <exclude>org.apache.jena:jena-rdfpatch</exclude>
+                  <exclude>org.apache.jena:jena-dboe-base</exclude>
+                  <exclude>org.apache.jena:jena-dboe-index</exclude>
+                  <exclude>org.apache.jena:jena-dboe-storage</exclude>
+                  <exclude>org.apache.jena:jena-dboe-trans-data</exclude>
+                  <exclude>org.apache.jena:jena-dboe-transaction</exclude>
+                  <!-- Playwright driver binaries (~130 MB) — downloaded at runtime -->
+                  <exclude>com.microsoft.playwright:driver</exclude>
+                  <exclude>com.microsoft.playwright:driver-bundle</exclude>
+                </excludes>
+              </artifactSet>
+              <filters>
+                <!-- Strip any remaining Playwright embedded browser driver resources -->
+                <filter>
+                  <artifact>com.microsoft.playwright:playwright</artifact>
+                  <excludes>
+                    <exclude>driver/**</exclude>
+                    <exclude>META-INF/maven/com.microsoft.playwright/**</exclude>
+                  </excludes>
+                </filter>
+                <!-- Drop duplicate/conflicting META-INF files that cause shade warnings -->
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/LICENSE</exclude>
+                    <exclude>META-INF/LICENSE.txt</exclude>
+                    <exclude>META-INF/NOTICE</exclude>
+                    <exclude>META-INF/NOTICE.txt</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>${main.class}</mainClass>
+                </transformer>
+                <!-- Merge Jena's ServiceLoader registrations so ARQ/RIOT
+                     services are still found after shading. -->
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -128,5 +249,5 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
+

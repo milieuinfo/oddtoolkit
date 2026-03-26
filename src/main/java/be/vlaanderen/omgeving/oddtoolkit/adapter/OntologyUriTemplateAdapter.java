@@ -1,17 +1,15 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
 import be.vlaanderen.omgeving.oddtoolkit.model.UriTemplate;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @AdapterDependency({
     OntologyClassExtractAdapter.class,
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-uri-template.enabled", havingValue = "true", matchIfMissing = true)
-@Component("ontology-uri-template")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-uri-template.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyUriTemplateAdapter extends AbstractAdapter<OntologyInfo> {
 
   public OntologyUriTemplateAdapter() {

@@ -44,7 +44,7 @@ public class CliConfiguration {
         if (cleanArg.contains("=")) {
           String[] parts = cleanArg.split("=", 2);
           String key = parts[0];
-          String value = parts[1];
+          String value = parts[1].trim();
 
           switch (key) {
             case "generator" -> config.setGeneratorName(value);
@@ -87,6 +87,15 @@ public class CliConfiguration {
     return System.getenv(envKey);
   }
 
+  /**
+   * Check if the special "all generators" mode is requested.
+   *
+   * @return true if the generator name is "all" (case-insensitive)
+   */
+  public boolean isAllGeneratorsRequested() {
+    return generatorName != null && "all".equalsIgnoreCase(generatorName.trim());
+  }
+
   @Override
   public String toString() {
     return "CliConfiguration{" +
@@ -101,4 +110,3 @@ public class CliConfiguration {
         '}';
   }
 }
-

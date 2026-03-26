@@ -3,11 +3,9 @@ package be.vlaanderen.omgeving.oddtoolkit.adapter;
 import be.vlaanderen.omgeving.oddtoolkit.model.AbstractInfo;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@Component
 public abstract class AbstractAdapter<T extends AbstractInfo> {
   private T info;
   private final Class<T> infoClass;

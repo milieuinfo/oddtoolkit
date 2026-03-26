@@ -91,14 +91,14 @@
 
 # ---------------------------------------- #
 
-:geimplementeerdDoor a skos:Concept ;
+:systeem a skos:Concept ;
     skos:prefLabel "geïmplementeerd door"@nl ;
     skos:definition "De eigenschap die de implementatie van een processtap door een agent beschrijft."@nl ;
     owl:equivalentProperty ssn:implementedBy ;
     skos:inScheme <> .
 
-:implementeert a skos:Concept ;
-    skos:prefLabel "implementeert"@nl ;
+:implementeertProces a skos:Concept ;
+    skos:prefLabel "implementeert proces"@nl ;
     skos:definition "De eigenschap die de implementatie van een processtap door een agent beschrijft."@nl ;
     owl:equivalentProperty ssn:implements ;
     skos:inScheme <> .
@@ -134,7 +134,7 @@
     owl:equivalentProperty sosa:isHostedBy, ssn:deployedOnPlatform ;
 	skos:inScheme <> .
 
-:inzetbaarSysteem a skos:Concept ;
+:systemen a skos:Concept ;
     skos:prefLabel "inzetbaar systeem"@nl ;
     skos:definition "De eigenschap die de relatie tussen een proces en een systeem beschrijft, waarbij het systeem inzetbaar is voor de uitvoering van het proces."@nl ;
     owl:equivalentProperty ssn:deployedSystem ;
@@ -196,8 +196,8 @@
     owl:equivalentProperty pplan:isStepOfPlan ;
     skos:inScheme <> .
 
-:gaatVoorafAan a skos:Concept ;
-    skos:prefLabel "gaat vooraf aan"@nl ;
+:volgtOp a skos:Concept ;
+    skos:prefLabel "volgt op"@nl ;
     skos:definition "De eigenschap die aangeeft welke stap direct voorafgaat aan een andere stap binnen hetzelfde plan."@nl ;
     owl:equivalentProperty pplan:isPrecededBy ;
     skos:inScheme <> .
@@ -212,19 +212,6 @@
     skos:prefLabel "beschrijving"@nl ;
     skos:definition "De eigenschap die een nadere toelichting of commentaar bij een entiteit geeft."@nl ;
     owl:equivalentProperty rdfs:comment ;
-    skos:inScheme <> .
-
-:diameter a skos:Concept ;
-    skos:prefLabel "diameter"@nl ;
-    skos:definition "De eigenschap die de diameter van een object beschrijft."@nl ;
-    owl:equivalentProperty dbo:diameter ;
-    skos:inScheme <> .
-
-:diepte a skos:Concept ;
-    skos:prefLabel "diepte"@nl ;
-    skos:definition "De eigenschap die de diepte van een object beschrijft."@nl ;
-    skos:exactMatch dbo:depth ;
-    owl:equivalentProperty dbo:depth ;
     skos:inScheme <> .
 
 :heeftInvoer a skos:Concept ;
@@ -265,6 +252,12 @@
     skos:prefLabel "systeem"@nl ;
     skos:definition "Een systeem dat betrokken is bij de uitvoering van een proces."@nl ;
     owl:equivalentClass ssn:System ;
+    skos:inScheme <> .
+
+:SysteemEigenschap a skos:Concept ;
+    skos:prefLabel "systeemeigenschap"@nl ;
+    skos:definition "Een eigenschap die betrekking heeft op een systeem."@nl ;
+    owl:equivalentClass ssn:Property ;
     skos:inScheme <> .
 
 :heeftEigenschap a skos:Concept ;

@@ -1,16 +1,11 @@
 package be.vlaanderen.omgeving.oddtoolkit.generator;
 
+import be.vlaanderen.omgeving.oddtoolkit.TestGeneratorFactory;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class SQLGeneratorTest {
 
-  @Qualifier("sqlGenerator")
-  @Autowired
-  SQLGenerator generator;
+  private final SQLGenerator generator = TestGeneratorFactory.generator("sql", SQLGenerator.class);
 
   @Test
   void testRunGeneratesDiagram() {
@@ -18,4 +13,3 @@ public class SQLGeneratorTest {
     generator.run();
   }
 }
-

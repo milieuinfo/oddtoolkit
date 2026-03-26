@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,12 @@ import org.apache.jena.atlas.lib.Pair;
 import org.jspecify.annotations.Nullable;
 
 public class JavaGenerator extends SchemaGenerator {
+
+  private static final Comparator<Pair<String, String>> DEPENDENCY_ORDER = Comparator
+      .comparing((Pair<String, String> p) -> p != null ? p.getLeft() : null,
+          Comparator.nullsLast(String::compareTo))
+      .thenComparing(p -> p != null ? p.getRight() : null,
+          Comparator.nullsLast(String::compareTo));
 
   private final Map<Clazz, String> fileNames = new HashMap<>();
   private final Map<String, String> nameMapping = new HashMap<>();
@@ -98,6 +105,7 @@ public class JavaGenerator extends SchemaGenerator {
           // Skip dependencies in the same package
           .stream()
           .filter(dep -> !dep.getLeft().equals(getPackageName()))
+          .sorted(DEPENDENCY_ORDER)
           .forEach(
               dep -> builder.append("import ").append(dep.getLeft()).append('.')
                   .append(dep.getRight())
@@ -163,9 +171,7 @@ public class JavaGenerator extends SchemaGenerator {
       if (clazz instanceof Enum enumClazz) {
         // For enums, we can add the enum values as constants
         enumClazz.getValues().forEach(value -> {
-          // Add comment
-          builder.append("\t// ").append(value.getUri()).append("\n");
-          builder.append("\t").append(value.getName()).append(",\n");
+          builder.append("\t").append(value.getName()).append(" = \"").append(value.getUri()).append("\"").append(",\n");
         });
       }
       clazz.getAttributes().forEach(prop -> {
@@ -225,9 +231,21 @@ public class JavaGenerator extends SchemaGenerator {
               }
             }
           } else if (prop.getRange() == null) {
-            // Atomic attribute
-            builder.append("\t@Column(name = \"").append(equivalentColumn.getName())
-                .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
+            // Atomic attribute - check if it's a merge-join-tables discriminator column
+            String columnName = equivalentColumn.getName();
+            String mergeJoinTableAttributeName = getSchemaGeneratorProperties().getMergeJoinTables()
+                .getAttributeName();
+
+            if (isMergeJoinTablesColumn(equivalentTable, columnName, mergeJoinTableAttributeName)) {
+              // This is a merge-join-tables discriminator column - treat as regular column with enum type
+              builder.append("\t@Column(name = \"").append(columnName)
+                  .append("\", nullable = ").append(equivalentColumn.isNullable())
+                  .append(", insertable = true, updatable = true)\n");
+            } else {
+              // Regular atomic attribute
+              builder.append("\t@Column(name = \"").append(columnName)
+                  .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
+            }
           } else if (!prop.getCardinality().equals(Cardinality.MANY_TO_MANY)) {
             Table rangeTable = getTableByClazz(prop.getRange());
             if (rangeTable != null) {
@@ -265,7 +283,9 @@ public class JavaGenerator extends SchemaGenerator {
     }
     clazz.getInterfaces()
         .forEach(i -> dependencies.add(new Pair<>(getPackageName(), nameMapping.get(i.getName()))));
-    return dependencies.stream().toList();
+    return dependencies.stream()
+        .sorted(DEPENDENCY_ORDER)
+        .toList();
   }
 
   protected void saveToFile(String fileName, String content) {
@@ -291,6 +311,12 @@ public class JavaGenerator extends SchemaGenerator {
           getJavaPackageAndClassName(LocalDateTime.class);
       default -> {
         String name = nameMapping.get(dataType.getName());
+        if (name == null) {
+          name = dataType.getName();
+        }
+        if (name == null || name.isBlank()) {
+          name = "Object";
+        }
         String packageName = getPackageName();
         yield new Pair<>(packageName, name);
       }
@@ -301,6 +327,20 @@ public class JavaGenerator extends SchemaGenerator {
     String packageName = clazz.getPackageName();
     String className = clazz.getSimpleName();
     return new Pair<>(packageName, className);
+  }
+
+  /**
+   * Check if a column is a merge-join-tables discriminator column.
+   * These columns are added by the merge-join-tables feature to distinguish between
+   * different many-to-many relationships to the same target table.
+   */
+  private boolean isMergeJoinTablesColumn(Table table, String columnName,
+      String mergeJoinTableAttributeName) {
+    // A column is a merge-join-tables column if:
+    // 1. The table is a JOIN table
+    // 2. The column name matches the configured merge-join-tables attribute name
+    return table.getTableType() == TableType.JOIN
+        && columnName.equals(mergeJoinTableAttributeName);
   }
 
 }

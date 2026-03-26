@@ -10,10 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @Getter
 @Setter
 public class OntologyInfo extends AbstractInfo {
@@ -26,13 +23,13 @@ public class OntologyInfo extends AbstractInfo {
   private InfModel inferredModel;
   private Map<String, OntologyInfo> externalOntologies;
 
-  @Autowired
   public OntologyInfo(OntologyConfiguration config) {
     super(Scope.ONTOLOGY, null);
     this.config = config;
     this.concepts = new ConceptSchemeInfo(config);
   }
 
+  // Constructor for creating external ontology instances (non-Spring managed)
   public OntologyInfo(Scope scope, OntologyConfiguration config, ConceptSchemeInfo concepts) {
     super(scope, null);
     this.config = config;

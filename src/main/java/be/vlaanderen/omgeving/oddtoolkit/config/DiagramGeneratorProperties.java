@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Typed configuration for general diagram generators.
- * Binds to: generators.diagram-generator
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "generators.diagram-generator")
+@ConfigPrefix("generators.diagram-generator")
 public class DiagramGeneratorProperties {
   private String outputFile;
   private List<StyleEntry> styles;
+  // Set to false to skip PNG rendering (useful for thin runtime without Playwright internals).
+  private boolean exportPng = true;
 
   @Getter
   @Setter

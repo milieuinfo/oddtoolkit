@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Properties to configure which adapters are used by each generator and generator-specific settings.
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "")
 public class GeneratorProperties {
   // Map generatorName -> map of generator-specific properties (adapters, styles, etc.)
   private Map<String, Map<String, Object>> generators = new HashMap<>();

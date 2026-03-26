@@ -2,16 +2,13 @@ package be.vlaanderen.omgeving.oddtoolkit.config;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Typed properties for the ontology reasoner adapter.
- * Binds to: adapters.ontology-reasoner
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "adapters.ontology-reasoner")
+@ConfigPrefix("adapters.ontology-reasoner")
 public class OntologyReasonerProperties {
   private boolean enabled = true;
 
@@ -37,4 +34,3 @@ public class OntologyReasonerProperties {
   private boolean inferredOutputEnabled = false;
   private String inferredOutputPath = "";
 }
-

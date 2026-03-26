@@ -1,13 +1,11 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
-@ConditionalOnProperty(prefix = "adapters", name = "concept-scheme-load.enabled", havingValue = "true", matchIfMissing = true)
-@Component("concept-scheme-load")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "concept-scheme-load.enabled", havingValue = "true", matchIfMissing = true)
 public class ConceptSchemeLoadAdapter extends AbstractAdapter<ConceptSchemeInfo> {
 
   public ConceptSchemeLoadAdapter() {

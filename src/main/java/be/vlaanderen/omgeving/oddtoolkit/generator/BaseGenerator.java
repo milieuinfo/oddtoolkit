@@ -7,8 +7,13 @@ import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +31,26 @@ public abstract class BaseGenerator {
   protected final OntologyInfo ontologyInfo;
   protected final ConceptSchemeInfo conceptSchemeInfo;
   protected final List<AbstractAdapter<?>> adapters;
-  protected final Map<String, Object> config;
+
+  protected static final Comparator<ClassInfo> CLASS_INFO_ORDER = Comparator
+      .comparing((ClassInfo c) -> c != null ? c.getUri() : null,
+          Comparator.nullsLast(String::compareTo))
+      .thenComparing(c -> c != null ? c.getName() : null,
+          Comparator.nullsLast(String::compareTo));
+
+  protected static final Comparator<ClassConceptInfo> CLASS_CONCEPT_ORDER = Comparator
+      .comparing((ClassConceptInfo c) -> c != null ? c.getUri() : null,
+          Comparator.nullsLast(String::compareTo))
+      .thenComparing(c -> c != null ? c.getName() : null,
+          Comparator.nullsLast(String::compareTo));
 
   public BaseGenerator(
       OntologyInfo ontologyInfo,
       ConceptSchemeInfo conceptSchemeInfo,
-      List<AbstractAdapter<?>> adapters,
-      Map<String, Object> config) {
+      List<AbstractAdapter<?>> adapters) {
     this.ontologyInfo = ontologyInfo;
     this.conceptSchemeInfo = conceptSchemeInfo;
     this.adapters = adapters != null ? adapters : List.of();
-    this.config = config != null ? config : Map.of();
   }
 
   /**
@@ -46,7 +60,11 @@ public abstract class BaseGenerator {
    * @return generator name (e.g., "class-diagram", "sql", "typescript")
    */
   public String getName() {
-    return this.getClass().getSimpleName().toLowerCase();
+    String simpleName = this.getClass().getSimpleName();
+    String baseName = simpleName.endsWith("Generator")
+        ? simpleName.substring(0, simpleName.length() - "Generator".length())
+        : simpleName;
+    return toKebabCase(baseName);
   }
 
   /**
@@ -101,52 +119,6 @@ public abstract class BaseGenerator {
   }
 
   /**
-   * Get configuration value for a given key.
-   *
-   * @param key configuration key
-   * @return configuration value or null if not found
-   */
-  protected Object getConfigValue(String key) {
-    return config.get(key);
-  }
-
-  /**
-   * Get configuration value for a given key with a default value.
-   *
-   * @param key configuration key
-   * @param defaultValue default value if key not found
-   * @return configuration value or default
-   */
-  protected Object getConfigValue(String key, Object defaultValue) {
-    return config.getOrDefault(key, defaultValue);
-  }
-
-  /**
-   * Get string configuration value.
-   *
-   * @param key configuration key
-   * @return configuration value as string or null
-   */
-  protected String getConfigString(String key) {
-    Object value = config.get(key);
-    return value != null ? value.toString() : null;
-  }
-
-  /**
-   * Get boolean configuration value.
-   *
-   * @param key configuration key
-   * @param defaultValue default value if key not found or invalid
-   * @return configuration value as boolean
-   */
-  protected boolean getConfigBoolean(String key, boolean defaultValue) {
-    Object value = config.get(key);
-    if (value == null) return defaultValue;
-    if (value instanceof Boolean) return (Boolean) value;
-    return Boolean.parseBoolean(value.toString());
-  }
-
-  /**
    * Get all classes defined in the ontology
    *
    * @return a list of ClassInfo objects representing the classes
@@ -155,6 +127,7 @@ public abstract class BaseGenerator {
     // Get all classes defined in the ontology and filter them based on the provided scope
     return ontologyInfo.getClasses().stream()
         .filter(c -> c.getScope() == Scope.ONTOLOGY)
+        .sorted(CLASS_INFO_ORDER)
         .toList();
   }
 
@@ -164,7 +137,9 @@ public abstract class BaseGenerator {
    * @return a list of ClassInfo objects representing all classes
    */
   public List<ClassInfo> getAllClasses() {
-    return ontologyInfo.getClasses();
+    return ontologyInfo.getClasses().stream()
+        .sorted(CLASS_INFO_ORDER)
+        .toList();
   }
 
   /**
@@ -173,7 +148,12 @@ public abstract class BaseGenerator {
    * @return a list of ConceptInfo objects representing the class concepts in the concept scheme
    */
   public List<ClassConceptInfo> getOntologyClassConcepts() {
-    return conceptSchemeInfo.getClassConcepts();
+    if (conceptSchemeInfo == null || conceptSchemeInfo.getClassConcepts() == null) {
+      return List.of();
+    }
+    return conceptSchemeInfo.getClassConcepts().stream()
+        .sorted(CLASS_CONCEPT_ORDER)
+        .toList();
   }
 
   /**
@@ -216,5 +196,29 @@ public abstract class BaseGenerator {
         .replaceAll("([a-z])([A-Z]+)", "$1_$2")
         .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
         .toLowerCase();
+  }
+
+  protected static String toKebabCase(String input) {
+    String snakeCase = toSnakeCase(input);
+    return snakeCase != null ? snakeCase.replace('_', '-') : null;
+  }
+
+  protected void saveToFile(String outputFile, String content) {
+    if (outputFile == null) {
+      return;
+    }
+    try {
+      Path parentDir = Paths.get(outputFile).getParent();
+      if (parentDir != null) {
+        Files.createDirectories(parentDir);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to create directories for output file: " + outputFile, e);
+    }
+    try (FileWriter writer = new FileWriter(outputFile)) {
+      writer.write(content);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write diagram to file: " + outputFile, e);
+    }
   }
 }

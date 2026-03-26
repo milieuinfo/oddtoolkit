@@ -1,15 +1,13 @@
 package be.vlaanderen.omgeving.oddtoolkit;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import be.vlaanderen.omgeving.oddtoolkit.cli.GeneratorCliRunner;
+import be.vlaanderen.omgeving.oddtoolkit.config.GeneratorRegistry;
+import be.vlaanderen.omgeving.oddtoolkit.config.OddtoolkitBootstrap;
 
-@SpringBootApplication
-@ConfigurationPropertiesScan
 public class OddtoolkitApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(OddtoolkitApplication.class, args);
+  public static void main(String[] args) throws Exception {
+    GeneratorRegistry registry = OddtoolkitBootstrap.bootstrap(args);
+    new GeneratorCliRunner(registry).run(args);
   }
-
 }

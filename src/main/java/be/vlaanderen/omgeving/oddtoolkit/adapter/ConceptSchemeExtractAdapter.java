@@ -1,5 +1,6 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyConceptInfo;
@@ -10,14 +11,11 @@ import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SKOS;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @AdapterDependency({
     ConceptSchemeLoadAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "concept-scheme-extract.enabled", havingValue = "true", matchIfMissing = true)
-@Component("concept-scheme-extract")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "concept-scheme-extract.enabled", havingValue = "true", matchIfMissing = true)
 public class ConceptSchemeExtractAdapter extends AbstractAdapter<ConceptSchemeInfo> {
 
   public ConceptSchemeExtractAdapter() {

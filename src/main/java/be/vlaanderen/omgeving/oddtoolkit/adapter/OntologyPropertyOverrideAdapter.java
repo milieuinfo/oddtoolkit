@@ -1,16 +1,14 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
 import be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration;
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @AdapterDependency({
     OntologyPropertyExtractAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-property-override.enabled", havingValue = "true", matchIfMissing = true)
-@Component("ontology-property-override")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-property-override.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyPropertyOverrideAdapter extends AbstractAdapter<OntologyInfo> {
   private final OntologyConfiguration ontologyConfiguration;
 

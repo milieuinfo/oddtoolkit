@@ -12,7 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public abstract class DiagramGenerator extends ClassGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(DiagramGenerator.class);
   protected final DiagramGeneratorProperties diagramGeneratorProperties;
-  protected final Map<String, String> stylesMap = new HashMap<>();
+  protected final Map<String, String> stylesMap = new LinkedHashMap<>();
 
   public DiagramGenerator(OntologyInfo ontologyInfo,
       ConceptSchemeInfo conceptSchemeInfo, List<AbstractAdapter<?>> adapters,
@@ -46,8 +47,12 @@ public abstract class DiagramGenerator extends ClassGenerator {
     String outputFile = getOutputFile();
     if (outputFile != null) {
       saveToFile(outputFile, diagramContent);
-      // Save as high-resolution PNG with the same base filename
-      saveDiagramAsPng(outputFile, diagramContent);
+      if (diagramGeneratorProperties == null || diagramGeneratorProperties.isExportPng()) {
+        // Save as high-resolution PNG with the same base filename when enabled
+        saveDiagramAsPng(outputFile, diagramContent);
+      } else {
+        logger.info("PNG export disabled by configuration (generators.diagram-generator.export-png=false)");
+      }
     } else {
       System.out.println(diagramContent);
     }
@@ -68,6 +73,10 @@ public abstract class DiagramGenerator extends ClassGenerator {
       logger.info("Successfully exported diagram to PNG: {}", pngFilePath);
     } catch (IOException e) {
       logger.error("Failed to export diagram to PNG", e);
+    } catch (LinkageError | RuntimeException e) {
+      logger.warn("PNG export skipped: Playwright runtime is unavailable ({}). "
+          + "Set generators.diagram-generator.export-png=false to suppress this warning.",
+          e.getMessage());
     }
   }
 
@@ -81,7 +90,9 @@ public abstract class DiagramGenerator extends ClassGenerator {
       if (style != null && style.name != null && style.props != null) {
         builder.append("classDef ").append(style.name).append(" ");
         int i = 0;
-        for (Map.Entry<String, Object> e : style.props.entrySet()) {
+        for (Map.Entry<String, Object> e : style.props.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey(Comparator.nullsLast(String::compareTo)))
+            .toList()) {
           if (i++ > 0) {
             builder.append(',');
           }
@@ -217,25 +228,6 @@ public abstract class DiagramGenerator extends ClassGenerator {
    */
   protected void renderContent(StringBuilder builder, String type) {
 
-  }
-
-  protected void saveToFile(String outputFile, String content) {
-    if (outputFile == null) {
-      return;
-    }
-    try {
-      Path parentDir = Paths.get(outputFile).getParent();
-      if (parentDir != null) {
-        Files.createDirectories(parentDir);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to create directories for output file: " + outputFile, e);
-    }
-    try (FileWriter writer = new FileWriter(outputFile)) {
-      writer.write(content);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to write diagram to file: " + outputFile, e);
-    }
   }
 
   /**

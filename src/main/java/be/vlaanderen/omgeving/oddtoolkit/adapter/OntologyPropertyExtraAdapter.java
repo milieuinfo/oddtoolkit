@@ -1,20 +1,17 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
 import be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration;
-import be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration.ExtraProperty;
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo.Cardinality;
 import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @AdapterDependency({
     OntologyClassExtractAdapter.class,
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-property-extra.enabled", havingValue = "true", matchIfMissing = true)
-@Component("ontology-property-extra")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-property-extra.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyPropertyExtraAdapter extends AbstractAdapter<OntologyInfo> {
 
   private final OntologyConfiguration ontologyConfiguration;
@@ -51,7 +48,7 @@ public class OntologyPropertyExtraAdapter extends AbstractAdapter<OntologyInfo> 
     }
   }
 
-  private static PropertyInfo getPropertyInfo(ExtraProperty extraProperty, ClassInfo c) {
+  private static PropertyInfo getPropertyInfo(OntologyConfiguration.ExtraProperty extraProperty, ClassInfo c) {
     PropertyInfo propertyInfo = new PropertyInfo(c.getScope(), null);
     propertyInfo.setUri(extraProperty.getUri());
     propertyInfo.setName(extraProperty.getName());

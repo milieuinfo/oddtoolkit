@@ -1,43 +1,20 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
-import be.vlaanderen.omgeving.oddtoolkit.generator.ClassDiagramGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.ClassGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.ERDiagramGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.JavaGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.SQLGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.ShaclGenerator;
-import be.vlaanderen.omgeving.oddtoolkit.generator.TypescriptGenerator;
-import jakarta.annotation.PostConstruct;
+import be.vlaanderen.omgeving.oddtoolkit.generator.BaseGenerator;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class to register all generator beans with the GeneratorRegistry on application startup.
- * This enables dynamic access to generators by name through the registry.
+ * Helper to register generators with the GeneratorRegistry.
  */
-public record GeneratorRegistrationHelper(GeneratorRegistry registry, ClassGenerator classGenerator,
-                                          ClassDiagramGenerator classDiagramGenerator,
-                                          ERDiagramGenerator erDiagramGenerator,
-                                          SQLGenerator sqlGenerator, ShaclGenerator shaclGenerator,
-                                          JavaGenerator javaGenerator,
-                                          TypescriptGenerator typescriptGenerator) {
+public record GeneratorRegistrationHelper(GeneratorRegistry registry, List<BaseGenerator> generators) {
 
   private static final Logger logger = LoggerFactory.getLogger(GeneratorRegistrationHelper.class);
 
-  @PostConstruct
   public void registerGenerators() {
-    logger.info("Registering generators with GeneratorRegistry");
-
-    registry.register("class", classGenerator);
-    registry.register("class-diagram", classDiagramGenerator);
-    registry.register("er-diagram", erDiagramGenerator);
-    registry.register("sql", sqlGenerator);
-    registry.register("shacl", shaclGenerator);
-    registry.register("java", javaGenerator);
-    registry.register("typescript", typescriptGenerator);
-
-    logger.info(
-        "Available generators: class, class-diagram, er-diagram, sql, shacl, java, typescript");
+    logger.info("Registering {} generators with GeneratorRegistry", generators.size());
+    generators.forEach(generator -> registry.register(generator.getName(), generator));
+    logger.info("Available generators: {}", String.join(", ", registry.getAvailableGenerators()));
   }
 }
-

@@ -2,19 +2,15 @@ package be.vlaanderen.omgeving.oddtoolkit.generator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import be.vlaanderen.omgeving.oddtoolkit.TestGeneratorFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class ERDiagramGeneratorTest {
 
-  @Qualifier("erDiagramGenerator")
-  @Autowired
-  ERDiagramGenerator generator;
+  private final ERDiagramGenerator generator = TestGeneratorFactory.generator("er-diagram",
+      ERDiagramGenerator.class);
 
   @Test
   void testRunGeneratesDiagram() throws Exception {
@@ -32,4 +28,3 @@ public class ERDiagramGeneratorTest {
     }
   }
 }
-

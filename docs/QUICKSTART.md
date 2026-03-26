@@ -14,8 +14,11 @@ mvn clean package
 # Show available options
 java -jar target/oddtoolkit-*.jar --help
 
-# Run a generator
+# Run one generator
 java -jar target/oddtoolkit-*.jar --generator=class-diagram
+
+# Run all generators
+java -jar target/oddtoolkit-*.jar --generator=all
 
 # Run with custom config
 java -jar target/oddtoolkit-*.jar --generator=sql --config-file=config.yml
@@ -79,12 +82,7 @@ That's it!
 
 ### Run All Available Generators
 ```bash
-java -jar oddtoolkit.jar --generator=class-diagram
-java -jar oddtoolkit.jar --generator=er-diagram
-java -jar oddtoolkit.jar --generator=sql
-java -jar oddtoolkit.jar --generator=java
-java -jar oddtoolkit.jar --generator=typescript
-java -jar oddtoolkit.jar --generator=shacl
+java -jar oddtoolkit.jar --generator=all
 ```
 
 ### Use Configuration File

@@ -1,13 +1,15 @@
 package be.vlaanderen.omgeving.oddtoolkit;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@SpringBootTest
+import org.junit.jupiter.api.Test;
+
 class OddtoolkitApplicationTests {
 
   @Test
-  void contextLoads() {
+  void bootstrapLoads() {
+    assertDoesNotThrow(() ->
+        be.vlaanderen.omgeving.oddtoolkit.config.OddtoolkitBootstrap.bootstrap(
+            new String[]{"--config-file=src/test/resources/application.yml"}));
   }
-
 }

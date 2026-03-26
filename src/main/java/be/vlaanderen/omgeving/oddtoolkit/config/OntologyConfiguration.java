@@ -5,25 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties("ontology")
+@ConfigPrefix("ontology")
 public class OntologyConfiguration {
   // Path to the main ontology file
   private String ontologyFilePath;
 
   private String conceptsFilePath;
 
-  // List of class URIs that should be treated as enumerations (configuration key: ontology.enum-classes)
-  private List<String> enumClasses = new ArrayList<>();
+  // Configuration for ontology classes that should be treated as enumerations
+  // YAML key: ontology.enum-classes
+  private EnumClassesConfiguration enumClasses = new EnumClassesConfiguration();
 
   // Extra fixed properties you want to inject into generated classes
   // YAML key: ontology.extra-properties
   private List<ExtraProperty> extraProperties = new ArrayList<>();
 
   private List<OverrideProperty> overrideProperties = new ArrayList<>();
+
+  private List<OverrideDatatype> overrideDatatypes = new ArrayList<>();
 
   private List<String> temporalProperties = new ArrayList<>();
 
@@ -48,6 +50,13 @@ public class OntologyConfiguration {
 
   @Getter
   @Setter
+  public static class OverrideDatatype {
+    private String uri;
+    private String override;
+  }
+
+  @Getter
+  @Setter
   public static class ExtraProperty {
     private String name;
     private String uri;
@@ -55,5 +64,18 @@ public class OntologyConfiguration {
     private String range;
     private boolean identifier = false;
     private PropertyInfo.Cardinality cardinality;
+  }
+
+  @Getter
+  @Setter
+  public static class EnumClassesConfiguration {
+    // List of class URIs that should be treated as enumerations
+    // YAML key: ontology.enum-classes.classes
+    private List<String> classes = new ArrayList<>();
+
+    // If true, enum class name tokens are removed from enum value names when they are a
+    // redundant prefix or suffix (e.g. TRANSPORT_PROCEDURE -> TRANSPORT)
+    // YAML key: ontology.enum-classes.trim-class-name-from-values
+    private boolean trimClassNameFromValues = false;
   }
 }

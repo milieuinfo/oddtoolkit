@@ -5,12 +5,16 @@ import be.vlaanderen.omgeving.oddtoolkit.model.AbstractInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Cardinality;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
+import be.vlaanderen.omgeving.oddtoolkit.model.ConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
+import be.vlaanderen.omgeving.oddtoolkit.model.PropertyConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,30 +33,51 @@ public class ClassGenerator extends BaseGenerator {
   protected List<Interface> interfaces = new ArrayList<>();
   protected List<Enum> enums = new ArrayList<>();
 
+  private static final Comparator<Clazz> CLAZZ_ORDER = Comparator
+      .comparing((Clazz c) -> c != null ? c.getUri() : null, Comparator.nullsLast(String::compareTo))
+      .thenComparing(c -> c != null ? c.getName() : null, Comparator.nullsLast(String::compareTo));
+
+  private static final Comparator<EnumValue> ENUM_VALUE_ORDER = Comparator
+      .comparing((EnumValue v) -> v != null ? v.getUri() : null, Comparator.nullsLast(String::compareTo))
+      .thenComparing(v -> v != null ? v.getName() : null, Comparator.nullsLast(String::compareTo));
+
   public ClassGenerator(OntologyInfo ontologyInfo,
       ConceptSchemeInfo conceptSchemeInfo, List<AbstractAdapter<?>> adapters) {
-    super(ontologyInfo, conceptSchemeInfo, adapters, Map.of());
+    super(ontologyInfo, conceptSchemeInfo, adapters);
   }
 
+  /**
+   * Get the name and label for a class, if a class concept is defined for the class, use the name and label from the class concept
+   * otherwise use the name and label from the class info
+   *
+   * @param classInfo the class info for which to get the name and label
+   * @return a pair of name and label for the class
+   */
   protected Pair<String, String> getClassNameAndLabel(ClassInfo classInfo) {
     String name = classInfo.getName();
     String label = classInfo.getLabel() != null ? classInfo.getLabel() : name;
     // Check concept class info
     ClassConceptInfo cci = getClassConceptForClass(classInfo.getUri());
-    if (cci != null) {
-      if (cci.getName() != null) {
-        name = cci.getName();
-      }
-      if (cci.getLabel() != null) {
-        label = cci.getLabel();
-      }
-    }
-    return new Pair<>(name, label);
+    return getStringPair(name, label, cci);
   }
 
   protected Pair<String, String> getPropertyNameAndLabel(PropertyInfo propertyInfo) {
     String name = propertyInfo.getName();
     String label = propertyInfo.getLabel() != null ? propertyInfo.getLabel() : name;
+    // Check concept property info
+    PropertyConceptInfo pci = getPropertyConceptForProperty(propertyInfo.getUri());
+    return getStringPair(name, label, pci);
+  }
+
+  private Pair<String, String> getStringPair(String name, String label, ConceptInfo ci) {
+    if (ci != null) {
+      if (ci.getName() != null) {
+        name = ci.getName();
+      }
+      if (ci.getLabel() != null) {
+        label = ci.getLabel();
+      }
+    }
     return new Pair<>(name, label);
   }
 
@@ -74,6 +99,10 @@ public class ClassGenerator extends BaseGenerator {
   @Override
   public void run() {
     super.run();
+    // Reset internal state so repeated invocations do not append into immutable snapshots.
+    classes = new ArrayList<>();
+    interfaces = new ArrayList<>();
+    enums = new ArrayList<>();
     extractClasses();
     extractInterfaces();
     extractEnums();
@@ -83,12 +112,83 @@ public class ClassGenerator extends BaseGenerator {
     applyFilters();
     updateRanges();
     extractDataTypes();
+    stabilizeOrdering();
+  }
+
+  private void stabilizeOrdering() {
+    classes = classes.stream().sorted(CLAZZ_ORDER).toList();
+    interfaces = interfaces.stream().sorted(CLAZZ_ORDER).toList();
+    enums = enums.stream().sorted(CLAZZ_ORDER).toList();
+
+    classes.forEach(this::sortClazzInternals);
+    interfaces.forEach(this::sortClazzInternals);
+    enums.forEach(this::sortClazzInternals);
+
+    enums.forEach(enumClazz -> enumClazz.setValues(enumClazz.getValues().stream()
+        .sorted(ENUM_VALUE_ORDER)
+        .toList()));
+  }
+
+  private void sortClazzInternals(Clazz clazz) {
+    clazz.setAttributes(clazz.getAttributes().stream()
+        .sorted(attributeOrder())
+        .toList());
+    clazz.setInterfaces(clazz.getInterfaces().stream()
+        .sorted(CLAZZ_ORDER)
+        .toList());
+  }
+
+  private Comparator<Attribute> attributeOrder() {
+    Map<String, Integer> extraOrder = new HashMap<>();
+    List<be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration.ExtraProperty> extras =
+        getOntologyConfiguration().getExtraProperties();
+    for (int i = 0; i < extras.size(); i++) {
+      String uri = extras.get(i).getUri();
+      if (uri != null) {
+        extraOrder.putIfAbsent(uri, i);
+      }
+    }
+
+    Map<String, Integer> temporalOrder = new HashMap<>();
+    List<String> temporals = getOntologyConfiguration().getTemporalProperties();
+    for (int i = 0; i < temporals.size(); i++) {
+      String uri = temporals.get(i);
+      if (uri != null) {
+        temporalOrder.putIfAbsent(uri, i);
+      }
+    }
+
+    return Comparator
+        .comparingInt((Attribute attribute) -> attributeBucket(attribute, extraOrder, temporalOrder))
+        .thenComparingInt(attribute -> orderIndex(attribute, extraOrder))
+        .thenComparingInt(attribute -> orderIndex(attribute, temporalOrder))
+        .thenComparing(attribute -> attribute != null ? attribute.getUri() : null,
+            Comparator.nullsLast(String::compareTo))
+        .thenComparing(attribute -> attribute != null ? attribute.getName() : null,
+            Comparator.nullsLast(String::compareTo));
+  }
+
+  private int attributeBucket(Attribute attribute, Map<String, Integer> extraOrder,
+      Map<String, Integer> temporalOrder) {
+    String uri = attribute != null ? attribute.getUri() : null;
+    if (uri != null && extraOrder.containsKey(uri)) {
+      return 0;
+    }
+    if (uri != null && temporalOrder.containsKey(uri)) {
+      return 1;
+    }
+    return 2;
+  }
+
+  private int orderIndex(Attribute attribute, Map<String, Integer> orderMap) {
+    String uri = attribute != null ? attribute.getUri() : null;
+    return uri != null ? orderMap.getOrDefault(uri, Integer.MAX_VALUE) : Integer.MAX_VALUE;
   }
 
   public void applyFilters() {
+    filterEnums();
     filterInterfaces();
     filterInterfaceProperties();
-    filterEnums();
     filterInheritedProperties();
     filterSuperClasses();
     getClasses().forEach(this::filterInverseProperties);
@@ -251,7 +351,7 @@ public class ClassGenerator extends BaseGenerator {
   protected void extractEnums() {
     this.enums.addAll(getAllClasses()
         .stream()
-        .filter(c -> getOntologyConfiguration().getEnumClasses().contains(c.getUri()))
+        .filter(c -> getOntologyConfiguration().getEnumClasses().getClasses().contains(c.getUri()))
         .map(c -> {
           try {
             return createClass(c, Enum.class);
@@ -276,14 +376,12 @@ public class ClassGenerator extends BaseGenerator {
 
     for (String classUri : metadataConfig.getClasses()) {
       // Find the corresponding class
-      Clazz sourceClass = classes.stream()
+      classes.stream()
           .filter(c -> c.getUri().equals(classUri))
-          .findFirst()
-          .orElse(null);
+          .findFirst().ifPresent(
+              sourceClass -> createMetadataClass(sourceClass, suffix, keyProperty, valueProperty,
+                  temporalProperties));
 
-      if (sourceClass != null) {
-        createMetadataClass(sourceClass, suffix, keyProperty, valueProperty, temporalProperties);
-      }
     }
   }
 
@@ -551,11 +649,6 @@ public class ClassGenerator extends BaseGenerator {
 
 
   protected void filterEnums() {
-    // Remove enums from interfaces
-    this.interfaces = interfaces
-        .stream()
-        .filter(i -> !isEnum(i.getClassInfo()))
-        .toList();
     // Remove enums from concrete classes
     this.classes = classes
         .stream()
@@ -584,8 +677,8 @@ public class ClassGenerator extends BaseGenerator {
           .stream().map(clazz -> {
             EnumValue enumValue = new EnumValue();
             enumValue.setPropertyInfo(clazz);
-            // Set to UPPER_SNAKE_CASE
-            enumValue.setName(toEnumValueName(clazz.getName()));
+            // Set to UPPER_SNAKE_CASE and optionally trim enum-class prefix/suffix tokens.
+            enumValue.setName(toEnumValueName(clazz.getName(), enumInfo.getName()));
             return enumValue;
           })
           .toList());
@@ -617,8 +710,36 @@ public class ClassGenerator extends BaseGenerator {
     return getNearestClass(classInfo);
   }
 
-  protected String toEnumValueName(String name) {
-    return toSnakeCase(name).toUpperCase();
+  protected String toEnumValueName(String enumValueName, String enumClassName) {
+    String enumConstantName = toSnakeCase(enumValueName).toUpperCase();
+
+    if (!getOntologyConfiguration().getEnumClasses().isTrimClassNameFromValues()) {
+      return enumConstantName;
+    }
+
+    String enumClassToken = toSnakeCase(enumClassName).toUpperCase();
+    return trimRedundantEnumClassToken(enumConstantName, enumClassToken);
+  }
+
+  private String trimRedundantEnumClassToken(String enumConstantName, String enumClassToken) {
+    if (enumConstantName == null || enumConstantName.isBlank() || enumClassToken == null
+        || enumClassToken.isBlank()) {
+      return enumConstantName;
+    }
+
+    String trimmedName = enumConstantName;
+    String prefixToken = enumClassToken + "_";
+    String suffixToken = "_" + enumClassToken;
+
+    if (trimmedName.startsWith(prefixToken)) {
+      trimmedName = trimmedName.substring(prefixToken.length());
+    }
+    if (trimmedName.endsWith(suffixToken)) {
+      trimmedName = trimmedName.substring(0, trimmedName.length() - suffixToken.length());
+    }
+
+    // Keep original value if trimming would result in an empty enum constant name.
+    return trimmedName.isBlank() ? enumConstantName : trimmedName;
   }
 
   /**
@@ -705,13 +826,6 @@ public class ClassGenerator extends BaseGenerator {
     }
   }
 
-  protected Interface getInterface(ClassInfo classInfo) {
-    return interfaces.stream()
-        .filter(i -> i.getUri().equals(classInfo.getUri()))
-        .findFirst()
-        .orElse(null);
-  }
-
   protected Clazz getClass(ClassInfo classInfo) {
     if (classInfo == null) {
       return null;
@@ -779,6 +893,10 @@ public class ClassGenerator extends BaseGenerator {
     public String toString() {
       return name;
     }
+
+    public Clazz copy() {
+      return new Clazz(this);
+    }
   }
 
   @Getter
@@ -792,6 +910,17 @@ public class ClassGenerator extends BaseGenerator {
   public static class Enum extends Clazz {
 
     private List<EnumValue> values = new ArrayList<>();
+
+    public Enum() {}
+
+    public Enum(Enum enumInfo) {
+      super(enumInfo);
+      this.values = new ArrayList<>(enumInfo.getValues());
+    }
+
+    public Enum copy() {
+      return new Enum(this);
+    }
   }
 
   @Getter

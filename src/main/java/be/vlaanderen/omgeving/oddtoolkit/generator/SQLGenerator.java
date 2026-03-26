@@ -6,11 +6,27 @@ import be.vlaanderen.omgeving.oddtoolkit.config.SQLGeneratorProperties;
 import be.vlaanderen.omgeving.oddtoolkit.config.SchemaGeneratorProperties;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
+import java.util.Comparator;
 import java.util.List;
 import lombok.Getter;
 
 @Getter
 public class SQLGenerator extends SchemaGenerator {
+
+  private static final Comparator<Table> TABLE_ORDER = Comparator
+      .comparing((Table t) -> t != null ? t.getName() : null, Comparator.nullsLast(String::compareTo));
+
+  private static final Comparator<Relation> RELATION_ORDER = Comparator
+      .comparing((Relation r) -> r != null && r.getFromColumn() != null ? r.getFromColumn().getName() : null,
+          Comparator.nullsLast(String::compareTo))
+      .thenComparing(r -> r != null && r.getTo() != null ? r.getTo().getName() : null,
+          Comparator.nullsLast(String::compareTo));
+
+  private static final Comparator<Enum> ENUM_ORDER = Comparator
+      .comparing((Enum e) -> e != null ? e.getName() : null, Comparator.nullsLast(String::compareTo));
+
+  private static final Comparator<EnumValue> ENUM_VALUE_ORDER = Comparator
+      .comparing((EnumValue v) -> v != null ? v.getName() : null, Comparator.nullsLast(String::compareTo));
 
   private final SQLGeneratorProperties sqlGeneratorProperties;
 
@@ -57,7 +73,9 @@ public class SQLGenerator extends SchemaGenerator {
   }
 
   private void generateTables(StringBuilder sb) {
-    getTables().forEach(table -> {
+    getTables().stream()
+        .sorted(TABLE_ORDER)
+        .forEach(table -> {
       sb.append("-- ").append(table.getUri()).append("\n");
       if (table.getTableType() != TableType.REGULAR) {
         sb.append("-- ").append("Table type: ").append(table.getTableType()).append("\n");
@@ -111,12 +129,15 @@ public class SQLGenerator extends SchemaGenerator {
     sb.append("-- Foreign key constraints\n\n");
 
     // Create foreign key constraints after all tables are created to avoid referencing tables that are not yet defined
-    getTables().forEach(table -> {
+    getTables().stream()
+        .sorted(TABLE_ORDER)
+        .forEach(table -> {
       List<Column> foreignKeys = table.getColumns().stream().filter(Column::isForeignKey).toList();
       for (Column fk : foreignKeys) {
         table.getRelations()
             .stream()
             .filter(relation -> relation.getFromColumn().equals(fk))
+            .sorted(RELATION_ORDER)
             .forEach(relation -> sb.append("ALTER TABLE ").append(table.getName())
               .append(" ADD FOREIGN KEY (").append(fk.getName()).append(") REFERENCES ")
               .append(relation.getTo().getName()).append("(")
@@ -126,14 +147,15 @@ public class SQLGenerator extends SchemaGenerator {
   }
 
   private void generateEnumTypes(StringBuilder sb) {
-    getSchemaEnums()
+    getSchemaEnums().stream()
+        .sorted(ENUM_ORDER)
         .forEach(type -> {
           if (type.getClassInfo() != null) {
             sb.append("-- ").append(type.getUri()).append("\n");
           }
           sb.append("CREATE TYPE ").append(type.getName()).append(" AS ENUM (\n");
           int i = 0;
-          for (EnumValue value : type.getValues()) {
+          for (EnumValue value : type.getValues().stream().sorted(ENUM_VALUE_ORDER).toList()) {
             if (i++ > 0) {
               sb.append(",\n");
             }

@@ -3,19 +3,14 @@ package be.vlaanderen.omgeving.oddtoolkit.generator;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import be.vlaanderen.omgeving.oddtoolkit.TestGeneratorFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class ShaclGeneratorTest {
-  @Qualifier("shaclGenerator")
-  @Autowired
-  ShaclGenerator generator;
+  private final ShaclGenerator generator = TestGeneratorFactory.generator("shacl", ShaclGenerator.class);
 
   @Test
   void testGenerator() throws IOException {

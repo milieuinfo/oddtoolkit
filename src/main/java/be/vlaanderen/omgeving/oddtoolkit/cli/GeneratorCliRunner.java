@@ -1,13 +1,11 @@
 package be.vlaanderen.omgeving.oddtoolkit.cli;
 
 import be.vlaanderen.omgeving.oddtoolkit.config.CliConfiguration;
-import be.vlaanderen.omgeving.oddtoolkit.config.ConfigurationSourceResolver;
+import be.vlaanderen.omgeving.oddtoolkit.config.GeneratorRegistry;
+import be.vlaanderen.omgeving.oddtoolkit.generator.BaseGenerator;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 /**
  * CLI runner for executing generators from command line.
@@ -22,19 +20,16 @@ import org.springframework.stereotype.Component;
  * - Configuration file loading (YAML/JSON)
  * - Custom property overrides via --key=value
  * - Environment variable interpolation via ODD_* prefixed variables
- *
- * Note: This is optional and for future CLI support. Current application
- * still works with Spring Boot configuration via application.yml.
  */
-@Component
-public class GeneratorCliRunner implements CommandLineRunner {
+public class GeneratorCliRunner {
 
   private static final Logger logger = LoggerFactory.getLogger(GeneratorCliRunner.class);
+  private final GeneratorRegistry generatorRegistry;
 
-  @Autowired
-  private ApplicationContext applicationContext;
+  public GeneratorCliRunner(GeneratorRegistry generatorRegistry) {
+    this.generatorRegistry = generatorRegistry;
+  }
 
-  @Override
   public void run(String... args) throws Exception {
     CliConfiguration cliConfig = CliConfiguration.fromArgs(args);
 
@@ -43,14 +38,42 @@ public class GeneratorCliRunner implements CommandLineRunner {
       return;
     }
 
-    // Only process CLI if a generator is explicitly specified
-    if (cliConfig.getGeneratorName() != null && !cliConfig.getGeneratorName().isEmpty()) {
-      logger.info("CLI Generator execution requested: {}", cliConfig);
-      // Future implementation: execute selected generator
-      // This is a placeholder for future CLI support
-      logger.info("Current implementation uses Spring Boot configuration via application.yml");
-      logger.info("CLI support for direct generator execution is in development");
+    if (!cliConfig.isValid()) {
+      return;
     }
+
+    if (cliConfig.isAllGeneratorsRequested()) {
+      executeAllGenerators();
+      return;
+    }
+
+    executeGenerator(cliConfig.getGeneratorName().trim());
+  }
+
+  private void executeAllGenerators() throws Exception {
+    List<String> generatorNames = generatorRegistry.getAvailableGenerators().stream()
+        .sorted()
+        .toList();
+
+    if (generatorNames.isEmpty()) {
+      logger.warn("No generators are registered; nothing to execute.");
+      return;
+    }
+
+    logger.info("Executing all {} generators: {}", generatorNames.size(), String.join(", ", generatorNames));
+    for (String generatorName : generatorNames) {
+      executeGenerator(generatorName);
+    }
+  }
+
+  private void executeGenerator(String generatorName) throws Exception {
+    BaseGenerator generator = generatorRegistry.get(generatorName)
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Generator '" + generatorName + "' is not available. Available: "
+                + String.join(", ", generatorRegistry.getAvailableGenerators().stream().sorted().toList())));
+
+    logger.info("Executing generator '{}'", generatorName);
+    generator.generate();
   }
 
   /**
@@ -64,7 +87,8 @@ public class GeneratorCliRunner implements CommandLineRunner {
         
         Options:
           --generator=NAME              Name of the generator to execute
-                                        Available: class, class-diagram, er-diagram, sql, shacl, java, typescript
+                                        Use --generator=all to execute all registered generators
+                                        Available: all, class, class-diagram, er-diagram, sql, shacl, java, typescript
           
           --config-file=PATH            Path to configuration file (YAML or JSON)
                                         Example: --config-file=config.yml
@@ -84,6 +108,9 @@ public class GeneratorCliRunner implements CommandLineRunner {
           # Generate class diagram with default configuration
           java -jar oddtoolkit.jar --generator=class-diagram
           
+          # Generate all registered outputs
+          java -jar oddtoolkit.jar --generator=all
+
           # Generate SQL with custom configuration file
           java -jar oddtoolkit.jar --generator=sql --config-file=myconfig.yml
           
@@ -104,4 +131,3 @@ public class GeneratorCliRunner implements CommandLineRunner {
         """);
   }
 }
-

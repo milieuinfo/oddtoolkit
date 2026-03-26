@@ -1,15 +1,10 @@
 package be.vlaanderen.omgeving.oddtoolkit.generator;
 
+import be.vlaanderen.omgeving.oddtoolkit.TestGeneratorFactory;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class JavaGeneratorTest {
-  @Qualifier("javaGenerator")
-  @Autowired
-  JavaGenerator generator;
+  private final JavaGenerator generator = TestGeneratorFactory.generator("java", JavaGenerator.class);
 
   @Test
   void testGenerator() {

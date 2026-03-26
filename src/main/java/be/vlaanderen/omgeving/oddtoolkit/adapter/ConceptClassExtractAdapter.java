@@ -1,5 +1,6 @@
 package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
@@ -9,27 +10,25 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @AdapterDependency({
     OntologyClassExtractAdapter.class,
     ConceptSchemeLoadAdapter.class,
     ConceptSchemeExtractAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "concept-class-extract.enabled", havingValue = "true", matchIfMissing = true)
-@Component("concept-class-extract")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "concept-class-extract.enabled", havingValue = "true", matchIfMissing = true)
 public class ConceptClassExtractAdapter extends AbstractAdapter<OntologyInfo> {
 
-  private final ConceptSchemeInfo conceptSchemeInfo;
+  private final OntologyInfo ontologyInfo;
 
-  public ConceptClassExtractAdapter(ConceptSchemeInfo conceptSchemeInfo) {
+  public ConceptClassExtractAdapter(OntologyInfo ontologyInfo) {
     super(OntologyInfo.class);
-    this.conceptSchemeInfo = conceptSchemeInfo;
+    this.ontologyInfo = ontologyInfo;
   }
 
   @Override
   public OntologyInfo adapt(OntologyInfo info) {
+    ConceptSchemeInfo conceptSchemeInfo = ontologyInfo.getConcepts();
     // Add all concept classes that are not already present in the ontology info
     if (conceptSchemeInfo.getClassConcepts() == null) {
       return info;
@@ -38,14 +37,15 @@ public class ConceptClassExtractAdapter extends AbstractAdapter<OntologyInfo> {
       if (info.getClassByUri(concept.getUri()) == null) {
         ClassInfo classInfo = new ClassInfo(Scope.ONTOLOGY, concept.getResource());
         classInfo.setUri(concept.getEquivalents().getFirst());
-        extractProperties(info, classInfo);
+        extractProperties(info, classInfo, conceptSchemeInfo);
         info.addClass(classInfo);
       }
     });
     return info;
   }
 
-  private void extractProperties(OntologyInfo info, ClassInfo classInfo) {
+  private void extractProperties(OntologyInfo info, ClassInfo classInfo,
+      ConceptSchemeInfo conceptSchemeInfo) {
     // Extract all properties from the inferred model that have as
     // a domain the class and add them to the class info (if not already present)
 

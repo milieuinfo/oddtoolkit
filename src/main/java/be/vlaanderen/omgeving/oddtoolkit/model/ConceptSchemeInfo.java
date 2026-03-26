@@ -6,9 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.rdf.model.Model;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @Getter
 @Setter
 public class ConceptSchemeInfo extends AbstractInfo {

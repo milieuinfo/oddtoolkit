@@ -1,12 +1,13 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "generators.schema-generator")
+@ConfigPrefix("generators.schema-generator")
 public class SchemaGeneratorProperties {
   private MergeJoinTables mergeJoinTables = new MergeJoinTables();
   private IdentityTables identityTables = new IdentityTables();
@@ -17,6 +18,22 @@ public class SchemaGeneratorProperties {
 
     private boolean enabled = true;
     private String attributeName = "relation_type";
+    private List<ExcludedPair> excludedPairs = new ArrayList<>();
+  }
+
+  @Getter
+  @Setter
+  public static class ExcludedPair {
+    private String sourceUri;
+    private String targetUri;
+
+    public boolean matches(String leftUri, String rightUri) {
+      if (sourceUri == null || targetUri == null || leftUri == null || rightUri == null) {
+        return false;
+      }
+      return (sourceUri.equals(leftUri) && targetUri.equals(rightUri))
+          || (sourceUri.equals(rightUri) && targetUri.equals(leftUri));
+    }
   }
 
   @Getter
@@ -26,4 +43,3 @@ public class SchemaGeneratorProperties {
     private String tableNameSuffix = "identity";
   }
 }
-

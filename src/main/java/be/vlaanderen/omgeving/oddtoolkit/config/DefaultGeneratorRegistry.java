@@ -6,13 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
 /**
  * Default implementation of GeneratorRegistry using an in-memory map.
  * Thread-safe for registration and retrieval.
  */
-@Component
 public class DefaultGeneratorRegistry implements GeneratorRegistry {
 
   private final Map<String, BaseGenerator> generators = new HashMap<>();
@@ -43,4 +41,3 @@ public class DefaultGeneratorRegistry implements GeneratorRegistry {
     return generators.containsKey(name);
   }
 }
-

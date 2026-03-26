@@ -8,8 +8,15 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -33,11 +40,63 @@ public class ShaclGenerator extends BaseGenerator {
   private final ShaclGeneratorProperties shaclGeneratorProperties;
   private final Logger logger = LoggerFactory.getLogger(ShaclGenerator.class);
 
+  /**
+   * Represents the unique signature of a property shape for duplicate detection.
+   */
+  private record PropertyShapeSignature(String path, ValueKind valueKind, Integer minCount,
+                                        Integer maxCount) {
+
+  }
+
+  /**
+   * Represents the value constraint kind (class, datatype, or union).
+   */
+  private interface ValueKind {
+
+  }
+
+  private record SingleValue(String uri, boolean isDatatype) implements ValueKind {
+
+  }
+
+  private static class OrValue implements ValueKind {
+
+    private final List<MemberValue> members;
+
+    public OrValue(List<MemberValue> members) {
+      // Sort members to ensure consistent comparison
+      this.members = members.stream()
+          .sorted(Comparator.comparing(m -> m.uri))
+          .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      OrValue orValue = (OrValue) o;
+      return Objects.equals(members, orValue.members);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(members);
+    }
+  }
+
+  private record MemberValue(String uri, boolean isDatatype) {
+
+  }
+
   public ShaclGenerator(OntologyInfo ontologyInfo,
       ConceptSchemeInfo conceptSchemeInfo,
       List<AbstractAdapter<?>> adapters,
       ShaclGeneratorProperties shaclGeneratorProperties) {
-    super(ontologyInfo, conceptSchemeInfo, adapters, java.util.Map.of());
+    super(ontologyInfo, conceptSchemeInfo, adapters);
     this.shaclGeneratorProperties = shaclGeneratorProperties;
   }
 
@@ -80,13 +139,11 @@ public class ShaclGenerator extends BaseGenerator {
   }
 
   /**
-   * Generate SHACL shapes from the ontology's inferred model.
-   * Uses inferredModel if present, otherwise falls back to the raw model.
+   * Generate SHACL shapes from the ontology's inferred model. Uses inferredModel if present,
+   * otherwise falls back to the raw model.
    */
   private Model generateShacl() {
-    Model ontology = ontologyInfo.getInferredModel() != null
-        ? ontologyInfo.getInferredModel()
-        : ontologyInfo.getModel();
+    Model ontology = ontologyInfo.getModel();
     if (ontology == null) {
       return ModelFactory.createDefaultModel();
     }
@@ -95,16 +152,19 @@ public class ShaclGenerator extends BaseGenerator {
     shacl.setNsPrefix("sh", SH);
     shacl.setNsPrefix("owl", OWL.NS);
     shacl.setNsPrefix("rdfs", RDFS.getURI());
-    // Copy all prefixes from the ontology
-    ontology.getNsPrefixMap().forEach(shacl::setNsPrefix);
+    // Copy all prefixes from the ontology in key order for deterministic output
+    ontology.getNsPrefixMap().entrySet().stream()
+        .sorted(Map.Entry.comparingByKey(Comparator.nullsLast(String::compareTo)))
+        .forEach(entry -> shacl.setNsPrefix(entry.getKey(), entry.getValue()));
 
     // iterate over all classes in the ontology and create node shapes
-    Iterator<Resource> classes = ontology.listResourcesWithProperty(RDF.type, OWL.Class);
-    while (classes.hasNext()) {
-      Resource cls = classes.next();
-      if (!cls.isURIResource()) continue;
-      generateNodeShape(cls, ontology, shacl);
-    }
+    List<Resource> classes = ontology.listResourcesWithProperty(RDF.type, OWL.Class)
+        .toList()
+        .stream()
+        .filter(Resource::isURIResource)
+        .sorted(Comparator.comparing(Resource::getURI, Comparator.nullsLast(String::compareTo)))
+        .toList();
+    classes.forEach(cls -> generateNodeShape(cls, ontology, shacl));
 
     return shacl;
   }
@@ -115,10 +175,23 @@ public class ShaclGenerator extends BaseGenerator {
   }
 
   private boolean isDatatype(Resource res) {
-    return res != null && res.isURIResource() && res.getURI().startsWith("http://www.w3.org/2001/XMLSchema#");
+    return res != null && res.isURIResource() && res.getURI()
+        .startsWith("http://www.w3.org/2001/XMLSchema#");
   }
 
   private RDFNode createPath(Resource prop, Model shacl) {
+    // Handle anonymous nodes with owl:inverseOf
+    if (prop.isAnon()) {
+      Statement invStmt = prop.getProperty(OWL.inverseOf);
+      if (invStmt != null && invStmt.getObject().isResource()) {
+        Resource inv = invStmt.getResource();
+        if (inv.isURIResource()) {
+          Resource b = shacl.createResource();
+          b.addProperty(shaclProp("inversePath", shacl), inv);
+          return b;
+        }
+      }
+    }
     // if prop has owl:inverseOf -> return a blank node with sh:inversePath inv
     Statement invStmt = prop.getProperty(OWL.inverseOf);
     if (invStmt != null && invStmt.getObject().isResource()) {
@@ -132,6 +205,73 @@ public class ShaclGenerator extends BaseGenerator {
       return shacl.createResource(prop.getURI());
     }
     return shacl.createResource();
+  }
+
+  /**
+   * Compute the signature of a restriction for duplicate detection. Returns Optional.empty() if the
+   * restriction is invalid or incomplete.
+   */
+  private Optional<PropertyShapeSignature> computeSignature(Resource restriction) {
+    Resource onProp = restriction.getPropertyResourceValue(OWL.onProperty);
+    if (onProp == null || !onProp.isURIResource()) {
+      return Optional.empty();
+    }
+
+    String path = onProp.getURI();
+
+    Resource some = restriction.getPropertyResourceValue(OWL.someValuesFrom);
+    Resource all = restriction.getPropertyResourceValue(OWL.allValuesFrom);
+    Resource valueNode = some != null ? some : all;
+
+    ValueKind valueKind;
+    if (valueNode != null && valueNode.hasProperty(OWL.unionOf)) {
+      // Handle union
+      Statement unionStmt = valueNode.getProperty(OWL.unionOf);
+      Resource unionRes = unionStmt != null && unionStmt.getObject().isResource()
+          ? unionStmt.getResource()
+          : valueNode;
+
+      if (unionRes.canAs(RDFList.class)) {
+        RDFList list = unionRes.as(RDFList.class);
+        List<MemberValue> members = new ArrayList<>();
+        Iterator<RDFNode> it = list.iterator();
+        while (it.hasNext()) {
+          RDFNode member = it.next();
+          if (member.isResource() && member.asResource().isURIResource()) {
+            Resource r = member.asResource();
+            members.add(new MemberValue(r.getURI(), isDatatype(r)));
+          }
+        }
+        valueKind = new OrValue(members);
+      } else {
+        valueKind = new SingleValue("__none__", false);
+      }
+    } else if (valueNode != null && valueNode.isURIResource()) {
+      // Single value
+      valueKind = new SingleValue(valueNode.getURI(), isDatatype(valueNode));
+    } else {
+      // No value constraint
+      valueKind = new SingleValue("__none__", false);
+    }
+
+    // Compute min count
+    Integer min = intValue(restriction, OWL.cardinality);
+    if (min == null) {
+      min = intValue(restriction, OWL.minCardinality);
+    }
+    if (min == null && restriction.hasProperty(OWL.someValuesFrom)
+        && !restriction.hasProperty(OWL.minCardinality)
+        && !restriction.hasProperty(OWL.cardinality)) {
+      min = 1;
+    }
+
+    // Compute max count
+    Integer max = intValue(restriction, OWL.cardinality);
+    if (max == null) {
+      max = intValue(restriction, OWL.maxCardinality);
+    }
+
+    return Optional.of(new PropertyShapeSignature(path, valueKind, min, max));
   }
 
   private void addClassOrDatatype(Resource ps, Resource value, Model shacl) {
@@ -155,8 +295,12 @@ public class ShaclGenerator extends BaseGenerator {
     Integer max = intValue(restriction, OWL.maxCardinality);
     Integer exact = intValue(restriction, OWL.cardinality);
 
-    if (min != null) ps.addLiteral(shaclProp("minCount", shacl), min);
-    if (max != null) ps.addLiteral(shaclProp("maxCount", shacl), max);
+    if (min != null) {
+      ps.addLiteral(shaclProp("minCount", shacl), min);
+    }
+    if (max != null) {
+      ps.addLiteral(shaclProp("maxCount", shacl), max);
+    }
     if (exact != null) {
       ps.addLiteral(shaclProp("minCount", shacl), exact);
       ps.addLiteral(shaclProp("maxCount", shacl), exact);
@@ -165,7 +309,9 @@ public class ShaclGenerator extends BaseGenerator {
 
   private Integer intValue(Resource res, Property p) {
     Statement s = res.getProperty(p);
-    if (s == null) return null;
+    if (s == null) {
+      return null;
+    }
     RDFNode node = s.getObject();
     if (node.isLiteral()) {
       try {
@@ -186,16 +332,22 @@ public class ShaclGenerator extends BaseGenerator {
     // nodeWithUnion should be an RDFList or a node with rdf:first/rdf:rest
     if (nodeWithUnion.canAs(RDFList.class)) {
       RDFList list = nodeWithUnion.as(RDFList.class);
-      List<RDFNode> shapes = new ArrayList<>();
+      List<Resource> members = new ArrayList<>();
       Iterator<RDFNode> it = list.iterator();
       while (it.hasNext()) {
         RDFNode member = it.next();
-        if (member.isResource()) {
-          Resource ps = shacl.createResource();
-          addClassOrDatatype(ps, member.asResource(), shacl);
-          shapes.add(ps);
+        if (member.isResource() && member.asResource().isURIResource()) {
+          members.add(member.asResource());
         }
       }
+      List<RDFNode> shapes = members.stream()
+          .sorted(Comparator.comparing(Resource::getURI, Comparator.nullsLast(String::compareTo)))
+          .map(resource -> {
+            Resource ps = shacl.createResource();
+            addClassOrDatatype(ps, resource, shacl);
+            return (RDFNode) ps;
+          })
+          .toList();
       return shacl.createList(shapes.iterator());
     }
     return shacl.createResource();
@@ -203,7 +355,9 @@ public class ShaclGenerator extends BaseGenerator {
 
   private void generatePropertyShape(Resource restriction, Model shacl, Resource nodeShape) {
     Resource onProp = restriction.getPropertyResourceValue(OWL.onProperty);
-    if (onProp == null) return;
+    if (onProp == null) {
+      return;
+    }
 
     Resource ps = shacl.createResource();
     ps.addProperty(shaclProp("path", shacl), createPath(onProp, shacl));
@@ -246,17 +400,30 @@ public class ShaclGenerator extends BaseGenerator {
     ns.addProperty(RDF.type, shacl.createResource(SH + "NodeShape"));
     ns.addProperty(shaclProp("targetClass", shacl), cls);
 
+    Set<PropertyShapeSignature> seen = new HashSet<>();
+
     // find rdfs:subClassOf values that are OWL.Restriction
-    Iterator<Statement> it = ontology.listStatements(cls, RDFS.subClassOf, (RDFNode) null);
-    while (it.hasNext()) {
-      Statement st = it.next();
-      RDFNode obj = st.getObject();
-      if (obj.isResource()) {
-        Resource r = obj.asResource();
-        if (r.hasProperty(RDF.type, OWL.Restriction)) {
-          generatePropertyShape(r, shacl, ns);
-        }
+    List<Statement> restrictions = ontology.listStatements(cls, RDFS.subClassOf, (RDFNode) null)
+        .toList()
+        .stream()
+        .filter(st -> st.getObject().isResource())
+        .filter(st -> st.getObject().asResource().hasProperty(RDF.type, OWL.Restriction))
+        .sorted(Comparator.comparing(
+            st -> {
+              Resource restriction = st.getObject().asResource();
+              Resource onProp = restriction.getPropertyResourceValue(OWL.onProperty);
+              return onProp != null && onProp.isURIResource() ? onProp.getURI() : "";
+            },
+            Comparator.nullsLast(String::compareTo)))
+        .toList();
+
+    restrictions.forEach(st -> {
+      Resource restriction = st.getObject().asResource();
+      Optional<PropertyShapeSignature> sig = computeSignature(restriction);
+      if (sig.isPresent() && !seen.contains(sig.get())) {
+        generatePropertyShape(restriction, shacl, ns);
+        seen.add(sig.get());
       }
-    }
+    });
   }
 }

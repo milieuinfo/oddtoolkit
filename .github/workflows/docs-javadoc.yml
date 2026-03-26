@@ -21,15 +21,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Detect docs lockfile
+        id: docs-lockfile
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "has_lockfile=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_lockfile=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js (with npm cache)
+        if: steps.docs-lockfile.outputs.has_lockfile == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
-      - name: Install dependencies
+      - name: Setup Node.js (without npm cache)
+        if: steps.docs-lockfile.outputs.has_lockfile != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies (npm ci)
+        if: steps.docs-lockfile.outputs.has_lockfile == 'true'
         run: npm ci
+
+      - name: Install dependencies (npm install)
+        if: steps.docs-lockfile.outputs.has_lockfile != 'true'
+        run: npm install
 
       - name: Build docs
         run: npm run docs:build

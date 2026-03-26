@@ -2,6 +2,7 @@ package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
 import be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration;
 import be.vlaanderen.omgeving.oddtoolkit.config.OntologyReasonerProperties;
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -18,16 +19,13 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.security.MessageDigest;
 
 @AdapterDependency({
     OntologyExtractExternalAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-reasoner.enabled", havingValue = "true", matchIfMissing = true)
-@Component("ontology-reasoner")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-reasoner.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyReasonerAdapter extends AbstractAdapter<OntologyInfo> {
 
   private static final Logger logger = LoggerFactory.getLogger(OntologyReasonerAdapter.class);

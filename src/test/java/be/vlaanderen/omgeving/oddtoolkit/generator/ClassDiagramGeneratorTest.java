@@ -2,18 +2,14 @@ package be.vlaanderen.omgeving.oddtoolkit.generator;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import be.vlaanderen.omgeving.oddtoolkit.TestGeneratorFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class ClassDiagramGeneratorTest {
-  @Qualifier("classDiagramGenerator")
-  @Autowired
-  ClassDiagramGenerator generator;
+  private final ClassDiagramGenerator generator = TestGeneratorFactory.generator("class-diagram",
+      ClassDiagramGenerator.class);
 
   @Test
   void testGetConcreteClasses() throws Exception {

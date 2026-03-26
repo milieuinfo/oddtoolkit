@@ -2,6 +2,8 @@ package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
+import be.vlaanderen.omgeving.oddtoolkit.config.ConfigPrefix;
+import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,10 +30,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.OWL2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
 import java.nio.file.attribute.FileTime;
 
 /**
@@ -40,9 +38,7 @@ import java.nio.file.attribute.FileTime;
 @AdapterDependency({
     OntologyLoadAdapter.class
 })
-@ConditionalOnProperty(prefix = "adapters", name = "ontology-extract-external.enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(OntologyExtractExternalAdapter.ExtractExternalProperties.class)
-@Component("ontology-extract-external")
+@ConditionalOnConfigProperty(prefix = "adapters", name = "ontology-extract-external.enabled", havingValue = "true", matchIfMissing = true)
 public class OntologyExtractExternalAdapter extends AbstractAdapter<OntologyInfo> {
 
   private static final Logger logger = LoggerFactory.getLogger(
@@ -440,7 +436,7 @@ public class OntologyExtractExternalAdapter extends AbstractAdapter<OntologyInfo
    */
   @Setter
   @Getter
-  @ConfigurationProperties(prefix = "adapters.ontology-extract-external")
+  @ConfigPrefix("adapters.ontology-extract-external")
   public static class ExtractExternalProperties {
 
     private boolean enabled = true;

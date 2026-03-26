@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 public class TypescriptGenerator extends ClassGenerator {
+
+  private static final Comparator<String> STRING_ORDER = Comparator.nullsLast(String::compareTo);
 
   private final Map<Clazz, String> fileNames = new HashMap<>();
   private final Map<String, String> nameMapping = new HashMap<>();
@@ -48,15 +51,16 @@ public class TypescriptGenerator extends ClassGenerator {
 
   protected void prepareFileNames() {
     // Prepare file names for all classes, interfaces and enums
-    getClasses().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".ts"));
-    getInterfaces().forEach(clazz -> fileNames.put(clazz, "I" + clazz.getName() + ".ts"));
-    getEnums().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".enum.ts"));
+    getClasses().forEach(
+        clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".model.ts"));
+    getInterfaces().forEach(
+        clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".interface.ts"));
+    getEnums().forEach(clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".enum.ts"));
     // Prepare name mapping for all classes, interfaces and enums
     getClasses().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
-    getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), "I" + clazz.getName()));
+    getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
     getEnums().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
   }
-
 
   protected void generateFile(List<? extends Clazz> classes, @Nullable String type) {
     classes.forEach(clazz -> {
@@ -65,7 +69,7 @@ public class TypescriptGenerator extends ClassGenerator {
 
       switch (type) {
         case "interface" -> {
-          clazz.setName("I" + clazz.getName());
+          clazz.setName(clazz.getName());
           typeDeclaration = "interface";
         }
         case "enum" -> typeDeclaration = "enum";
@@ -79,8 +83,7 @@ public class TypescriptGenerator extends ClassGenerator {
       if (fileName == null) {
         // Try to find by original name
         for (Map.Entry<Clazz, String> entry : fileNames.entrySet()) {
-          if (entry.getKey().getName().equals(originalName) ||
-              entry.getKey().getName().equals("I" + originalName)) {
+          if (entry.getKey().getName().equals(originalName)) {
             fileName = entry.getValue();
             break;
           }
@@ -122,7 +125,7 @@ public class TypescriptGenerator extends ClassGenerator {
         if (depClazz == null) {
           for (Interface i : getInterfaces()) {
             String mappedName = nameMapping.get(i.getName());
-            if (("I" + i.getName()).equals(dep) || (mappedName != null && mappedName.equals(dep))) {
+            if ((i.getName()).equals(dep) || (mappedName != null && mappedName.equals(dep))) {
               depClazz = i;
               break;
             }
@@ -150,7 +153,9 @@ public class TypescriptGenerator extends ClassGenerator {
       });
 
       // Write imports
-      imports.forEach(imp -> builder.append(imp).append("\n"));
+      imports.stream()
+          .sorted(STRING_ORDER)
+          .forEach(imp -> builder.append(imp).append("\n"));
       if (!imports.isEmpty()) {
         builder.append("\n");
       }
@@ -195,8 +200,7 @@ public class TypescriptGenerator extends ClassGenerator {
         for (int i = 0; i < values.size(); i++) {
           EnumValue value = values.get(i);
           // Add JSDoc comment with URI
-          builder.append("\t/** @see {@link ").append(value.getUri()).append("} */\n");
-          builder.append("\t").append(value.getName()).append(" = '").append(value.getName())
+          builder.append("\t").append(value.getName()).append(" = '").append(value.getUri())
               .append("'");
           if (i < values.size() - 1) {
             builder.append(",");
@@ -220,7 +224,7 @@ public class TypescriptGenerator extends ClassGenerator {
 
           // Check if property is optional (not required)
           boolean isOptional = !prop.getCardinality().equals(Cardinality.ONE_TO_ONE) &&
-                               !prop.getCardinality().equals(Cardinality.ONE_TO_MANY);
+              !prop.getCardinality().equals(Cardinality.ONE_TO_MANY) && !prop.isPrimaryKey();
 
           if (isInterface) {
             // Interface: just declare the property
@@ -233,15 +237,17 @@ public class TypescriptGenerator extends ClassGenerator {
             // Class: add @jsonMember or @jsonArrayMember decorator and property
             if (isArray) {
               // Use @jsonArrayMember for arrays
-              builder.append("\t@jsonArrayMember({ name: '").append(prop.getPropertyInfo().getName())
-                  .append("', constructor: ").append(tsType.typeName()).append(" })\n");
+              builder.append("\t@jsonArrayMember(() => ").append(tsType.jsonType())
+                  .append(", { name: '")
+                  .append(prop.getPropertyInfo().getName()).append("'").append(" })\n");
+            } else if (tsType.needsConstructor) {
+              // Use @jsonMember for single values
+              builder.append("\t@jsonMember(").append("() => ").append(tsType.jsonType()).append(", { name: '")
+                  .append(prop.getPropertyInfo().getName()).append("'").append(" })\n");
             } else {
               // Use @jsonMember for single values
-              builder.append("\t@jsonMember({ name: '").append(prop.getPropertyInfo().getName()).append("'");
-              if (tsType.needsConstructor()) {
-                builder.append(", constructor: ").append(tsType.typeName());
-              }
-              builder.append(" })\n");
+              builder.append("\t@jsonMember(").append("{ name: '")
+                  .append(prop.getPropertyInfo().getName()).append("'").append(" })\n");
             }
             builder.append("\t").append(prop.getName());
             if (isOptional) {
@@ -287,7 +293,9 @@ public class TypescriptGenerator extends ClassGenerator {
       }
     });
 
-    return dependencies.stream().toList();
+    return dependencies.stream()
+        .sorted(STRING_ORDER)
+        .toList();
   }
 
   protected void saveToFile(String fileName, String content) {
@@ -303,42 +311,49 @@ public class TypescriptGenerator extends ClassGenerator {
   protected TypeScriptType getTypeScriptType(DataType dataType) {
     // Map XSD types to TypeScript types
     return switch (dataType.getUri()) {
-      case "http://www.w3.org/2001/XMLSchema#string" ->
-          new TypeScriptType("string", false);
-      case "http://www.w3.org/2001/XMLSchema#integer" ->
-          new TypeScriptType("number", false);
+      case "http://www.w3.org/2001/XMLSchema#string" -> new TypeScriptType("string", false);
+      case "http://www.w3.org/2001/XMLSchema#integer" -> new TypeScriptType("number", false);
       case "http://www.w3.org/2001/XMLSchema#decimal",
            "http://www.w3.org/2001/XMLSchema#double",
-           "http://www.w3.org/2001/XMLSchema#float" ->
-          new TypeScriptType("number", false);
-      case "http://www.w3.org/2001/XMLSchema#boolean" ->
-          new TypeScriptType("boolean", false);
+           "http://www.w3.org/2001/XMLSchema#float" -> new TypeScriptType("number", false);
+      case "http://www.w3.org/2001/XMLSchema#boolean" -> new TypeScriptType("boolean", false);
       case "http://www.w3.org/2001/XMLSchema#date",
-           "http://www.w3.org/2001/XMLSchema#dateTime" ->
-          new TypeScriptType("Date", true);
+           "http://www.w3.org/2001/XMLSchema#dateTime" -> new TypeScriptType("Date", true);
       default -> {
         // Custom type - use the mapped name
-        String name = nameMapping.get(dataType.getName());
-        if (name == null) {
-          name = dataType.getName();
-        }
-        yield new TypeScriptType(name, true);
+        final String name = nameMapping.containsKey(dataType.getName()) ? nameMapping.get(dataType.getName())
+              : dataType.getName();
+        boolean isEnum = getEnums().stream().anyMatch(e -> e.getName().equals(name));
+        yield new TypeScriptType(name, isEnum ? "String" : name, true);
       }
     };
   }
 
   /**
    * Record to represent TypeScript type information
-   * @param typeName the TypeScript type name
+   *
+   * @param typeName         the TypeScript type name
+   * @param jsonType         the type to use in @jsonMember (e.g. for Date it should be 'Date' even if the property type is string)
    * @param needsConstructor whether this type needs a constructor in @jsonMember
    */
-  protected record TypeScriptType(String typeName, boolean needsConstructor) {
+  protected record TypeScriptType(String typeName, String jsonType, boolean needsConstructor) {
+
+    public TypeScriptType(String typeName, boolean needsConstructor) {
+      this(typeName, null, needsConstructor);
+    }
+
+    public TypeScriptType {
+      if (jsonType == null || jsonType.isBlank()) {
+        jsonType = typeName;
+      }
+    }
+
     public boolean isCustomType() {
       return needsConstructor &&
-             !typeName.equals("Date") &&
-             !typeName.equals("string") &&
-             !typeName.equals("number") &&
-             !typeName.equals("boolean");
+          !typeName.equals("Date") &&
+          !typeName.equalsIgnoreCase("string") &&
+          !typeName.equalsIgnoreCase("number") &&
+          !typeName.equalsIgnoreCase("boolean");
     }
   }
 }
