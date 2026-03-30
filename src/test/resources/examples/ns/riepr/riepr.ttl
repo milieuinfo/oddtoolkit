@@ -90,6 +90,13 @@
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een exploitant kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een exploitant moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
@@ -242,6 +249,13 @@
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een exploitatie locatie kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een exploitatie locatie moet gekoppeld zijn aan exact één exploitant"@nl ;
         owl:onProperty prov:wasAttributedTo ;
         owl:someValuesFrom :Exploitant ;
@@ -372,6 +386,13 @@
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een exploitatie kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een exploitatie implementeert een proces"@nl ;
         owl:onProperty ssn:implements ;
         owl:someValuesFrom :Proces ;
@@ -426,6 +447,13 @@
         rdfs:comment "Een proces kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een proces kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
@@ -596,75 +624,78 @@
                       [ hydra:variable "issued" ; hydra:property dct:issued ; hydra:required true ] ,
                       [ hydra:variable "created" ; hydra:property dct:created ; hydra:required true ]
     ] ;
-    ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
+        rdfs:comment "Een installatie heeft externe identificaties (optioneel)"@nl ;
         owl:onProperty adms:identifier ;
         owl:someValuesFrom adms:Identifier ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
         # *..* relation with the inverse of ssn:hasSubSystem
-        rdfs:comment "Een systeem kan meerdere objecten bevatten."@nl ;
+        rdfs:comment "Een installatie kan meerdere objecten bevatten."@nl ;
         owl:onProperty ssn:hasSubSystem ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een benaming hebben"@nl ;
+        rdfs:comment "Een installatie moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een beschrijving hebben"@nl ;
+        rdfs:comment "Een installatie kan een beschrijving hebben"@nl ;
         owl:onProperty rdfs:comment ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een modificatie datum hebben"@nl ;
+        rdfs:comment "Een installatie moet een modificatie datum hebben"@nl ;
         owl:onProperty dct:modified ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een creatie datum hebben"@nl ;
+        rdfs:comment "Een installatie moet een creatie datum hebben"@nl ;
         owl:onProperty dct:created ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een geldigheid start hebben"@nl ;
+        rdfs:comment "Een installatie kan een referentie hebben naar een aangifte."@nl ;
+        owl:onProperty :ingediend ;
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een installatie moet een geldigheid start hebben"@nl ;
         owl:onProperty dct:issued ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een geldigheid einde hebben"@nl ;
+        rdfs:comment "Een installatie kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
+        rdfs:comment "Een installatie kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een installatie moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
         owl:someValuesFrom adms:Status ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een revisie zijn van een andere systemen (optioneel)"@nl ;
+        rdfs:comment "Een installatie kan een revisie zijn van een andere systemen (optioneel)"@nl ;
         owl:onProperty prov:wasRevisionOf ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
@@ -685,61 +716,23 @@
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem mag max 1 geometrie hebben"@nl ;
+        rdfs:comment "Een installatie mag max 1 geometrie hebben"@nl ;
         owl:onProperty ogc:hasGeometry ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een typering hebben via dct:type"@nl ;
+        rdfs:comment "Een installatie kan een typering hebben via dct:type"@nl ;
         owl:onProperty dct:type ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     ## ----- Installatie restricties ------
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een installatie kan meerdere installatie eigenschappen hebben"@nl ;
+        rdfs:comment "Een installatie kan meerdere eigenschappen hebben"@nl ;
         owl:onProperty ssn:hasProperty ;
-        owl:someValuesFrom :InstallatieEigenschap ;
+        owl:someValuesFrom :SysteemEigenschap ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] .
-
-:InstallatieEigenschap a owl:Class ;
-    rdfs:label "Installatie Eigenschap"@nl ;
-    rdfs:comment "Een installatie eigenschap is een specifieke eigenschap van een installatie, zoals capaciteit of rendement."@nl ;
-    rdfs:subClassOf ssn:Property ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap moet een typering hebben"@nl ;
-        owl:onProperty dct:type ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap moet een datatype hebben"@nl ;
-        owl:onProperty rdfs:range ;
-        owl:someValuesFrom rdfs:Datatype ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap kan een waarde hebben"@nl ;
-        owl:onProperty rdfs:value ;
-        owl:someValuesFrom rdfs:Literal ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap kan een eenheid hebben"@nl ;
-        owl:onProperty qudt:hasUnit ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een installatie eigenschap moet gekoppeld zijn aan exact één installatie"@nl ;
-        owl:onProperty ssn:isPropertyOf ;
-        owl:someValuesFrom :Installatie ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
 
 :Emissiepunt a owl:Class ;
@@ -759,67 +752,67 @@
         ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
+        rdfs:comment "Een emissiepunt heeft externe identificaties (optioneel)"@nl ;
         owl:onProperty adms:identifier ;
         owl:someValuesFrom adms:Identifier ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
         # *..* relation with the inverse of ssn:hasSubSystem
-        rdfs:comment "Een systeem kan meerdere objecten bevatten."@nl ;
+        rdfs:comment "Een emissiepunt kan meerdere objecten bevatten."@nl ;
         owl:onProperty ssn:hasSubSystem ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een benaming hebben"@nl ;
+        rdfs:comment "Een emissiepunt moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een modificatie datum hebben"@nl ;
+        rdfs:comment "Een emissiepunt moet een modificatie datum hebben"@nl ;
         owl:onProperty dct:modified ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een creatie datum hebben"@nl ;
+        rdfs:comment "Een emissiepunt moet een creatie datum hebben"@nl ;
         owl:onProperty dct:created ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een geldigheid start hebben"@nl ;
+        rdfs:comment "Een emissiepunt moet een geldigheid start hebben"@nl ;
         owl:onProperty dct:issued ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een geldigheid einde hebben"@nl ;
+        rdfs:comment "Een emissiepunt kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
+        rdfs:comment "Een emissiepunt kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een emissiepunt moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
         owl:someValuesFrom adms:Status ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een revisie zijn van een andere systemen (optioneel)"@nl ;
+        rdfs:comment "Een emissiepunt kan een revisie zijn van een andere systemen (optioneel)"@nl ;
         owl:onProperty prov:wasRevisionOf ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
@@ -840,18 +833,17 @@
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem mag max 1 geometrie hebben"@nl ;
+        rdfs:comment "Een emissiepunt mag max 1 geometrie hebben"@nl ;
         owl:onProperty ogc:hasGeometry ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een typering hebben via dct:type"@nl ;
+        rdfs:comment "Een emissiepunt kan een typering hebben via dct:type"@nl ;
         owl:onProperty dct:type ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    ## ----- Emissiepunt restricties ------
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een emissiepunt is verschillend van een onttrekkingspunt (disjoint)"@nl ;
         owl:disjointWith :Onttrekkingspunt
@@ -861,11 +853,17 @@
         hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ] ,
                       [ hydra:variable "issued" ; hydra:property dct:issued ; hydra:required true ] ,
                       [ hydra:variable "created" ; hydra:property dct:created ; hydra:required true ]
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een emissiepunt kan meerdere eigenschappen hebben"@nl ;
+        owl:onProperty ssn:hasProperty ;
+        owl:someValuesFrom :SysteemEigenschap ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] .
 
-:EmissiepuntEigenschap a owl:Class ;
-    rdfs:label "Emissiepunt Eigenschap"@nl ;
-    rdfs:comment "Een emissiepunt eigenschap is een specifieke eigenschap van een emissiepunt, zoals de hoogte van de schouw."@nl ;
+:SysteemEigenschap a owl:Class ;
+    rdfs:label "Systeem Eigenschap"@nl ;
+    rdfs:comment "Een systeem eigenschap is een specifieke eigenschap van een systeem, zoals de hoogte van de schouw."@nl ;
     rdfs:subClassOf ssn:Property ;
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een systeem eigenschap moet een typering hebben"@nl ;
@@ -892,6 +890,13 @@
         owl:onProperty qudt:hasUnit ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een systeem eigenschap kan een referentie naar een parameter hebben"@nl ;
+        owl:onProperty :parameter ;
+        owl:someValuesFrom rdfs:Literal ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
 
 :Onttrekkingspunt a owl:Class ;
@@ -906,63 +911,62 @@
                       [ hydra:variable "issued" ; hydra:property dct:issued ; hydra:required true ] ,
                       [ hydra:variable "created" ; hydra:property dct:created ; hydra:required true ]
     ] ;
-        ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
+        rdfs:comment "Een onttrekkingspunt heeft externe identificaties (optioneel)"@nl ;
         owl:onProperty adms:identifier ;
         owl:someValuesFrom adms:Identifier ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een benaming hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een modificatie datum hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt moet een modificatie datum hebben"@nl ;
         owl:onProperty dct:modified ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een creatie datum hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt moet een creatie datum hebben"@nl ;
         owl:onProperty dct:created ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een geldigheid start hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt moet een geldigheid start hebben"@nl ;
         owl:onProperty dct:issued ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een geldigheid einde hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
+        rdfs:comment "Een onttrekkingspunt kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een onttrekkingspunt moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
         owl:someValuesFrom adms:Status ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een revisie zijn van een andere systemen (optioneel)"@nl ;
+        rdfs:comment "Een onttrekkingspunt kan een revisie zijn van een andere systemen (optioneel)"@nl ;
         owl:onProperty prov:wasRevisionOf ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
@@ -1011,6 +1015,12 @@
         owl:onProperty ssn:hasSubSystem ;
         owl:someValuesFrom :Filter ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een onttrekkingspunt kan meerdere eigenschappen hebben"@nl ;
+        owl:onProperty ssn:hasProperty ;
+        owl:someValuesFrom :SysteemEigenschap ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] .
 
 :AbstractEmissiepunt a owl:Class ;
@@ -1044,63 +1054,62 @@
             ogc:asWKT "POINT(4.4026 51.2195)"^^ogc:wktLiteral
         ]
     ] ;
-        ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
+        rdfs:comment "Een meetpunt heeft externe identificaties (optioneel)"@nl ;
         owl:onProperty adms:identifier ;
         owl:someValuesFrom adms:Identifier ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een benaming hebben"@nl ;
+        rdfs:comment "Een meetpunt moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een modificatie datum hebben"@nl ;
+        rdfs:comment "Een meetpunt moet een modificatie datum hebben"@nl ;
         owl:onProperty dct:modified ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een creatie datum hebben"@nl ;
+        rdfs:comment "Een meetpunt moet een creatie datum hebben"@nl ;
         owl:onProperty dct:created ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een geldigheid start hebben"@nl ;
+        rdfs:comment "Een meetpunt moet een geldigheid start hebben"@nl ;
         owl:onProperty dct:issued ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een geldigheid einde hebben"@nl ;
+        rdfs:comment "Een meetpunt kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
+        rdfs:comment "Een meetpunt kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een meetpunt moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
         owl:someValuesFrom adms:Status ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een revisie zijn van een andere systemen (optioneel)"@nl ;
+        rdfs:comment "Een meetpunt kan een revisie zijn van een andere systemen (optioneel)"@nl ;
         owl:onProperty prov:wasRevisionOf ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
@@ -1121,18 +1130,17 @@
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem mag max 1 geometrie hebben"@nl ;
+        rdfs:comment "Een meetpunt mag max 1 geometrie hebben"@nl ;
         owl:onProperty ogc:hasGeometry ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een typering hebben via dct:type"@nl ;
+        rdfs:comment "Een meetpunt kan een typering hebben via dct:type"@nl ;
         owl:onProperty dct:type ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    ## ----- Meetpunt restricties ------
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een meetpunt is verschillend van een emissiepunt (disjoint)"@nl ;
         owl:disjointWith :Emissiepunt
@@ -1147,68 +1155,73 @@
         owl:onProperty ssn:hasSubSystem ;
         owl:someValuesFrom :MeetInstrument ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een meetpunt kan meerdere eigenschappen hebben"@nl ;
+        owl:onProperty ssn:hasProperty ;
+        owl:someValuesFrom :SysteemEigenschap ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] .
 
 :MeetInstrument a owl:Class ;
     rdfs:label "Meetinstrument"@nl ;
     rdfs:comment "Een meetinstrument is een specifiek apparaat of systeem dat wordt gebruikt om metingen uit te voeren op meetpunten."@nl ;
-        ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
+        rdfs:comment "Een meetinstrument heeft externe identificaties (optioneel)"@nl ;
         owl:onProperty adms:identifier ;
         owl:someValuesFrom adms:Identifier ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een benaming hebben"@nl ;
+        rdfs:comment "Een meetinstrument moet een benaming hebben"@nl ;
         owl:onProperty rdfs:label ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een modificatie datum hebben"@nl ;
+        rdfs:comment "Een meetinstrument moet een modificatie datum hebben"@nl ;
         owl:onProperty dct:modified ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een creatie datum hebben"@nl ;
+        rdfs:comment "Een meetinstrument moet een creatie datum hebben"@nl ;
         owl:onProperty dct:created ;
         owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een geldigheid start hebben"@nl ;
+        rdfs:comment "Een meetinstrument moet een geldigheid start hebben"@nl ;
         owl:onProperty dct:issued ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een geldigheid einde hebben"@nl ;
+        rdfs:comment "Een meetinstrument kan een geldigheid einde hebben"@nl ;
         owl:onProperty dct:valid ;
         owl:someValuesFrom xsd:date ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
+        rdfs:comment "Een meetinstrument kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een meetinstrument moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
         owl:someValuesFrom adms:Status ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een revisie zijn van een andere systemen (optioneel)"@nl ;
+        rdfs:comment "Een meetinstrument kan een revisie zijn van een andere systemen (optioneel)"@nl ;
         owl:onProperty prov:wasRevisionOf ;
         owl:someValuesFrom ssn:System ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
@@ -1229,13 +1242,13 @@
         owl:minCardinality "0"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem mag max 1 geometrie hebben"@nl ;
+        rdfs:comment "Een meetinstrument mag max 1 geometrie hebben"@nl ;
         owl:onProperty ogc:hasGeometry ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem kan een typering hebben via dct:type"@nl ;
+        rdfs:comment "Een meetinstrument kan een typering hebben via dct:type"@nl ;
         owl:onProperty dct:type ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
@@ -1244,7 +1257,6 @@
 :Filter a owl:Class ;
     rdfs:label "Filter"@nl ;
     rdfs:comment "Een filter is een specifiek systeem dat wordt gebruikt om de kwaliteit van de uitstoot te verbeteren door het verwijderen of verminderen van schadelijke stoffen."@nl ;
-        ## ----- Systeem restricties ------
     rdfs:subClassOf ssn:System, ogc:SpatialObject ;
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een systeem heeft externe identificaties (optioneel)"@nl ;
@@ -1285,13 +1297,13 @@
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
-    # rdfs:subClassOf [ a owl:Restriction ;
-    #     rdfs:comment "Een systeem moet onderdeel van een locatie zijn"@nl ;
-    #     owl:onProperty sosa:isHostedBy ;
-    #     owl:someValuesFrom :Exploitatielocatie ;
-    #     owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-    #     owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    # ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een filter kan verbonden zijn aan een enkele aangifte"@nl ;
+        owl:onProperty :aangifte ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een systeem moet een enkele status hebben"@nl ;
         owl:onProperty adms:status ;
@@ -1330,44 +1342,6 @@
         rdfs:comment "Een systeem kan een typering hebben via dct:type"@nl ;
         owl:onProperty dct:type ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] .
-
-:FilterEigenschap a owl:Class ;
-    rdfs:label "Filter Eigenschap"@nl ;
-    rdfs:comment "Een filter eigenschap is een specifieke eigenschap van een filter, zoals het type filtermedium."@nl ;
-    rdfs:subClassOf ssn:Property ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap moet een typering hebben"@nl ;
-        owl:onProperty dct:type ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap moet een datatype hebben"@nl ;
-        owl:onProperty rdfs:range ;
-        owl:someValuesFrom rdfs:Datatype ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap kan een waarde hebben"@nl ;
-        owl:onProperty rdfs:value ;
-        owl:someValuesFrom rdfs:Literal ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een systeem eigenschap kan een eenheid hebben"@nl ;
-        owl:onProperty qudt:hasUnit ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een filter eigenschap moet gekoppeld zijn aan exact één filter"@nl ;
-        owl:onProperty ssn:isPropertyOf ;
-        owl:someValuesFrom :Filter ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
 
@@ -1469,14 +1443,71 @@
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
 
-:Aangifte a owl:Class ;
-    rdfs:label "Aangifte"@nl ;
-    rdfs:comment "Een aangifte is een specifieke gebeurtenis waarbij een aanvraag of melding wordt ingediend bij de overheid."@nl ;
+:Transactie a owl:Class ;
+    rdfs:label "Transactie"@nl ;
+    rdfs:comment "Een transactie is een proces van indienen, verwerken en goedkeuren van documenten door de rapporteringsplichtige."@nl ;
     rdfs:subClassOf prov:Activity ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een aangifte heeft meerdere stukken"@nl ;
-        owl:onProperty prov:hadPart ;
-        owl:someValuesFrom dossier:Stuk ;
+        rdfs:comment "Een transactie genereert een of meerdere aangiften"@nl ;
+        owl:onProperty dossier:genereert ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een transactie heeft een start datum waarop de transactie is gestart"@nl ;
+        owl:onProperty prov:startedAtTime ;
+        owl:someValuesFrom xsd:dateTime ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een transactie heeft een eind datum waarop de transactie is beëindigd"@nl ;
+        owl:onProperty prov:endedAtTime ;
+        owl:someValuesFrom xsd:dateTime ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een transactie heeft een verantwoordelijke agent"@nl ;
+        owl:onProperty prov:wasAssociatedWith ;
+        owl:someValuesFrom prov:Agent ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] .
+
+:Aangifte a owl:Class ;
+    rdfs:label "Aangifte"@nl ;
+    rdfs:comment "Een aangifte is een document dat wordt ingediend bij de overheid."@nl ;
+    hydra:search [ a hydra:IriTemplate ;
+        hydra:template "https://data.riepr.omgeving.vlaanderen.be/id/aangifte/{vlaanderenId}"^^hydra:Rfc6570Template ;
+        hydra:mapping [ hydra:variable "vlaanderenId" ; hydra:property :vlaanderenId ; hydra:required true ]
+    ] ;
+    rdfs:subClassOf dossier:Stuk ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een aangifte heeft optioneel een auteur (die verschillend kan zijn dan de indiener)."@nl ;
+        owl:onProperty prov:wasAssociatedWith ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een aangifte heeft een datum van indiening."@nl ;
+        owl:onProperty dct:created ;
+        owl:someValuesFrom xsd:date ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een aangifte kan deel zijn van een andere aangifte."@nl ;
+        owl:onProperty dct:isPartOf ;
+        owl:someValuesFrom :Aangifte ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Een aangifte heeft een informatie classificatie."@nl ;
+        owl:onProperty dossier:informatieclassificatie ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
 
 # --------------------------------------- #
@@ -1494,17 +1525,34 @@
     ] ;
     rdfs:range :Rubriek .
 
+:parameter a owl:ObjectProperty ;
+    rdfs:label "Parameter"@nl ;
+    rdfs:comment "De parameter die wordt gebruikt bij een eigenschap of meting."@nl ;
+    rdfs:domain :SysteemEigenschap ;
+    rdfs:range pplan:Variable .
+
+:aangifte a owl:ObjectProperty ;
+    rdfs:label "Aangifte"@nl ;
+    rdfs:comment "De aangifte die gerelateerd is aan een exploitatie of observatie."@nl ;
+    rdfs:range :Aangifte .
+
 # --------------------------------------- #
 # Data Properties
 # --------------------------------------- #
 
+:localId a owl:DatatypeProperty ;
+    rdfs:label "Local Identifier"@en ;
+    rdfs:comment "Een local identifier is een unieke identificatie binnen de context van RIE-IEPR."@en ;
+    rdfs:range xsd:string .
+
+:vlaanderenId a owl:DatatypeProperty ;
+    rdfs:label "Vlaanderen Identifier"@nl ;
+    rdfs:comment "Een unieke identificatie binnen de context van Vlaanderen, gebruikt voor het identificeren van entiteiten zoals aangiften."@nl ;
+    rdfs:range xsd:string .
+
 # --------------------------------------- #
 # Datatypes
 # --------------------------------------- #
-:localId a rdfs:Datatype ;
-    rdfs:label "Local Identifier"@en ;
-    rdfs:comment "Een local identifier is een unieke identificatie binnen de context van RIE-IEPR."@en .
-
 :putNummer a rdfs:Datatype ;
     rdfs:label "Grondwaterput nummer"@nl ;
     rdfs:comment "Het putnummer van een grondwaterput, gebruikt als identificatie binnen de context van RIE-IEPR."@nl .

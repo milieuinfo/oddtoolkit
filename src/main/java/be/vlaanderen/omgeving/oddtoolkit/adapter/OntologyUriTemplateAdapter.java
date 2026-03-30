@@ -23,7 +23,7 @@ public class OntologyUriTemplateAdapter extends AbstractAdapter<OntologyInfo> {
         .filter(c -> c.getScope().equals(Scope.ONTOLOGY))
         .filter(c -> c.getResource().hasProperty(info.getModel().getProperty("http://www.w3.org/ns/hydra/core#search")))
         .forEach(this::extractUriTemplate);
-    return null;
+    return info;
   }
 
   private void extractUriTemplate(ClassInfo classInfo) {

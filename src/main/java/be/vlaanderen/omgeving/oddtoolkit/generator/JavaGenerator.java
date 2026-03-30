@@ -77,7 +77,7 @@ public class JavaGenerator extends SchemaGenerator {
 
   protected void generateFile(List<? extends Clazz> classes, @Nullable String type) {
     classes.forEach(clazz -> {
-      Table equivalentTable = getTableByClazz(clazz);
+      Table equivalentTable = getTableByClazz(clazz, false);
 
       String typeDeclaration = "class";
       switch (type) {
@@ -122,9 +122,14 @@ public class JavaGenerator extends SchemaGenerator {
         builder.append("import lombok.Builder;\n");
         builder.append("import lombok.NoArgsConstructor;\n");
         builder.append("import lombok.AllArgsConstructor;\n");
+        builder.append("import lombok.EqualsAndHashCode;\n");
         builder.append("import jakarta.persistence.Table;\n");
         builder.append("import jakarta.persistence.Entity;\n");
         builder.append("import jakarta.persistence.Column;\n");
+        builder.append("import jakarta.persistence.Id;\n");
+        builder.append("import jakarta.persistence.IdClass;\n");
+        builder.append("import jakarta.persistence.EmbeddedId;\n");
+        builder.append("import jakarta.persistence.Embeddable;\n");
         builder.append("import jakarta.persistence.OneToOne;\n");
         builder.append("import jakarta.persistence.OneToMany;\n");
         builder.append("import jakarta.persistence.ManyToOne;\n");
@@ -132,6 +137,7 @@ public class JavaGenerator extends SchemaGenerator {
         builder.append("import jakarta.persistence.JoinColumn;\n");
         builder.append("import jakarta.persistence.JoinTable;\n");
         builder.append("import jakarta.persistence.JoinColumns;\n");
+        builder.append("import java.io.Serializable;\n");
         builder.append("import java.util.List;\n");
       }
       builder.append("\n");
@@ -144,11 +150,19 @@ public class JavaGenerator extends SchemaGenerator {
       builder.append(" **/\n");
 
       if (!isInterface && !isEnum) {
+        List<Attribute> primaryKeys = clazz.getAttributes().stream()
+            .filter(Attribute::isPrimaryKey)
+            .toList();
+        boolean isCompositePk = primaryKeys.size() > 1;
+
         builder.append("@Getter\n").append("@Setter\n");
         builder.append("@Entity(name = \"").append(clazz.getName()).append("\")\n");
         builder.append("@Builder(toBuilder = true)\n");
         builder.append("@NoArgsConstructor\n").append("@AllArgsConstructor\n");
         builder.append("@Table(name = \"").append(equivalentTable.getName()).append("\")\n");
+        if (isCompositePk) {
+          builder.append("@IdClass(").append(clazz.getName()).append(".Id.class)\n");
+        }
       }
 
       // Determine if it extends or implements other classes/interfaces
@@ -200,14 +214,13 @@ public class JavaGenerator extends SchemaGenerator {
         } else {
           Column equivalentColumn = equivalentTable.getColumnByAttribute(prop);
           if (equivalentColumn == null) {
-            // Relation - check if it's many-to-many with join table
             if (prop.getCardinality().equals(Cardinality.MANY_TO_MANY)) {
               // Many-to-many relationship
               builder.append("\t@ManyToMany\n");
 
               // Try to get the join table information
               // For many-to-many, we need @JoinTable with joinColumns and inverseJoinColumns
-              Table targetTable = getTableByClazz(prop.getRange());
+              Table targetTable = getTableByClazz(prop.getRange(), false);
               if (targetTable != null) {
                 // Construct the join table name based on naming convention
                 // Typically: rel_<source>_<target> or similar pattern
@@ -236,6 +249,10 @@ public class JavaGenerator extends SchemaGenerator {
             String mergeJoinTableAttributeName = getSchemaGeneratorProperties().getMergeJoinTables()
                 .getAttributeName();
 
+            if (prop.isPrimaryKey()) {
+              builder.append("\t@Id\n");
+            }
+
             if (isMergeJoinTablesColumn(equivalentTable, columnName, mergeJoinTableAttributeName)) {
               // This is a merge-join-tables discriminator column - treat as regular column with enum type
               builder.append("\t@Column(name = \"").append(columnName)
@@ -247,12 +264,17 @@ public class JavaGenerator extends SchemaGenerator {
                   .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
             }
           } else if (!prop.getCardinality().equals(Cardinality.MANY_TO_MANY)) {
-            Table rangeTable = getTableByClazz(prop.getRange());
+            Table rangeTable = getTableByClazz(prop.getRange(), false);
             if (rangeTable != null) {
-              // Join column
+              // Join column — add @Id when this FK is also part of the primary key
+              if (prop.isPrimaryKey()) {
+                builder.append("\t@Id\n");
+              }
               Relation relation = equivalentTable.getRelationByAttribute(prop);
-              builder.append("\t@JoinColumn(name = \"").append(relation.getToColumn().getName())
-                  .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
+              if (relation != null && relation.getToColumn() != null) {
+                builder.append("\t@JoinColumn(name = \"").append(relation.getToColumn().getName())
+                    .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
+              }
             }
           }
 
@@ -264,10 +286,42 @@ public class JavaGenerator extends SchemaGenerator {
               .append(" ").append(prop.getName()).append(";\n");
         }
       });
+
+      // Emit composite Id as a static inner class — keeps it scoped to its owner.
+      if (!isInterface && !isEnum) {
+        List<Attribute> primaryKeys = clazz.getAttributes().stream()
+            .filter(Attribute::isPrimaryKey)
+            .toList();
+        if (primaryKeys.size() > 1) {
+          builder.append("\n");
+          appendCompositeIdInnerClass(builder, primaryKeys);
+        }
+      }
+
       builder.append("}\n");
-      // Save to file
       saveToFile(fileName, builder.toString());
     });
+  }
+
+  /**
+   * Appends a composite primary-key {@code Id} static inner class to {@code builder}.
+   * The inner class is annotated with {@code @Embeddable} and implements
+   * {@link java.io.Serializable}, making it suitable for use with {@code @IdClass}.
+   */
+  private void appendCompositeIdInnerClass(StringBuilder builder, List<Attribute> primaryKeys) {
+    builder.append("\t/** Composite primary-key class. */\n");
+    builder.append("\t@Embeddable\n");
+    builder.append("\t@Getter\n");
+    builder.append("\t@EqualsAndHashCode\n");
+    builder.append("\t@NoArgsConstructor\n");
+    builder.append("\t@AllArgsConstructor\n");
+    builder.append("\tpublic static class Id implements Serializable {\n");
+    for (Attribute pk : primaryKeys) {
+      Pair<String, String> javaType = getJavaType(pk.getDataType());
+      builder.append("\t\tprivate ").append(javaType.getRight()).append(" ").append(pk.getName())
+          .append(";\n");
+    }
+    builder.append("\t}\n");
   }
 
   protected List<Pair<String, String>> getDependencies(Clazz clazz) {

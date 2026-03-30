@@ -131,14 +131,22 @@ public class ClassGenerator extends BaseGenerator {
 
   private void sortClazzInternals(Clazz clazz) {
     clazz.setAttributes(clazz.getAttributes().stream()
-        .sorted(attributeOrder())
+        .sorted(attributeOrder(clazz))
         .toList());
     clazz.setInterfaces(clazz.getInterfaces().stream()
         .sorted(CLAZZ_ORDER)
         .toList());
   }
 
-  private Comparator<Attribute> attributeOrder() {
+  /**
+   * Build a comparator for the attributes of the given class.
+   * Bucket 0 – primary keys, ordered by their position in the class's Hydra URI-template
+   *           (keys that don't appear in the template sort after those that do).
+   * Bucket 1 – extra-properties (in config list order).
+   * Bucket 2 – temporal properties (in config list order).
+   * Bucket 3 – everything else (stable URI / name order).
+   */
+  private Comparator<Attribute> attributeOrder(Clazz clazz) {
     Map<String, Integer> extraOrder = new HashMap<>();
     List<be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration.ExtraProperty> extras =
         getOntologyConfiguration().getExtraProperties();
@@ -158,8 +166,12 @@ public class ClassGenerator extends BaseGenerator {
       }
     }
 
+    // Build a PK ordering map from the URI template of this class, when available.
+    Map<String, Integer> pkTemplateOrder = buildPkTemplateOrder(clazz);
+
     return Comparator
         .comparingInt((Attribute attribute) -> attributeBucket(attribute, extraOrder, temporalOrder))
+        .thenComparingInt(attribute -> pkTemplateIndex(attribute, pkTemplateOrder))
         .thenComparingInt(attribute -> orderIndex(attribute, extraOrder))
         .thenComparingInt(attribute -> orderIndex(attribute, temporalOrder))
         .thenComparing(attribute -> attribute != null ? attribute.getUri() : null,
@@ -168,16 +180,70 @@ public class ClassGenerator extends BaseGenerator {
             Comparator.nullsLast(String::compareTo));
   }
 
+  /**
+   * Build a {propertyUri → template-variable-position} map for the attributes of the given class.
+   * The position is derived from the left-to-right order of variable names in the URI template
+   * string (e.g. "{a}/{b}" gives a=0, b=1).
+   * Returns an empty map when no URI template is set or the template string is absent.
+   */
+  private Map<String, Integer> buildPkTemplateOrder(Clazz clazz) {
+    if (clazz == null || clazz.getClassInfo() == null) {
+      return Map.of();
+    }
+    be.vlaanderen.omgeving.oddtoolkit.model.UriTemplate uriTemplate =
+        clazz.getClassInfo().getUriTemplate();
+    if (uriTemplate == null || uriTemplate.getTemplate() == null
+        || uriTemplate.getVariables() == null || uriTemplate.getVariables().isEmpty()) {
+      return Map.of();
+    }
+
+    String template = uriTemplate.getTemplate();
+    Map<String, String> variableToPropertyUri = uriTemplate.getVariables();
+
+    // Extract variable names in left-to-right appearance order from the template string.
+    Map<String, Integer> variablePosition = new HashMap<>();
+    java.util.regex.Matcher matcher =
+        java.util.regex.Pattern.compile("\\{([^}]+)}").matcher(template);
+    int pos = 0;
+    while (matcher.find()) {
+      String varName = matcher.group(1);
+      variablePosition.putIfAbsent(varName, pos++);
+    }
+
+    // Invert: propertyUri → position
+    Map<String, Integer> pkOrder = new HashMap<>();
+    variableToPropertyUri.forEach((varName, propertyUri) -> {
+      Integer idx = variablePosition.get(varName);
+      if (idx != null) {
+        pkOrder.put(propertyUri, idx);
+      }
+    });
+    return pkOrder;
+  }
+
+  /** Returns the template-position index for a PK attribute, or MAX_VALUE when not in template. */
+  private int pkTemplateIndex(Attribute attribute, Map<String, Integer> pkTemplateOrder) {
+    if (attribute == null || !attribute.isPrimaryKey()) {
+      return Integer.MAX_VALUE; // only meaningful for bucket-0 attributes
+    }
+    String uri = attribute.getUri();
+    return uri != null ? pkTemplateOrder.getOrDefault(uri, Integer.MAX_VALUE) : Integer.MAX_VALUE;
+  }
+
   private int attributeBucket(Attribute attribute, Map<String, Integer> extraOrder,
       Map<String, Integer> temporalOrder) {
-    String uri = attribute != null ? attribute.getUri() : null;
-    if (uri != null && extraOrder.containsKey(uri)) {
+    // Primary keys always come first, before extra-properties and temporal fields.
+    if (attribute != null && attribute.isPrimaryKey()) {
       return 0;
     }
-    if (uri != null && temporalOrder.containsKey(uri)) {
+    String uri = attribute != null ? attribute.getUri() : null;
+    if (uri != null && extraOrder.containsKey(uri)) {
       return 1;
     }
-    return 2;
+    if (uri != null && temporalOrder.containsKey(uri)) {
+      return 2;
+    }
+    return 3;
   }
 
   private int orderIndex(Attribute attribute, Map<String, Integer> orderMap) {
@@ -229,6 +295,8 @@ public class ClassGenerator extends BaseGenerator {
           attribute.setCardinality(getCardinality(p));
           attribute.setDomain(clazz);
           attribute.setPrimaryKey(p.isIdentifier());
+          attribute.setNullable(!p.isIdentifier() && (attribute.getCardinality() == null || !attribute.getCardinality()
+              .isMinOne()));
           // Check if the property is a relation to another class
           if (!p.getRange().isEmpty() && p.getRange().getFirst().equals(RDFS.Datatype.getURI())) {
             // Set datatype to string

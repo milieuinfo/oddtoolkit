@@ -89,6 +89,26 @@
     owl:equivalentProperty foaf:phone ;
     skos:inScheme <> .
 
+:startdatum a skos:Concept ;
+    skos:prefLabel "startdatum"@nl ;
+    skos:definition "De eigenschap die de startdatum van een entiteit beschrijft."@nl ;
+    owl:equivalentProperty prov:startedAtTime ;
+    rdfs:seeAlso <https://data.vlaanderen.be/ns/dossier#Activiteit.startdatum> ;
+    skos:inScheme <> .
+
+:einddatum a skos:Concept ;
+    skos:prefLabel "einddatum"@nl ;
+    skos:definition "De eigenschap die de einddatum van een entiteit beschrijft."@nl ;
+    owl:equivalentProperty prov:endedAtTime ;
+    rdfs:seeAlso <https://data.vlaanderen.be/ns/dossier#Activiteit.einddatum> ;
+    skos:inScheme <> .
+
+:verantwoordelijke a skos:Concept ;
+    skos:prefLabel "verantwoordelijke"@nl ;
+    skos:definition "De eigenschap die de verantwoordelijke agent voor een proces beschrijft."@nl ;
+    owl:equivalentProperty prov:wasAssociatedWith ;
+    skos:inScheme <> .
+
 # ---------------------------------------- #
 
 :systeem a skos:Concept ;
@@ -192,8 +212,8 @@
 :onderdeelVan a skos:Concept ;
     skos:prefLabel "onderdeel van"@nl ;
     skos:definition "De eigenschap die aangeeft van welk plan of welk proces een stap deel uitmaakt."@nl ;
-    skos:exactMatch pplan:isStepOfPlan ;
-    owl:equivalentProperty pplan:isStepOfPlan ;
+    skos:exactMatch pplan:isStepOfPlan, dct:isPartOf ;
+    owl:equivalentProperty pplan:isStepOfPlan, dct:isPartOf ;
     skos:inScheme <> .
 
 :volgtOp a skos:Concept ;

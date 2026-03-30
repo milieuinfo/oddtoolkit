@@ -32,5 +32,14 @@ public enum Cardinality {
   public boolean isToMany() {
     return this == ONE_TO_MANY || this == MANY_TO_MANY;
   }
+
+  /**
+   * Checks if this cardinality represents at least a to-one relationship.
+   *
+   * @return true if the cardinality is ONE_TO_ONE or MANY_TO_ONE, false otherwise
+   */
+  public boolean isMinOne() {
+    return this == ONE_TO_ONE || this == ONE_TO_MANY;
+  }
 }
 

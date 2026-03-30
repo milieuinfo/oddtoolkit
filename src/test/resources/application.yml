@@ -11,15 +11,6 @@ ontology:
     - "http://purl.org/dc/terms/issued"
     - "http://purl.org/dc/terms/valid"
   extra-properties:
-    # We want to use UUIDs as identifiers (including any identifiers from the IRI Template's)
-    - name: "uuid"
-      uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId"
-      comment: "UUID"
-      identifier: true
-      range: "http://www.w3.org/2001/XMLSchema#string"
-      cardinality:
-        max: 1
-        min: 1
     # We want to keep the URI in the database for reference
     - name: "uri"
       uri: "http://example.org/vocab/uri"
@@ -28,32 +19,30 @@ ontology:
       cardinality:
         max: 1
         min: 1
-    # We want to determine if something is posted or in draft
-    - name: "ingediend"
-      uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ingediend"
-      comment: "Indicates whether the entity is ingediend (posted) or not (draft)"
-      range: "http://www.w3.org/2001/XMLSchema#boolean"
+  override-properties:
+    - uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId"
+      comment: "UUID"
+      name: "uuid"
+      identifier: true
+      range: "http://www.w3.org/2001/XMLSchema#string"
       cardinality:
         max: 1
         min: 1
-  override-properties:
-    # Labels and comments can be available in multiple languages
-    # In our application we only want one label and comment per entity
     - uri: "http://www.w3.org/2000/01/rdf-schema#label"
       cardinality:
         max: 1
-      datatype: "http://www.w3.org/2001/XMLSchema#string"
+      range: "http://www.w3.org/2001/XMLSchema#string"
     - uri: "http://www.w3.org/2000/01/rdf-schema#comment"
       cardinality:
         max: 1
-      datatype: "http://www.w3.org/2001/XMLSchema#string"
+      range: "http://www.w3.org/2001/XMLSchema#string"
     - uri: "http://qudt.org/schema/qudt/numericValue"
       cardinality:
         max: 1
-      datatype: "http://www.w3.org/2001/XMLSchema#decimal"
-    # By setting the datatype to rdfs:Datatype, we create a new attribute for the datatype
+      range: "http://www.w3.org/2001/XMLSchema#decimal"
+    # By setting the range to rdfs:Datatype, we create a new attribute for the datatype
     - uri: "http://www.w3.org/2004/02/skos/core#notation"
-      datatype: "http://www.w3.org/2000/01/rdf-schema#Datatype"
+      range: "http://www.w3.org/2000/01/rdf-schema#Datatype"
   override-datatypes:
     - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"
       override: "http://www.w3.org/2001/XMLSchema#string"

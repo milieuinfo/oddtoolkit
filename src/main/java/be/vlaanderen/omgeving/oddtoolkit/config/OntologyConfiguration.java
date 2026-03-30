@@ -44,8 +44,13 @@ public class OntologyConfiguration {
   @Setter
   public static class OverrideProperty {
     private String uri;
+    private String name;
+    private String comment;
     private PropertyInfo.Cardinality cardinality;
+    private String range;
+    private Boolean identifier;
     private String datatype;
+
   }
 
   @Getter

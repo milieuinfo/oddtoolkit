@@ -11,6 +11,7 @@ import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,8 @@ import org.apache.jena.atlas.lib.Pair;
 
 @Getter
 public abstract class SchemaGenerator extends DiagramGenerator {
+  private static final String DEFAULT_IDENTIFIER_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#id";
+
   private final List<Enum> schemaEnums = new ArrayList<>();
   private final List<Table> tables = new ArrayList<>();
   private final OntologyConfiguration ontologyConfiguration;
@@ -35,6 +38,8 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   @Override
   public void run() {
     super.run();
+    schemaEnums.clear();
+    tables.clear();
     updateEnums();
     extractTables();
     extractTableRelations();
@@ -73,6 +78,82 @@ public abstract class SchemaGenerator extends DiagramGenerator {
         .forEach(e -> e.setName(toSnakeCase(e.getName()).toLowerCase()));
   }
 
+  private List<String> getIdentifierColumnUris() {
+    LinkedHashSet<String> identifierUris = new LinkedHashSet<>();
+    ontologyConfiguration.getExtraProperties().stream()
+        .filter(ExtraProperty::isIdentifier)
+        .map(ExtraProperty::getUri)
+        .map(SchemaGenerator::normalizeUri)
+        .filter(uri -> uri != null)
+        .forEach(identifierUris::add);
+    ontologyConfiguration.getOverrideProperties().stream()
+        .filter(overrideProperty -> overrideProperty != null
+            && Boolean.TRUE.equals(overrideProperty.getIdentifier()))
+        .map(OntologyConfiguration.OverrideProperty::getUri)
+        .map(SchemaGenerator::normalizeUri)
+        .filter(uri -> uri != null)
+        .forEach(identifierUris::add);
+    if (identifierUris.isEmpty()) {
+      identifierUris.add(DEFAULT_IDENTIFIER_URI);
+    }
+    return List.copyOf(identifierUris);
+  }
+
+  private Column findIdentifierColumn(Table table, boolean preferNonForeignKey) {
+    if (table == null) {
+      return null;
+    }
+
+    for (String identifierUri : getIdentifierColumnUris()) {
+      Column column = table.getColumnByUri(identifierUri);
+      if (column != null && (!preferNonForeignKey || !column.isForeignKey())) {
+        return column;
+      }
+    }
+    if (preferNonForeignKey) {
+      for (String identifierUri : getIdentifierColumnUris()) {
+        Column column = table.getColumnByUri(identifierUri);
+        if (column != null) {
+          return column;
+        }
+      }
+    }
+
+    List<Column> primaryKeys = table.getColumns().stream()
+        .filter(Column::isPrimaryKey)
+        .toList();
+    List<Column> preferredPrimaryKeys = preferNonForeignKey
+        ? primaryKeys.stream().filter(column -> !column.isForeignKey()).toList()
+        : primaryKeys;
+
+    if (preferredPrimaryKeys.size() == 1) {
+      return preferredPrimaryKeys.getFirst();
+    }
+    if (preferNonForeignKey && preferredPrimaryKeys.isEmpty() && primaryKeys.size() == 1) {
+      return primaryKeys.getFirst();
+    }
+    return null;
+  }
+
+  private Column resolveIdentifierColumn(Table table, String context) {
+    Column identifierColumn = findIdentifierColumn(table, false);
+    if (identifierColumn != null) {
+      return identifierColumn;
+    }
+    throw new IllegalStateException(
+        "Cannot determine identifier column for table '" + table.getName() + "' while "
+            + context
+            + ". Configure an identifier via ontology.extra-properties or ontology.override-properties, or ensure the table has a single primary key.");
+  }
+
+  private static String normalizeUri(String uri) {
+    if (uri == null) {
+      return null;
+    }
+    String normalized = uri.trim();
+    return normalized.isEmpty() ? null : normalized;
+  }
+
   private String getIdentifierColumnUri() {
     return this.ontologyConfiguration.getExtraProperties()
         .stream()
@@ -105,18 +186,24 @@ public abstract class SchemaGenerator extends DiagramGenerator {
             && ((Table) t.getExtendsClass()).getTableType() == TableType.IDENTITY)
         .forEach(table -> tables.forEach(otherTable -> otherTable.getRelations().forEach(relation -> {
           if (relation.getTo().equals(table)) {
-            relation.setTo((Table) table.getExtendsClass());
-            Column targetColumn = ((Table) table.getExtendsClass()).getColumnByUri(
-                getIdentifierColumnUri());
-            relation.setToColumn(targetColumn);
+            Table parentTable = (Table) table.getExtendsClass();
+            Column parentIdentifierColumn = findIdentifierColumn(parentTable, false);
+            if (parentIdentifierColumn == null) {
+              return;
+            }
+            relation.setTo(parentTable);
+            relation.setToColumn(parentIdentifierColumn);
           } else if (relation.getFrom().equals(table) && !relation.getTo().equals(table.getExtendsClass())) {
-            relation.setFrom((Table) table.getExtendsClass());
-            Column targetColumn = ((Table) table.getExtendsClass()).getColumnByUri(
-                getIdentifierColumnUri());
-            relation.setToColumn(targetColumn);
+            Table parentTable = (Table) table.getExtendsClass();
+            Column parentIdentifierColumn = findIdentifierColumn(parentTable, false);
+            if (parentIdentifierColumn == null) {
+              return;
+            }
+            relation.setFrom(parentTable);
+            relation.setToColumn(parentIdentifierColumn);
             // Move the relation to the correct table instance
             relation.getFrom().getRelations().remove(relation);
-            ((Table) table.getExtendsClass()).getRelations().add(relation);
+            parentTable.getRelations().add(relation);
           }
         })));
   }
@@ -153,7 +240,8 @@ public abstract class SchemaGenerator extends DiagramGenerator {
             .getTableNameSuffix());
         identityTable.setColumns(new ArrayList<>());
         // Add the identifier column to the identity table
-        Column identifierColumn = table.getColumnByUri(getIdentifierColumnUri());
+        Column identifierColumn = resolveIdentifierColumn(table,
+            "creating an identity table for '" + table.getName() + "'");
         Column identityColumnCopy = identifierColumn.copy();
         identityColumnCopy.setDomain(identityTable);
         identityTable.addColumn(identityColumnCopy);
@@ -222,26 +310,18 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     List<Column> joinColumns = new ArrayList<>();
     // Get identity columns if enabled
     if (schemaGeneratorProperties.getIdentityTables().isEnabled()) {
-      Column fromIdentityColumn = relation.getFrom().getColumns().stream()
-          .filter(Attribute::isPrimaryKey)
-          .map(Column::copy)
-          .peek(a -> a.setName("source_" + a.getName()))
-          .findFirst()
-          .orElse(null);
-      Column toIdentityColumn = relation.getTo().getColumns().stream()
-          .filter(Attribute::isPrimaryKey)
-          .map(Column::copy)
-          .peek(a -> a.setName("target_" + a.getName()))
-          .findFirst()
-          .orElse(null);
-      if (fromIdentityColumn != null && toIdentityColumn != null) {
-        joinColumns.add(fromIdentityColumn);
-        joinColumns.add(toIdentityColumn);
-      } else {
-        throw new IllegalStateException(
-            "Cannot create join table for relation " + relation.getName()
-                + " because the from table does not have an identity column");
+      Column fromIdentifierColumn = findIdentifierColumn(relation.getFrom(), false);
+      Column toIdentifierColumn = findIdentifierColumn(relation.getTo(), false);
+      if (fromIdentifierColumn == null || toIdentifierColumn == null) {
+        return null;
       }
+
+      Column fromIdentityColumn = fromIdentifierColumn.copy();
+      fromIdentityColumn.setName("source_" + fromIdentityColumn.getName());
+      Column toIdentityColumn = toIdentifierColumn.copy();
+      toIdentityColumn.setName("target_" + toIdentityColumn.getName());
+      joinColumns.add(fromIdentityColumn);
+      joinColumns.add(toIdentityColumn);
 
       // Set all columns as FK in the join table
       joinColumns.forEach(c -> c.setForeignKey(true));
@@ -358,6 +438,9 @@ public abstract class SchemaGenerator extends DiagramGenerator {
               relation.setName(toSnakeCase(table.getName() + "_" + targetTable.getName()));
 
               Table joinTable = createJoinTable(relation);
+              if (joinTable == null) {
+                return;
+              }
               // Add merge type column
               Column mergeTypeColumn = new Column();
               mergeTypeColumn.setName(
@@ -377,8 +460,10 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     List<Relation> relations = new ArrayList<>(table.getRelations());
     relations.forEach(relation -> {
       if (relation.getCardinality() == Cardinality.MANY_TO_MANY) {
-        createJoinTable(relation);
-        cleanRelation(relation);
+        Table joinTable = createJoinTable(relation);
+        if (joinTable != null) {
+          cleanRelation(relation);
+        }
       }
     });
   }
@@ -409,7 +494,11 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     if (parentTable == null) {
       return; // Skip if the parent table is not found
     }
-    Column targetColumn = parentTable.getColumnByUri(getIdentifierColumnUri());
+    Column targetColumn = findIdentifierColumn(parentTable, false);
+    if (targetColumn == null) {
+      table.setExtendsClass(parentTable);
+      return;
+    }
     // Add column
     Column column = table.getColumnByUri(targetColumn.getUri());
     if (column == null) {
@@ -454,8 +543,11 @@ public abstract class SchemaGenerator extends DiagramGenerator {
 
         // Update the data type of the column to match the identifier column of the target table
         Column column = table.getColumnByAttribute(attribute);
-        Column targetColumn = targetTable.getColumnByUri(getIdentifierColumnUri());
-        if (column != null && targetColumn != null) {
+        Column targetColumn = findIdentifierColumn(targetTable, false);
+        if (targetColumn == null) {
+          continue;
+        }
+        if (column != null) {
           // Skip if the relation already exists
           boolean relationExists = table.getRelations().stream()
               .anyMatch(
@@ -501,10 +593,14 @@ public abstract class SchemaGenerator extends DiagramGenerator {
         .filter(t -> t.getClassInfo().equals(clazz.getClassInfo()))
         .toList();
     return candidateTables.stream()
-        .filter(t -> !identifier || t.getColumnByUri(getIdentifierColumnUri()) == null
-            || !t.getColumnByUri(getIdentifierColumnUri()).isForeignKey())
+        .filter(t -> !identifier || isPreferredIdentifierTable(t))
         .findFirst()
         .orElse(candidateTables.isEmpty() ? null : candidateTables.getFirst());
+  }
+
+  private boolean isPreferredIdentifierTable(Table table) {
+    Column identifierColumn = findIdentifierColumn(table, true);
+    return identifierColumn == null || !identifierColumn.isForeignKey();
   }
 
   /**
