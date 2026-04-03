@@ -31,13 +31,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Configure Pages metadata for this run (required by deploy-pages in many setups).
+      - name: Setup Pages
+        if: github.event_name == 'push'
+        uses: actions/configure-pages@v5
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build documentation
         run: npm run docs:build
@@ -52,7 +57,7 @@ jobs:
           path: docs/.vitepress/dist
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build-docs
     runs-on: ubuntu-latest
     environment:
