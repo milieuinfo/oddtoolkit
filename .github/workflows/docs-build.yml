@@ -50,6 +50,8 @@ jobs:
           fi
 
       - name: Build documentation
+        env:
+          DOCS_BASE: ${{ format('/{0}/', github.event.repository.name) }}
         run: npm run docs:build
 
       - name: Add .nojekyll

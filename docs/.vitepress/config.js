@@ -1,6 +1,29 @@
 import { defineConfig } from 'vitepress'
 
-const base = process.env.DOCS_BASE || '/'
+function normalizeBasePath(value) {
+  if (!value || value.trim() === '') {
+    return '/'
+  }
+  const withLeadingSlash = value.startsWith('/') ? value : `/${value}`
+  return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`
+}
+
+function detectBasePath() {
+  if (process.env.DOCS_BASE) {
+    return normalizeBasePath(process.env.DOCS_BASE)
+  }
+
+  if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REPOSITORY) {
+    const repositoryName = process.env.GITHUB_REPOSITORY.split('/')[1]
+    if (repositoryName) {
+      return normalizeBasePath(repositoryName)
+    }
+  }
+
+  return '/'
+}
+
+const base = detectBasePath()
 
 export default defineConfig({
   title: 'ODDToolkit',
@@ -42,4 +65,3 @@ export default defineConfig({
     }
   }
 })
-
