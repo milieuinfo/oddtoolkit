@@ -71,4 +71,19 @@ class ConfigurationBinderTest {
     assertEquals("http://www.w3.org/2001/XMLSchema#string",
         bound.getOverrideProperties().get(1).getDatatype());
   }
+
+  @Test
+  void bindSupportsJoinTableNamePattern() {
+    Map<String, Object> root = new LinkedHashMap<>();
+    Map<String, Object> generators = new LinkedHashMap<>();
+    Map<String, Object> schemaGenerator = new LinkedHashMap<>();
+    schemaGenerator.put("join-table-name-pattern", "jt_{source_table}_{target_table}");
+    generators.put("schema-generator", schemaGenerator);
+    root.put("generators", generators);
+
+    SchemaGeneratorProperties bound = ConfigurationBinder.bind(root,
+        SchemaGeneratorProperties.class, new SchemaGeneratorProperties());
+
+    assertEquals("jt_{source_table}_{target_table}", bound.getJoinTableNamePattern());
+  }
 }

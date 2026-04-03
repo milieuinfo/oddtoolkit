@@ -20,6 +20,10 @@ import org.apache.jena.atlas.lib.Pair;
 @Getter
 public abstract class SchemaGenerator extends DiagramGenerator {
   private static final String DEFAULT_IDENTIFIER_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#id";
+  private static final String DEFAULT_JOIN_TABLE_NAME_PATTERN = "rel_{source_table}_{target_table}";
+  private static final String SOURCE_TABLE_PLACEHOLDER = "{source_table}";
+  private static final String TARGET_TABLE_PLACEHOLDER = "{target_table}";
+  private static final String RELATION_NAME_PLACEHOLDER = "{relation_name}";
 
   private final List<Enum> schemaEnums = new ArrayList<>();
   private final List<Table> tables = new ArrayList<>();
@@ -279,33 +283,86 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     tables.sort(Comparator.comparingInt(t -> -t.getClassInfo().getSuperClasses().size()));
   }
 
-  private String getJoinTableName(Relation relation) {
-    // Get the from table and to table names
-    // Remove duplicate parts in the "to" table and add plural (e.g. "proces" and "proces_variable" -> "proces_variables")
+  private String getJoinTableName(Relation relation, boolean appendRelationName) {
     Table tableFrom = getTableByClazz(relation.getFrom(), false);
     Table tableTo = getTableByClazz(relation.getTo(), false);
-    String fromName = tableFrom.getName();
-    String toName = tableTo.getName();
-    if (toName.startsWith(fromName)) {
-      toName = toName.substring(fromName.length());
-      // Trim _
-      if (toName.startsWith("_")) {
-        toName = toName.substring(1);
-      }
-    }
-    // If the toName is now equal to the fromName change toName to the relation
-    if (toName.isEmpty() || toName.equals(fromName)) {
-      toName = relation.getName() != null ? relation.getName() : "relation";
-    }
-    return toSnakeCase("rel_" + fromName + "_" + toName).toLowerCase();
+    String relationName = relation.getName() != null ? relation.getName() : "relation";
+    return resolveJoinTableName(tableFrom.getName(), tableTo.getName(), relationName,
+        appendRelationName);
   }
 
-  private Table createJoinTable(Relation relation) {
+  protected String resolveJoinTableName(String sourceTableName, String targetTableName,
+      String relationName, boolean appendRelationName) {
+    String normalizedRelationName = normalizeJoinTableRelationName(relationName, targetTableName);
+
+    String pattern = schemaGeneratorProperties.getJoinTableNamePattern();
+    if (pattern == null || pattern.isBlank()) {
+      pattern = DEFAULT_JOIN_TABLE_NAME_PATTERN;
+    }
+    boolean patternContainsRelationPlaceholder = pattern.contains(RELATION_NAME_PLACEHOLDER);
+    String resolvedPattern = pattern
+        .replace(SOURCE_TABLE_PLACEHOLDER, sourceTableName)
+        .replace(TARGET_TABLE_PLACEHOLDER, targetTableName)
+        .replace(RELATION_NAME_PLACEHOLDER, normalizedRelationName);
+
+    if (appendRelationName && !patternContainsRelationPlaceholder) {
+      resolvedPattern = resolvedPattern + "_" + normalizedRelationName;
+    }
+
+    return toSnakeCase(resolvedPattern).toLowerCase();
+  }
+
+  private String normalizeJoinTableRelationName(String relationName, String targetTableName) {
+    String normalizedRelationName =
+        relationName == null || relationName.isBlank() ? "relation" : relationName;
+    String targetSuffix = "_" + targetTableName;
+    if (normalizedRelationName.endsWith(targetSuffix)
+        && normalizedRelationName.length() > targetSuffix.length()) {
+      return normalizedRelationName.substring(0,
+          normalizedRelationName.length() - targetSuffix.length());
+    }
+    return normalizedRelationName;
+  }
+
+  protected String resolveJoinTableName(String sourceTableName, String targetTableName,
+      String relationName) {
+    return resolveJoinTableName(sourceTableName, targetTableName, relationName, false);
+  }
+
+  protected String resolveJoinTableName(String sourceTableName, String targetTableName) {
+    return resolveJoinTableName(sourceTableName, targetTableName, "relation", false);
+  }
+
+  private boolean shouldAppendRelationNameForSelfRelation(Relation relation,
+      List<Relation> relations) {
+    if (relation.getFrom() == null || relation.getTo() == null
+        || relation.getFrom().getClassInfo() == null || relation.getTo().getClassInfo() == null) {
+      return false;
+    }
+
+    boolean selfRelation = relation.getFrom().getClassInfo().equals(relation.getTo().getClassInfo());
+    if (!selfRelation) {
+      return false;
+    }
+
+    String targetTableName = getTableByClazz(relation.getTo(), false).getName();
+    long relationCountBetweenSameTables = relations.stream()
+        .filter(r -> r.getFrom() != null && r.getTo() != null)
+        .filter(r -> r.getFrom().getClassInfo() != null && r.getTo().getClassInfo() != null)
+        .filter(r -> relation.getFrom().getClassInfo().equals(r.getFrom().getClassInfo())
+            && relation.getTo().getClassInfo().equals(r.getTo().getClassInfo()))
+        .map(r -> normalizeJoinTableRelationName(r.getName(), targetTableName))
+        .distinct()
+        .count();
+    return relationCountBetweenSameTables > 1;
+  }
+
+  private Table createJoinTable(Relation relation, boolean appendRelationName) {
     Table joinTable = new Table();
     joinTable.setTableType(TableType.JOIN);
     joinTable.setDiagramStyle(relation.getFrom().getDiagramStyle());
     joinTable.setClassInfo(relation.getFrom().getClassInfo());
-    joinTable.setName(getJoinTableName(relation));
+    joinTable.setName(getJoinTableName(relation, appendRelationName));
     // Add all primary key columns from both tables to the join table
     List<Column> joinColumns = new ArrayList<>();
     // Get identity columns if enabled
@@ -437,7 +494,7 @@ public abstract class SchemaGenerator extends DiagramGenerator {
               Relation relation = new Relation(relationsToTarget.getFirst());
               relation.setName(toSnakeCase(table.getName() + "_" + targetTable.getName()));
 
-              Table joinTable = createJoinTable(relation);
+              Table joinTable = createJoinTable(relation, false);
               if (joinTable == null) {
                 return;
               }
@@ -460,7 +517,8 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     List<Relation> relations = new ArrayList<>(table.getRelations());
     relations.forEach(relation -> {
       if (relation.getCardinality() == Cardinality.MANY_TO_MANY) {
-        Table joinTable = createJoinTable(relation);
+        boolean appendRelationName = shouldAppendRelationNameForSelfRelation(relation, relations);
+        Table joinTable = createJoinTable(relation, appendRelationName);
         if (joinTable != null) {
           cleanRelation(relation);
         }

@@ -11,6 +11,7 @@ import lombok.Setter;
 public class SchemaGeneratorProperties {
   private MergeJoinTables mergeJoinTables = new MergeJoinTables();
   private IdentityTables identityTables = new IdentityTables();
+  private String joinTableNamePattern = "rel_{source_table}_{target_table}";
 
   @Getter
   @Setter

@@ -222,10 +222,10 @@ public class JavaGenerator extends SchemaGenerator {
               // For many-to-many, we need @JoinTable with joinColumns and inverseJoinColumns
               Table targetTable = getTableByClazz(prop.getRange(), false);
               if (targetTable != null) {
-                // Construct the join table name based on naming convention
-                // Typically: rel_<source>_<target> or similar pattern
-                String joinTableName = "rel_" + equivalentTable.getName().toLowerCase() + "_"
-                    + targetTable.getName().toLowerCase();
+                boolean appendRelationName = shouldAppendRelationNameForSelfManyToMany(clazz,
+                    targetTable);
+                String joinTableName = resolveJoinTableName(equivalentTable.getName(),
+                    targetTable.getName(), prop.getName(), appendRelationName);
 
                 builder.append("\t@JoinTable(\n");
                 builder.append("\t\tname = \"").append(joinTableName).append("\",\n");
@@ -395,6 +395,24 @@ public class JavaGenerator extends SchemaGenerator {
     // 2. The column name matches the configured merge-join-tables attribute name
     return table.getTableType() == TableType.JOIN
         && columnName.equals(mergeJoinTableAttributeName);
+  }
+
+  private boolean shouldAppendRelationNameForSelfManyToMany(Clazz clazz, Table targetTable) {
+    Table sourceTable = getTableByClazz(clazz, false);
+    if (sourceTable == null || targetTable == null
+        || !sourceTable.getName().equals(targetTable.getName())) {
+      return false;
+    }
+
+    long selfRelationCount = clazz.getAttributes().stream()
+        .filter(attribute -> {
+          Table rangeTable = getTableByClazz(attribute.getRange(), false);
+          return rangeTable != null && sourceTable.getName().equals(rangeTable.getName());
+        })
+        .map(attribute -> attribute.getName())
+        .distinct()
+        .count();
+    return selfRelationCount > 1;
   }
 
 }

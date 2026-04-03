@@ -1,40 +1,51 @@
 # ODDToolkit
 
-ODDToolkit (Ontology Driven Design Toolkit) is a small toolkit to help generate code and documentation from ontology-driven models. It includes generators and utilities to produce class diagrams, ER diagrams, and Java code from RDF/Turtle sources and ontology metadata.
+ODDToolkit (Ontology Driven Design Toolkit) generates diagrams and source artifacts from ontology-driven models.
 
 ## Key Features
 
-- Generate class diagrams and ER diagrams from ontology sources
-- Produce Java classes and artifacts based on ontology models
+- Mermaid class and ER diagram generation
+- SQL schema generation
+- Java and TypeScript model generation
+- SHACL shape generation
+- Configurable adapter pipeline
 
 ## Quickstart
 
-Build the project (from repository root)
-
 ```bash
-# build the Java project and create the JAR (skip tests for a faster build)
-mvn -DskipTests package
-
-# run the produced JAR (example)
-java -jar target/oddtoolkit-0.0.1-SNAPSHOT.jar
+./mvnw clean package
+java -jar target/oddtoolkit.jar --help
 ```
 
-If you prefer to run tests during build, omit `-DskipTests`.
+Run one generator:
+
+```bash
+java -jar target/oddtoolkit.jar --generator=class-diagram --config-file=src/test/resources/application.yml
+```
+
+Run all generators:
+
+```bash
+java -jar target/oddtoolkit.jar --generator=all --config-file=src/test/resources/application.yml
+```
 
 ## Project layout
 
-- `src/main/java` - main Java sources
-- `src/test/java` - tests
-- `docs/` - documentation site
+- `src/main/java` - application and generator code
+- `src/test/java` - unit tests
+- `src/test/resources/application.yml` - example configuration
+- `docs/` - VitePress documentation
 
-## Contributing
+## Documentation
 
-Contributions, issues and feature requests are welcome. Please open issues on the repository and follow the standard forking workflow. Keep changes focused and add tests where appropriate.
+The docs site source is in `docs/`.
+
+```bash
+cd docs
+npm install
+npm run docs:build
+```
 
 ## License
 
-This project is licensed under the terms in the `LICENSE` file.
-
-## Contact / Maintainers
-
-Maintained by the project authors. See the repository for contributor details.
+This project is licensed under the terms in `LICENSE`.

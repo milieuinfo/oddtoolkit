@@ -24,7 +24,6 @@ public class GeneratorConfiguration {
 
   private static final Logger logger = LoggerFactory.getLogger(GeneratorConfiguration.class);
 
-  @SuppressWarnings("unchecked")
   public DataFrameGenerator dataFrameGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       DataFrameGeneratorProperties dataFrameGeneratorProperties,
@@ -34,7 +33,6 @@ public class GeneratorConfiguration {
         dataFrameGeneratorProperties);
   }
 
-  @SuppressWarnings("unchecked")
   public ClassGenerator classGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       Map<String, AbstractAdapter<?>> adapterBeans) {
@@ -42,7 +40,6 @@ public class GeneratorConfiguration {
     return new ClassGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters);
   }
 
-  @SuppressWarnings("unchecked")
   public ClassDiagramGenerator classDiagramGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       ClassDiagramProperties classDiagramProperties,
@@ -54,7 +51,6 @@ public class GeneratorConfiguration {
         classDiagramProperties, diagramGeneratorProperties);
   }
 
-  @SuppressWarnings("unchecked")
   public ERDiagramGenerator erDiagramGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       DiagramGeneratorProperties diagramGeneratorProperties,
@@ -78,7 +74,6 @@ public class GeneratorConfiguration {
         diagramGeneratorProperties, schemaGeneratorProperties, sqlGeneratorProperties);
   }
 
-  @SuppressWarnings("unchecked")
   public ShaclGenerator shaclGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       ShaclGeneratorProperties shaclGeneratorProperties,
@@ -88,24 +83,22 @@ public class GeneratorConfiguration {
         shaclGeneratorProperties);
   }
 
-  @SuppressWarnings("unchecked")
   public JavaGenerator javaGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       DiagramGeneratorProperties diagramGeneratorProperties,
       SchemaGeneratorProperties schemaGeneratorProperties,
       JavaGeneratorProperties javaGeneratorProperties,
       Map<String, AbstractAdapter<?>> adapterBeans) {
-    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("shacl"));
+    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("java"));
     return new JavaGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
         diagramGeneratorProperties, schemaGeneratorProperties, javaGeneratorProperties);
   }
 
-  @SuppressWarnings("unchecked")
   public TypescriptGenerator typescriptGenerator(OntologyInfo ontologyInfo,
       GeneratorProperties generatorProperties,
       TypescriptGeneratorProperties typescriptGeneratorProperties,
       Map<String, AbstractAdapter<?>> adapterBeans) {
-    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("shacl"));
+    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("typescript"));
     return new TypescriptGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
         typescriptGeneratorProperties);
   }

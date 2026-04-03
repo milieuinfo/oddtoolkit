@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -33,63 +35,72 @@ public class PropertyInfo extends AbstractInfo {
   }
 
   protected void initializeProperty(Resource resource) {
-    if (getComment() == null) {
-      // Try to get the comment from the resource if not already set
-      if (resource.hasProperty(RDFS.comment)) {
-        setComment(resource.getProperty(RDFS.comment).getString());
-      }
-    }
-    if (resource.hasProperty(RDF.type, RDF.Property) || resource.hasProperty(RDF.type,
-        OWL2.ObjectProperty) || resource.hasProperty(RDF.type, OWL2.DatatypeProperty)) {
-      setUri(resource.getURI());
-      setName(resource.getLocalName());
-      if (resource.hasProperty(RDFS.range)) {
-        resource.listProperties(RDFS.range).forEachRemaining(stmt -> {
-          if (stmt.getObject().isResource()) {
-            range.add(stmt.getObject().asResource().getURI());
-          }
-        });
-      }
+    if (getComment() == null && resource.hasProperty(RDFS.comment)) {
+      setComment(resource.getProperty(RDFS.comment).getString());
     }
 
-    // Determine the cardinality of the property based on the presence of certain RDF properties
+    if (isPropertyResource(resource)) {
+      setUri(resource.getURI());
+      setName(resource.getLocalName());
+      addRangeValues(resource, RDFS.range);
+    }
+
+    updateCardinality(resource);
+    addRestrictedRangeValues(resource);
+
+    if (getUri() == null) {
+      throw new IllegalArgumentException("Property URI cannot be null for resource: \n" + this);
+    }
+  }
+
+  private boolean isPropertyResource(Resource resource) {
+    return resource.hasProperty(RDF.type, RDF.Property)
+        || resource.hasProperty(RDF.type, OWL2.ObjectProperty)
+        || resource.hasProperty(RDF.type, OWL2.DatatypeProperty);
+  }
+
+  private void updateCardinality(Resource resource) {
     if (resource.hasProperty(OWL2.maxCardinality)) {
       cardinalityTo.max = resource.getProperty(OWL2.maxCardinality).getInt();
     }
-
     if (resource.hasProperty(OWL2.minCardinality)) {
       cardinalityTo.min = resource.getProperty(OWL2.minCardinality).getInt();
     }
-
     if (resource.hasProperty(OWL2.cardinality)) {
-      int card = resource.getProperty(OWL2.cardinality).getInt();
-      cardinalityTo.min = card;
-      cardinalityTo.max = card;
+      int exactCardinality = resource.getProperty(OWL2.cardinality).getInt();
+      cardinalityTo.min = exactCardinality;
+      cardinalityTo.max = exactCardinality;
     }
+  }
 
+  private void addRestrictedRangeValues(Resource resource) {
     if (resource.hasProperty(OWL2.someValuesFrom)) {
-      // Set the range types
-      resource.listProperties(OWL2.someValuesFrom).forEachRemaining(stmt -> {
-        if (stmt.getObject().isResource() && stmt.getObject().asResource().getURI() != null) {
-          range.add(stmt.getObject().asResource().getURI());
-        } else {
-          throw new IllegalArgumentException(
-              "Invalid range for property: " + getUri() + ". Range must be a resource with a valid URI. Found: " + stmt.getObject());
-        }
-      });
-    } else if (resource.hasProperty(OWL2.allValuesFrom)) {
-      resource.listProperties(OWL2.allValuesFrom).forEachRemaining(stmt -> {
-        if (stmt.getObject().isResource()) {
-          range.add(stmt.getObject().asResource().getURI());
-        }
-      });
+      resource.listProperties(OWL2.someValuesFrom).forEachRemaining(this::addRequiredRangeValue);
+      return;
     }
+    addRangeValues(resource, OWL2.allValuesFrom);
+  }
 
-    // Ensure no properties are allowed with null uri
-    if (getUri() == null) {
-      throw new IllegalArgumentException(
-          "Property URI cannot be null for resource: \n" + this);
+  private void addRangeValues(Resource resource, Property property) {
+    resource.listProperties(property).forEachRemaining(this::addRangeValueIfPresent);
+  }
+
+  private void addRangeValueIfPresent(Statement statement) {
+    if (statement.getObject().isResource()) {
+      String uri = statement.getObject().asResource().getURI();
+      if (uri != null) {
+        range.add(uri);
+      }
     }
+  }
+
+  private void addRequiredRangeValue(Statement statement) {
+    if (!statement.getObject().isResource() || statement.getObject().asResource().getURI() == null) {
+      throw new IllegalArgumentException(
+          "Invalid range for property: " + getUri() + ". Range must be a resource with a valid URI. Found: "
+              + statement.getObject());
+    }
+    range.add(statement.getObject().asResource().getURI());
   }
 
   @Getter

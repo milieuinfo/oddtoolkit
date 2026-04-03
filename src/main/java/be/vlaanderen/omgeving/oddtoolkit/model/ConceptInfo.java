@@ -18,7 +18,6 @@ public abstract class ConceptInfo extends AbstractInfo {
   @Override
   protected void initializeFromResource(Resource resource) {
     super.initializeFromResource(resource);
-    // Initialize equivalents as an empty list
     this.equivalents = new ArrayList<>();
   }
 }

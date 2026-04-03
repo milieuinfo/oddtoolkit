@@ -6,10 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 
 @Getter
 @Setter
 public class UriTemplate extends AbstractInfo {
+
+  private static final String HYDRA_NS = "http://www.w3.org/ns/hydra/core#";
 
   private String template;
   private Map<String, String> variables;
@@ -21,29 +24,35 @@ public class UriTemplate extends AbstractInfo {
   public void initializeFromResource(Resource resource) {
     super.initializeFromResource(resource);
     variables = new HashMap<>();
-    // Extract the template string and variables from the resource
-    Property hydraTemplate = resource.getModel()
-        .getProperty("http://www.w3.org/ns/hydra/core#template");
-    if (resource.hasProperty(hydraTemplate)) {
-      this.template = resource.getProperty(hydraTemplate).getString();
+
+    Property hydraTemplate = resource.getModel().getProperty(HYDRA_NS + "template");
+    Statement templateStatement = resource.getProperty(hydraTemplate);
+    if (templateStatement != null) {
+      this.template = templateStatement.getString();
     }
-    // Extract variables and their corresponding properties
-    Property hydraMapping = resource.getModel()
-        .getProperty("http://www.w3.org/ns/hydra/core#mapping");
-    if (resource.hasProperty(hydraMapping)) {
-      // Loop through the mappings and extract variable names and their corresponding properties
-      resource.listProperties(hydraMapping).forEachRemaining(stmt -> {
-        if (stmt.getObject().isResource()) {
-          Resource mappingResource = stmt.getObject().asResource();
-          String variableName = mappingResource.getProperty(
-                  resource.getModel().getProperty("http://www.w3.org/ns/hydra/core#variable"))
-              .getString();
-          String propertyUri = mappingResource.getProperty(
-                  resource.getModel().getProperty("http://www.w3.org/ns/hydra/core#property"))
-              .getObject().asResource().getURI();
-          variables.put(variableName, propertyUri);
-        }
-      });
+
+    Property hydraMapping = resource.getModel().getProperty(HYDRA_NS + "mapping");
+    Property hydraVariable = resource.getModel().getProperty(HYDRA_NS + "variable");
+    Property hydraProperty = resource.getModel().getProperty(HYDRA_NS + "property");
+    resource.listProperties(hydraMapping).forEachRemaining(stmt -> mapVariable(stmt, hydraVariable, hydraProperty));
+  }
+
+  private void mapVariable(Statement statement, Property hydraVariable, Property hydraProperty) {
+    if (!statement.getObject().isResource()) {
+      return;
+    }
+
+    Resource mappingResource = statement.getObject().asResource();
+    Statement variableStatement = mappingResource.getProperty(hydraVariable);
+    Statement propertyStatement = mappingResource.getProperty(hydraProperty);
+    if (variableStatement == null || propertyStatement == null
+        || !propertyStatement.getObject().isResource()) {
+      return;
+    }
+
+    String propertyUri = propertyStatement.getObject().asResource().getURI();
+    if (propertyUri != null) {
+      variables.put(variableStatement.getString(), propertyUri);
     }
   }
 }

@@ -28,7 +28,6 @@ public class ClassDiagramGenerator extends DiagramGenerator {
   public void run() {
     super.run();
     String classDiagram = generate("classDiagram");
-    // Save to file
     if (getOutputFile() != null) {
       logger.info("Writing class diagram to {}", getOutputFile());
       saveDiagram(classDiagram);
@@ -38,13 +37,7 @@ public class ClassDiagramGenerator extends DiagramGenerator {
   }
 
   @Override
-  protected String getOutputFile() {
-    return generatorProperties.getOutputFile();
-  }
-
-  @Override
   protected void renderContent(StringBuilder builder, String type) {
-    // Generate classes and interfaces
     for (Clazz classInfo : getClasses()) {
       generateClass(builder, classInfo, ClassType.CLASS);
     }
@@ -54,15 +47,11 @@ public class ClassDiagramGenerator extends DiagramGenerator {
     for (Enum enumInfo : getEnums()) {
       generateClass(builder, enumInfo, ClassType.ENUM);
     }
-
-    // Emit class diagram style definitions (classDef ..) local to this generator
     emitStyleDefinitions(builder);
   }
 
   protected void generateClass(StringBuilder builder, Clazz classInfo, ClassType type) {
-    // Add documentation as comment
     builder.append("%% ").append(classInfo.getUri()).append("\n");
-    // apply style if configured
     String style = getStyleForClass(classInfo.getClassInfo());
     builder.append("class ").append(classInfo.getName());
     if (style != null) {
@@ -83,7 +72,6 @@ public class ClassDiagramGenerator extends DiagramGenerator {
       }
     }
     builder.append("}\n");
-    // Generate relations
     generateRelations(builder, classInfo);
   }
 
@@ -97,10 +85,9 @@ public class ClassDiagramGenerator extends DiagramGenerator {
             .append(" : ").append(attribute.getName()).append("\n");
       }
     }
-    // Generate subclass relations for classes that are in concrete classes or interfaces, but not for enums
     for (Interface superInterface : classInfo.getInterfaces()) {
-        builder.append(superInterface.getName()).append(" <|-- ")
-            .append(classInfo.getName()).append("\n");
+      builder.append(superInterface.getName()).append(" <|-- ")
+          .append(classInfo.getName()).append("\n");
     }
     if (classInfo.getExtendsClass() != null) {
       builder.append(classInfo.getExtendsClass().getName()).append(" <|-- ")
@@ -109,14 +96,10 @@ public class ClassDiagramGenerator extends DiagramGenerator {
   }
 
   protected void generateProperty(StringBuilder builder, Attribute propertyInfo) {
-    // Get the data type of the property
     String dataTypeName = propertyInfo.getDataType().getName();
-    // Determine if it is an array
     if (propertyInfo.getCardinality().isToMany()) {
       dataTypeName += "[]";
     }
-
-    // Determine if its an identifier
     if (propertyInfo.isPrimaryKey()) {
       dataTypeName = "+" + dataTypeName;
     }

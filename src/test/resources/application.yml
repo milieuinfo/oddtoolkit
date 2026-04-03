@@ -65,6 +65,7 @@ generators:
     output-file: "target/test-cache/dataframe/frame.json"
 
   schema-generator:
+    join-table-name-pattern: "{source_table}_{target_table}"
     # Create stable identity tables for classes that have more than one primary key
     identity-tables:
       enabled: true
