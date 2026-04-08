@@ -12,4 +12,4 @@ This site explains how to build, use and contribute to ODDToolkit — an Ontolog
 - **Using from CLI?** Check [CLI Guide](/cli-guide)
 - **Building extensions?** See [Extension Guide](/extension-guide)
 - **Need a quick demo?** Try [Quickstart](/QUICKSTART)
-
+- **Need concrete output examples?** Open [Generated Examples](/guide/generated-examples)

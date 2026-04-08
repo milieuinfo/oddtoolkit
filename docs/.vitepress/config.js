@@ -34,6 +34,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/usage' },
+      { text: 'Examples', link: '/guide/generated-examples' },
       { text: 'CLI', link: '/cli-guide' },
       { text: 'Extension', link: '/extension-guide' },
       { text: 'Quickstart', link: '/QUICKSTART' }
@@ -45,6 +46,7 @@ export default defineConfig({
           { text: 'Overview', link: '/' },
           { text: 'Usage', link: '/guide/usage' },
           { text: 'Configuration', link: '/guide/configuration' },
+          { text: 'Generated Examples', link: '/guide/generated-examples' },
           { text: 'Ontology & Metadata', link: '/guide/ontology-metadata' }
         ]
       },

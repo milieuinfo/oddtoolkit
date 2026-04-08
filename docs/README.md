@@ -11,6 +11,7 @@ This folder contains the VitePress documentation site.
 - `cli-guide.md` - CLI command reference
 - `extension-guide.md` - extension points and wiring
 - `QUICKSTART.md` - fast start commands
+- `guide/generated-examples.md` - screenshots and snippets generated from tests
 
 ## Local docs build
 
