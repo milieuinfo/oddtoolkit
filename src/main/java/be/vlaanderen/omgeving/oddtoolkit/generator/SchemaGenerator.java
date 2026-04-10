@@ -465,6 +465,8 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   }
 
   private void extractManyToManyRelations(Table table) {
+    deduplicateManyToManyRelations(table);
+
     // First determine if there are relations that need to be merged
     if (schemaGeneratorProperties.getMergeJoinTables().isEnabled()) {
       // Find all relations that are many-to-many to the same target
@@ -526,139 +528,32 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     });
   }
 
-  private boolean isExcludedFromMerge(Table sourceTable, Table targetTable) {
-    String sourceUri = sourceTable.getClassInfo() != null ? sourceTable.getClassInfo().getUri() : null;
-    String targetUri = targetTable.getClassInfo() != null ? targetTable.getClassInfo().getUri() : null;
-    return schemaGeneratorProperties.getMergeJoinTables().getExcludedPairs().stream()
-        .anyMatch(excludedPair -> excludedPair.matches(sourceUri, targetUri));
-  }
+  private void deduplicateManyToManyRelations(Table table) {
+    List<Relation> deduplicated = new ArrayList<>();
+    for (Relation relation : table.getRelations()) {
+      if (relation.getCardinality() != Cardinality.MANY_TO_MANY) {
+        deduplicated.add(relation);
+        continue;
+      }
 
-  private void createJoinTableRelation(String name, Table targetTable, Table joinTable,
-      List<Column> joinColumns) {
-    joinColumns.forEach(joinColumn -> {
-      Relation toRelation = new Relation();
-      toRelation.setFrom(joinTable);
-      toRelation.setTo(targetTable);
-      toRelation.setFromColumn(joinColumn);
-      toRelation.setToColumn(targetTable.getColumnByUri(joinColumn.getUri()));
-      toRelation.setCardinality(Cardinality.MANY_TO_ONE);
-      toRelation.setName(name);
-      joinTable.getRelations().add(toRelation);
-    });
-  }
+      String relationName = relation.getName();
+      String fromName = relation.getFrom() != null ? relation.getFrom().getName() : null;
+      String toName = relation.getTo() != null ? relation.getTo().getName() : null;
 
-  private void extractInheritance(Table table) {
-    Table parentTable = (Table) table.getExtendsClass();
-    if (parentTable == null) {
-      return; // Skip if the parent table is not found
-    }
-    Column targetColumn = findIdentifierColumn(parentTable, false);
-    if (targetColumn == null) {
-      table.setExtendsClass(parentTable);
-      return;
-    }
-    // Add column
-    Column column = table.getColumnByUri(targetColumn.getUri());
-    if (column == null) {
-      column = new Column();
-      column.setPropertyInfo(targetColumn.getPropertyInfo());
-      column.setDomain(table);
-      table.addColumn(column);
-    }
-    column.setName(toSnakeCase(parentTable.getName()) + "_" + targetColumn.getName());
-    column.setForeignKey(true);
-    column.setPrimaryKey(true);
-    column.setDataType(new DataType(targetColumn.getDataType().getName(),
-        targetColumn.getDataType().getUri()));
-    column.setCardinality(Cardinality.MANY_TO_ONE);
-
-    // Add relation
-    Relation relation = new Relation();
-    relation.setFrom(table);
-    relation.setFromColumn(column);
-    relation.setTo(parentTable);
-    relation.setToColumn(targetColumn);
-    relation.setCardinality(Cardinality.ONE_TO_MANY);
-    table.getRelations().add(relation);
-    table.setExtendsClass(parentTable);
-  }
-
-  private void extractColumnRelations(Table table) {
-    // Extract relations based on properties that reference other classes
-    for (Attribute attribute : table.getAttributes()) {
-      // Relations may not be to the direct range of the property
-      // use nearest class to find the target table
-      if (attribute.getRange() != null) {
-        // Get a target table
-        Clazz nearestClass = attribute.getRange();
-        Table targetTable = getTableByClazz(nearestClass, false);
-        // Skip if the target is null or an identity table
-        if (targetTable == null) {
-          continue; // Skip if the target table is not found
-        }
-        String targetName = targetTable.getName();
-        targetTable = getTableByClazz(targetTable, true);
-
-        // Update the data type of the column to match the identifier column of the target table
-        Column column = table.getColumnByAttribute(attribute);
-        Column targetColumn = findIdentifierColumn(targetTable, false);
-        if (targetColumn == null) {
-          continue;
-        }
-        if (column != null) {
-          // Skip if the relation already exists
-          boolean relationExists = table.getRelations().stream()
-              .anyMatch(
-                  r -> r.getFromColumn().equals(column) && r.getToColumn().equals(targetColumn));
-          if (relationExists) {
-            continue;
-          }
-          column.setDataType(targetColumn.getDataType());
-          // Only change the name if its not a reference to the identity table
-          if (!(nearestClass instanceof Table
-              && ((Table) nearestClass).getTableType().equals(TableType.IDENTITY))) {
-            column.setName(column.getName());
-          }
-          column.setForeignKey(true);
-        }
-
-        // Determine the PK of the related table to use as FK
-        Pair<String, String> propertyNameAndLabel = getPropertyNameAndLabel(
-            (PropertyInfo) attribute.getPropertyInfo());
-        Relation relation = new Relation();
-        relation.setName(toSnakeCase(propertyNameAndLabel.getLeft()) + "_" + targetName);
-        relation.setFrom(table);
-        relation.setTo(targetTable);
-        relation.setFromColumn(column);
-        relation.setToColumn(targetColumn);
-        relation.setCardinality(attribute.getCardinality());
-        table.getRelations().add(relation);
+      boolean alreadyPresent = deduplicated.stream().anyMatch(existing ->
+          existing.getCardinality() == Cardinality.MANY_TO_MANY
+              && same(existing.getName(), relationName)
+              && same(existing.getFrom() != null ? existing.getFrom().getName() : null, fromName)
+              && same(existing.getTo() != null ? existing.getTo().getName() : null, toName));
+      if (!alreadyPresent) {
+        deduplicated.add(relation);
       }
     }
+    table.setRelations(deduplicated);
   }
 
-  protected Table getTableByClazz(Clazz clazz) {
-    return getTableByClazz(clazz, false);
-  }
-
-  protected Table getTableByClazz(Clazz clazz, boolean identifier) {
-    if (clazz == null) {
-      return null;
-    }
-    // If there are multiple tables for the same class, prefer the one where the pk is not a fk
-    // else fallback to any table with the same class info
-    List<Table> candidateTables = tables.stream()
-        .filter(t -> t.getClassInfo().equals(clazz.getClassInfo()))
-        .toList();
-    return candidateTables.stream()
-        .filter(t -> !identifier || isPreferredIdentifierTable(t))
-        .findFirst()
-        .orElse(candidateTables.isEmpty() ? null : candidateTables.getFirst());
-  }
-
-  private boolean isPreferredIdentifierTable(Table table) {
-    Column identifierColumn = findIdentifierColumn(table, true);
-    return identifierColumn == null || !identifierColumn.isForeignKey();
+  private boolean same(String first, String second) {
+    return first == null ? second == null : first.equals(second);
   }
 
   /**
@@ -794,6 +689,7 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       setDomain(attribute.getDomain());
       setName(toSnakeCase(attribute.getName()));
       setRange(attribute.getRange());
+      setRangeClasses(new ArrayList<>(attribute.getRangeClasses()));
       setPrimaryKey(attribute.isPrimaryKey());
       setNullable(attribute.isNullable());
       setCardinality(attribute.getCardinality());
@@ -839,5 +735,145 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       return "Relation{name='" + name + "', from=" + from.getName() + ", to=" + to.getName()
           + ", cardinality=" + cardinality + "}";
     }
+  }
+
+  private boolean isExcludedFromMerge(Table sourceTable, Table targetTable) {
+    String sourceUri = sourceTable.getClassInfo() != null ? sourceTable.getClassInfo().getUri() : null;
+    String targetUri = targetTable.getClassInfo() != null ? targetTable.getClassInfo().getUri() : null;
+    return schemaGeneratorProperties.getMergeJoinTables().getExcludedPairs().stream()
+        .anyMatch(excludedPair -> excludedPair.matches(sourceUri, targetUri));
+  }
+
+  private void createJoinTableRelation(String name, Table targetTable, Table joinTable,
+      List<Column> joinColumns) {
+    joinColumns.forEach(joinColumn -> {
+      Relation toRelation = new Relation();
+      toRelation.setFrom(joinTable);
+      toRelation.setTo(targetTable);
+      toRelation.setFromColumn(joinColumn);
+      toRelation.setToColumn(targetTable.getColumnByUri(joinColumn.getUri()));
+      toRelation.setCardinality(Cardinality.MANY_TO_ONE);
+      toRelation.setName(name);
+      joinTable.getRelations().add(toRelation);
+    });
+  }
+
+  private void extractInheritance(Table table) {
+    Table parentTable = (Table) table.getExtendsClass();
+    if (parentTable == null) {
+      return;
+    }
+    Column targetColumn = findIdentifierColumn(parentTable, false);
+    if (targetColumn == null) {
+      table.setExtendsClass(parentTable);
+      return;
+    }
+
+    Column column = table.getColumnByUri(targetColumn.getUri());
+    if (column == null) {
+      column = new Column();
+      column.setPropertyInfo(targetColumn.getPropertyInfo());
+      column.setDomain(table);
+      table.addColumn(column);
+    }
+    column.setName(toSnakeCase(parentTable.getName()) + "_" + targetColumn.getName());
+    column.setForeignKey(true);
+    column.setPrimaryKey(true);
+    column.setDataType(new DataType(targetColumn.getDataType().getName(),
+        targetColumn.getDataType().getUri()));
+    column.setCardinality(Cardinality.MANY_TO_ONE);
+
+    Relation relation = new Relation();
+    relation.setFrom(table);
+    relation.setFromColumn(column);
+    relation.setTo(parentTable);
+    relation.setToColumn(targetColumn);
+    relation.setCardinality(Cardinality.ONE_TO_MANY);
+    table.getRelations().add(relation);
+    table.setExtendsClass(parentTable);
+  }
+
+  private void extractColumnRelations(Table table) {
+    for (Attribute attribute : table.getAttributes()) {
+      List<Clazz> targetRanges = resolveAttributeRanges(attribute);
+      for (Clazz nearestClass : targetRanges) {
+        Table targetTable = getTableByClazz(nearestClass, false);
+        if (targetTable == null) {
+          continue;
+        }
+        String targetName = targetTable.getName();
+        targetTable = getTableByClazz(targetTable, true);
+
+        Column column = table.getColumnByAttribute(attribute);
+        Column targetColumn = findIdentifierColumn(targetTable, false);
+        if (targetColumn == null) {
+          continue;
+        }
+        if (column != null) {
+          boolean relationExists = table.getRelations().stream()
+              .anyMatch(r -> r.getFromColumn().equals(column) && r.getToColumn().equals(targetColumn));
+          if (relationExists) {
+            continue;
+          }
+          column.setDataType(targetColumn.getDataType());
+          column.setForeignKey(true);
+        }
+
+        Pair<String, String> propertyNameAndLabel = getPropertyNameAndLabel(
+            (PropertyInfo) attribute.getPropertyInfo());
+        Relation relation = new Relation();
+        relation.setName(toSnakeCase(propertyNameAndLabel.getLeft()) + "_" + targetName);
+        relation.setFrom(table);
+        relation.setTo(targetTable);
+        relation.setFromColumn(column);
+        relation.setToColumn(targetColumn);
+        relation.setCardinality(attribute.getCardinality());
+        table.getRelations().add(relation);
+      }
+    }
+  }
+
+  private List<Clazz> resolveAttributeRanges(Attribute attribute) {
+    if (attribute.getRangeClasses() != null && !attribute.getRangeClasses().isEmpty()) {
+      return attribute.getRangeClasses();
+    }
+    if (attribute.getPropertyInfo() instanceof PropertyInfo propertyInfo
+        && propertyInfo.getRange() != null && !propertyInfo.getRange().isEmpty()) {
+      List<Clazz> resolved = propertyInfo.getRange().stream()
+          .map(this::getNearestClass)
+          .map(this::getClass)
+          .filter(clazz -> clazz != null)
+          .distinct()
+          .toList();
+      if (!resolved.isEmpty()) {
+        return resolved;
+      }
+    }
+    if (attribute.getRange() != null) {
+      return List.of(attribute.getRange());
+    }
+    return List.of();
+  }
+
+  protected Table getTableByClazz(Clazz clazz) {
+    return getTableByClazz(clazz, false);
+  }
+
+  protected Table getTableByClazz(Clazz clazz, boolean identifier) {
+    if (clazz == null) {
+      return null;
+    }
+    List<Table> candidateTables = tables.stream()
+        .filter(t -> t.getClassInfo().equals(clazz.getClassInfo()))
+        .toList();
+    return candidateTables.stream()
+        .filter(t -> !identifier || isPreferredIdentifierTable(t))
+        .findFirst()
+        .orElse(candidateTables.isEmpty() ? null : candidateTables.getFirst());
+  }
+
+  private boolean isPreferredIdentifierTable(Table table) {
+    Column identifierColumn = findIdentifierColumn(table, true);
+    return identifierColumn == null || !identifierColumn.isForeignKey();
   }
 }

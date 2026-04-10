@@ -48,4 +48,5 @@ npm run docs:build
 
 ## License
 
-This project is licensed under the terms in `LICENSE`.
+ODDToolkit is distributed under the **GNU General Public License v3.0**. See [License](./license) for details and the full license text.
+

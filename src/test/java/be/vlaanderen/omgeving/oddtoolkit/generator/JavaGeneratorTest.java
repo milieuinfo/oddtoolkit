@@ -7,7 +7,7 @@ public class JavaGeneratorTest {
   private final JavaGenerator generator = TestGeneratorFactory.generator("java", JavaGenerator.class);
 
   @Test
-  void testGenerator() {
+  void testGenerator() throws Exception {
     generator.run();
   }
 }

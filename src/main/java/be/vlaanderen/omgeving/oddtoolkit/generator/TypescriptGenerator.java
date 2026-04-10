@@ -219,8 +219,25 @@ public class TypescriptGenerator extends ClassGenerator {
           builder.append("\t */\n");
 
           boolean isArray = prop.getCardinality().isToMany();
-          TypeScriptType tsType = getTypeScriptType(prop.getDataType());
-          String dataType = tsType.typeName() + (isArray ? "[]" : "");
+
+          // Handle union types
+          String dataType;
+          TypeScriptType tsType;
+          boolean isUnion = prop.isUnionType();
+
+          if (isUnion) {
+            // Generate union type like: (Type1 | Type2 | Type3)
+            String unionType = prop.getRangeClasses().stream()
+                .map(Clazz::getName)
+                .collect(Collectors.joining(" | "));
+            dataType = "(" + unionType + ")" + (isArray ? "[]" : "");
+            // Use the first type for the JSON decorator
+            tsType = getTypeScriptType(new DataType(prop.getRangeClasses().getFirst().getName(),
+                prop.getRangeClasses().getFirst().getUri()));
+          } else {
+            tsType = getTypeScriptType(prop.getDataType());
+            dataType = tsType.typeName() + (isArray ? "[]" : "");
+          }
 
           // Check if property is optional (not required)
           boolean isOptional = !prop.getCardinality().equals(Cardinality.ONE_TO_ONE) &&
@@ -273,10 +290,20 @@ public class TypescriptGenerator extends ClassGenerator {
     Set<String> dependencies = new HashSet<>();
 
     clazz.getAttributes().stream()
-        .map(attr -> getTypeScriptType(attr.getDataType()))
-        .filter(TypeScriptType::isCustomType)
-        .map(TypeScriptType::typeName)
-        .forEach(dependencies::add);
+        .forEach(attr -> {
+          // Handle union types
+          if (attr.isUnionType()) {
+            attr.getRangeClasses().stream()
+                .map(Clazz::getName)
+                .forEach(dependencies::add);
+          } else {
+            // Handle single type
+            TypeScriptType tsType = getTypeScriptType(attr.getDataType());
+            if (tsType.isCustomType()) {
+              dependencies.add(tsType.typeName());
+            }
+          }
+        });
 
     // Add extend and implement dependencies
     if (clazz.getExtendsClass() != null) {

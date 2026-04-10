@@ -192,6 +192,12 @@ public class JavaGenerator extends SchemaGenerator {
         // Add comments for the property
         builder.append("\t// ").append("<a href=\"").append(prop.getUri()).append("\">")
             .append(prop.getPropertyInfo().getName()).append("</a>\n");
+
+        if (!isInterface && prop.isUnionType() && prop.getCardinality().equals(Cardinality.MANY_TO_MANY)) {
+          appendUnionManyToManyFields(builder, clazz, equivalentTable, prop);
+          return;
+        }
+
         // Add JSON annotations
         boolean isArray = prop.getCardinality().isToMany();
         String dataType = isArray ? "List<" + getJavaType(prop.getDataType()).getRight() + ">" : getJavaType(
@@ -324,12 +330,52 @@ public class JavaGenerator extends SchemaGenerator {
     builder.append("\t}\n");
   }
 
+  private void appendUnionManyToManyFields(StringBuilder builder, Clazz ownerClazz,
+      Table ownerTable, Attribute prop) {
+    for (Clazz rangeClazz : prop.getRangeClasses()) {
+      Table targetTable = getTableByClazz(rangeClazz, false);
+      if (targetTable == null) {
+        continue;
+      }
+
+      String targetType = nameMapping.getOrDefault(rangeClazz.getName(), rangeClazz.getName());
+      String fieldName = prop.getName() + targetType;
+      String jsonName = prop.getPropertyInfo().getName() + "_"
+          + toSnakeCase(targetType).toLowerCase();
+
+      boolean appendRelationName = shouldAppendRelationNameForSelfManyToMany(ownerClazz,
+          targetTable);
+      String joinTableName = resolveJoinTableName(ownerTable.getName(),
+          targetTable.getName(), prop.getName(), appendRelationName);
+
+      builder.append("\t@ManyToMany\n");
+      builder.append("\t@JoinTable(\n");
+      builder.append("\t\tname = \"").append(joinTableName).append("\",\n");
+      builder.append("\t\tjoinColumns = @JoinColumn(name = \"source_uuid\"),\n");
+      builder.append("\t\tinverseJoinColumns = @JoinColumn(name = \"target_uuid\")\n");
+      builder.append("\t)\n");
+      builder.append("\t@JsonProperty(\"").append(jsonName).append("\")\n");
+      builder.append("\tprivate List<").append(targetType).append("> ")
+          .append(fieldName).append(";\n");
+    }
+  }
+
   protected List<Pair<String, String>> getDependencies(Clazz clazz) {
     // For Java, we can determine dependencies based on the data types of the attributes
     Set<Pair<String, String>> dependencies = new HashSet<>(clazz.getAttributes().stream()
         .map(attr -> getJavaType(attr.getDataType()))
         .filter(pair -> !pair.getLeft().startsWith("java.lang"))
         .toList());
+
+    clazz.getAttributes().forEach(attr -> {
+      if (attr.isUnionType()) {
+        attr.getRangeClasses().forEach(rangeClazz -> {
+          String mappedName = nameMapping.getOrDefault(rangeClazz.getName(), rangeClazz.getName());
+          dependencies.add(new Pair<>(getPackageName(), mappedName));
+        });
+      }
+    });
+
     // Add extend and implement dependencies
     if (clazz.getExtendsClass() != null) {
       dependencies.add(

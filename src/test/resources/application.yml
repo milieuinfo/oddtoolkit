@@ -1,6 +1,6 @@
 ontology:
-  ontology-file-path: "src/test/resources/examples/ns/riepr/riepr.ttl"
-  concepts-file-path: "src/test/resources/examples/id/concept/riepr/riepr.ttl"
+  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
+  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
   enum-classes:
     classes:
       - "http://www.w3.org/ns/sosa/Procedure"

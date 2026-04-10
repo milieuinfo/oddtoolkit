@@ -344,11 +344,23 @@ public class ClassGenerator extends BaseGenerator {
           if (propertyInfo.getRange() != null && !propertyInfo
               .getRange()
               .isEmpty()) {
-            String rangeUri = propertyInfo.getRange().getFirst();
-            ClassInfo rangeClass = getNearestClass(rangeUri);
-            if (rangeClass != null) {
-              // Find the clazz or interface for the range class
-              attribute.setRange(findNeareast(rangeClass));
+            // Handle all range URIs to support union types
+            List<Clazz> rangeClasses = new ArrayList<>();
+            for (String rangeUri : propertyInfo.getRange()) {
+              ClassInfo rangeClass = getNearestClass(rangeUri);
+              if (rangeClass != null) {
+                Clazz rangeClazz = findNeareast(rangeClass);
+                if (rangeClazz != null) {
+                  rangeClasses.add(rangeClazz);
+                }
+              }
+            }
+
+            // Set the range classes list
+            if (!rangeClasses.isEmpty()) {
+              attribute.setRangeClasses(rangeClasses);
+              // For backwards compatibility, set range to the first class
+              attribute.setRange(rangeClasses.getFirst());
               attribute.setDataType(
                   new DataType(attribute.getRange().getName(), attribute.getRange().getUri()));
             }
@@ -1006,6 +1018,7 @@ public class ClassGenerator extends BaseGenerator {
     private Cardinality cardinality;
     private Clazz domain;
     private Clazz range;
+    private List<Clazz> rangeClasses = new ArrayList<>();
     private DataType dataType;
     private boolean primaryKey;
     private boolean nullable;
@@ -1022,6 +1035,13 @@ public class ClassGenerator extends BaseGenerator {
       return attribute.getUri().equals(getUri()) && attribute.getDomain().getUri()
           .equals(getDomain().getUri()) && attribute.getRange() != null && getRange() != null
           && attribute.getRange().getUri().equals(getRange().getUri());
+    }
+
+    /**
+     * Returns true if this attribute has a union type (multiple range classes).
+     */
+    public boolean isUnionType() {
+      return rangeClasses != null && rangeClasses.size() > 1;
     }
   }
 

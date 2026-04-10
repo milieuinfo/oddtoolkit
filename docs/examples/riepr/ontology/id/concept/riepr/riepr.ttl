@@ -265,6 +265,12 @@
     owl:equivalentProperty prov:wasAttributedTo ;
     skos:inScheme <> .
 
+:onderwerp a skos:Concept ;
+    skos:prefLabel "onderwerp"@nl ;
+    skos:definition "De eigenschap die het onderwerp van een entiteit beschrijft."@nl ;
+    owl:equivalentProperty dct:subject ;
+    skos:inScheme <> .
+
 # ---------------------------------------- #
 # Systeem
 # ---------------------------------------- #

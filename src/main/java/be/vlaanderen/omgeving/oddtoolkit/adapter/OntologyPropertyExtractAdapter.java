@@ -7,7 +7,9 @@ import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo.Cardinality;
 import be.vlaanderen.omgeving.oddtoolkit.model.UriTemplate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.OWL2;
@@ -111,5 +113,63 @@ public class OntologyPropertyExtractAdapter extends AbstractAdapter<OntologyInfo
             .add(new PropertyInfo(classInfo.getScope(), statementResource));
       }
     });
+
+    combinePropertiesByUri(classInfo);
+  }
+
+  private void combinePropertiesByUri(ClassInfo classInfo) {
+    Map<String, PropertyInfo> combinedByUri = new LinkedHashMap<>();
+    for (PropertyInfo property : classInfo.getProperties()) {
+      if (property == null || property.getUri() == null) {
+        continue;
+      }
+      PropertyInfo existing = combinedByUri.get(property.getUri());
+      if (existing == null) {
+        combinedByUri.put(property.getUri(), property);
+      } else {
+        mergeProperty(existing, property);
+      }
+    }
+    classInfo.setProperties(new ArrayList<>(combinedByUri.values()));
+  }
+
+  private void mergeProperty(PropertyInfo target, PropertyInfo source) {
+    if (target.getName() == null && source.getName() != null) {
+      target.setName(source.getName());
+    }
+    if (target.getComment() == null && source.getComment() != null) {
+      target.setComment(source.getComment());
+    }
+    if (target.getInverseOf() == null && source.getInverseOf() != null) {
+      target.setInverseOf(source.getInverseOf());
+    }
+
+    if (source.getRange() != null) {
+      source.getRange().stream()
+          .filter(rangeUri -> rangeUri != null && !target.getRange().contains(rangeUri))
+          .forEach(target.getRange()::add);
+    }
+
+    if (target.getCardinalityTo() == null) {
+      target.setCardinalityTo(new Cardinality());
+    }
+    if (source.getCardinalityTo() == null) {
+      source.setCardinalityTo(new Cardinality());
+    }
+
+    // Merge cardinality constraints: strongest lower bound and strongest upper bound.
+    Integer sourceMin = source.getCardinalityTo().getMin();
+    Integer sourceMax = source.getCardinalityTo().getMax();
+    Integer targetMin = target.getCardinalityTo().getMin();
+    Integer targetMax = target.getCardinalityTo().getMax();
+
+    if (sourceMin != null && (targetMin == null || sourceMin > targetMin)) {
+      target.getCardinalityTo().setMin(sourceMin);
+    }
+    if (sourceMax != null && (targetMax == null || sourceMax < targetMax)) {
+      target.getCardinalityTo().setMax(sourceMax);
+    }
+
+    target.setIdentifier(target.isIdentifier() || source.isIdentifier());
   }
 }
