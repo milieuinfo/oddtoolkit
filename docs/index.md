@@ -1,15 +1,28 @@
-# ODDToolkit Documentation
+---
+layout: home
 
-Welcome to the ODDToolkit documentation.
+hero:
+  name: "ODDToolkit"
+  text: "Ontology-Driven Design Toolkit"
+  tagline: Generate diagrams, code and data artifacts from OWL ontologies.
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/usage
+    - theme: alt
+      text: Examples & Generated Artifacts
+      link: /guide/generated-examples
+    - theme: alt
+      text: Configuration
+      link: /guide/configuration
 
-This site explains how to build, use and contribute to ODDToolkit — an Ontology Driven Design Toolkit for generating diagrams and Java artifacts from ontology sources.
-
-## Get Started
-
-- **New user?** Start with [Usage Guide](/guide/usage)
-- **Need to configure?** See [Configuration Guide](/guide/configuration)
-- **Want to learn about ontologies?** Read [Ontology & Metadata](/guide/ontology-metadata)
-- **Using from CLI?** Check [CLI Guide](/cli-guide)
-- **Building extensions?** See [Extension Guide](/extension-guide)
-- **Need a quick demo?** Try [Quickstart](/QUICKSTART)
-- **Need concrete output examples?** Open [Generated Examples](/guide/generated-examples)
+features:
+  - title: Ontology-First Artifacts
+    details: Generate diagrams, Java classes and SQL schemas directly from ontology models.
+  - title: Extensible Generators
+    details: Plugins and adapters let you extend output formats and naming strategies.
+  - title: Reproducible Builds
+    details: Deterministic generation with configurable profiles and benchmark snapshots.
+  - title: CLI + Extensions
+    details: Use the CLI for batch runs and build custom extensions with the extension guide.
+---
