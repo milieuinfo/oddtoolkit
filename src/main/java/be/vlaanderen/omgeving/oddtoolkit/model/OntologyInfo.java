@@ -29,7 +29,7 @@ public class OntologyInfo extends AbstractInfo {
     this.concepts = new ConceptSchemeInfo(config);
   }
 
-  // Constructor for creating external ontology instances (non-Spring managed)
+  /** Constructor for external (non-primary) ontology instances. */
   public OntologyInfo(Scope scope, OntologyConfiguration config, ConceptSchemeInfo concepts) {
     super(scope, null);
     this.config = config;

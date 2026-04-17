@@ -14,6 +14,7 @@ import be.vlaanderen.omgeving.oddtoolkit.adapter.OntologyPropertyExtractAdapter;
 import be.vlaanderen.omgeving.oddtoolkit.adapter.OntologyPropertyOverrideAdapter;
 import be.vlaanderen.omgeving.oddtoolkit.adapter.OntologyReasonerAdapter;
 import be.vlaanderen.omgeving.oddtoolkit.adapter.OntologyUriTemplateAdapter;
+import be.vlaanderen.omgeving.oddtoolkit.generator.BikeshedGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ClassDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ClassGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
@@ -70,6 +71,8 @@ public final class OddtoolkitBootstrap {
         ShaclGeneratorProperties.class, new ShaclGeneratorProperties());
     TypescriptGeneratorProperties typescriptGeneratorProperties = bindAnnotated(rootConfiguration,
         TypescriptGeneratorProperties.class, new TypescriptGeneratorProperties());
+    BikeshedGeneratorProperties bikeshedGeneratorProperties = bindAnnotated(rootConfiguration,
+        BikeshedGeneratorProperties.class, new BikeshedGeneratorProperties());
 
     OntologyInfo ontologyInfo = new OntologyInfo(ontologyConfiguration);
     Map<String, AbstractAdapter<?>> adapterBeans = createAdapterBeans(rootConfiguration, ontologyInfo,
@@ -97,6 +100,8 @@ public final class OddtoolkitBootstrap {
         javaGeneratorProperties, adapterBeans);
     TypescriptGenerator typescriptGenerator = generatorConfiguration.typescriptGenerator(ontologyInfo,
         generatorProperties, typescriptGeneratorProperties, adapterBeans);
+    BikeshedGenerator bikeshedGenerator = generatorConfiguration.bikeshedGenerator(ontologyInfo,
+        generatorProperties, bikeshedGeneratorProperties, adapterBeans);
 
     DefaultGeneratorRegistry registry = new DefaultGeneratorRegistry();
     registry.register(dataFrameGenerator.getName(), dataFrameGenerator);
@@ -107,6 +112,7 @@ public final class OddtoolkitBootstrap {
     registry.register(shaclGenerator.getName(), shaclGenerator);
     registry.register(javaGenerator.getName(), javaGenerator);
     registry.register(typescriptGenerator.getName(), typescriptGenerator);
+    registry.register(bikeshedGenerator.getName(), bikeshedGenerator);
     return registry;
   }
 

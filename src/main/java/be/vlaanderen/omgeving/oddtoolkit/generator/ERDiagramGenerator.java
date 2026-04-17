@@ -70,7 +70,6 @@ public class ERDiagramGenerator extends SchemaGenerator {
         builder.append("\n");
       });
       builder.append("}\n\n");
-      // Generate style for the table if applicable
       if (table.getDiagramStyle() != null) {
         builder.append("class ").append(table.getName()).append(" ").append(table.getDiagramStyle()).append("\n");
       }
@@ -80,14 +79,12 @@ public class ERDiagramGenerator extends SchemaGenerator {
 
   private void generateRelations(StringBuilder builder, Table table) {
     table.getRelations().forEach(relation -> {
-      // Add a comment
       PropertyInfo relationProperty = (PropertyInfo) relation.getFromColumn().getPropertyInfo();
       Cardinality cardinality = relation.getCardinality();
       if (relationProperty != null) {
         builder.append("%% ").append(relation.getFromColumn().getPropertyInfo().getUri())
             .append("\n");
       }
-      // Get the enum value (MANY_TO_ONE, ONE_TO_MANY, etc.) as a string (key of the enum)
       String cardinalityString = cardinality.name();
       String cardinalityFromString = cardinalityString.split("_TO_")[0].toLowerCase();
       String cardinalityToString = cardinalityString.split("_TO_")[1].toLowerCase();

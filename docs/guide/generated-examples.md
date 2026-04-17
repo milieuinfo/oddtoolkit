@@ -13,7 +13,7 @@ The examples used in this page are stored in stable docs paths:
 Run the generator tests and then sync the committed documentation examples:
 
 ```bash
-./mvnw -Dtest='*GeneratorTest,DataFrameGeneratorTest,ClassGeneratorTest,ERDiagramGeneratorTest,SQLGeneratorTest,JavaGeneratorTest,TypescriptGeneratorTest,ShaclGeneratorTest' test
+./mvnw -Dtest='*GeneratorTest,DataFrameGeneratorTest,ClassGeneratorTest,ERDiagramGeneratorTest,SQLGeneratorTest,JavaGeneratorTest,TypescriptGeneratorTest,ShaclGeneratorTest,BikeshedGeneratorTest' test
 ./scripts/update-doc-examples.sh
 ```
 
@@ -75,3 +75,13 @@ Run the generator tests and then sync the committed documentation examples:
 ```json
 <<< ../examples/riepr/outputs/frame.json
 ```
+
+## Bikeshed example (`docs/examples/riepr/outputs/ontology.bs`)
+
+The Bikeshed generator produces a `.bs` source file that can be rendered to a W3C-style HTML
+specification by the `bikeshed` CLI tool or the [online API](https://api.csswg.org/bikeshed/).
+
+```bikeshed
+<<< ../examples/riepr/outputs/ontology.bs
+```
+

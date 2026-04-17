@@ -63,6 +63,12 @@ generators:
     output-directory: "target/test-cache/typescript"
   data-frame-generator:
     output-file: "target/test-cache/dataframe/frame.json"
+  bikeshed-generator:
+    output-file: "target/test-cache/bikeshed/ontology.bs"
+    title: "RIE-IEPR Ontology"
+    status: "LS"
+    editor-name: "ODDToolkit"
+    editor-affiliation: "Vlaamse overheid"
 
   schema-generator:
     join-table-name-pattern: "{source_table}_{target_table}"

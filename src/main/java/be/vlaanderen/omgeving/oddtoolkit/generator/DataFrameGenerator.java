@@ -69,7 +69,6 @@ public class DataFrameGenerator extends BaseGenerator {
   }
 
   public void generate() {
-    // Add context
     context.put("uri", "@id");
     ObjectNode typeContext = objectMapper.createObjectNode();
     typeContext.put("@type", "@id");
@@ -83,12 +82,10 @@ public class DataFrameGenerator extends BaseGenerator {
       context.put(propertyInfo.getName(), propertyContext);
     });
     frame.put("@context", context);
-    // Add all types
     ArrayNode properties = objectMapper.createArrayNode();
     types.forEach(properties::add);
     frame.put("@type", properties);
     frame.put("@embed", "@always");
-    // Add all properties
     propertyAggregation.forEach(propertyInfo -> {
       ObjectNode propertyNode = objectMapper.createObjectNode();
       propertyNode.put("@embed", "@never");

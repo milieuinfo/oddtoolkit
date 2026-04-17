@@ -31,7 +31,6 @@ public abstract class AbstractInfo {
     if (this.uri == null) {
       this.uri = resource.getURI();
     }
-    // Get rdfs label and comment if available
     Statement labelStmt = resource.getProperty(RDFS.label);
     if (labelStmt != null && labelStmt.getObject().isLiteral()) {
       this.label = labelStmt.getString();

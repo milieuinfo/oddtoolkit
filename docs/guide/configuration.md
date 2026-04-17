@@ -68,9 +68,10 @@ Generator names used by CLI:
 - `shacl`
 - `java`
 - `typescript`
+- `bikeshed`
 - `all` (special CLI mode)
 
-Some generator-specific property blocks use `*-generator` names (for example `sql-generator`, `java-generator`, `typescript-generator`, `shacl-generator`, `schema-generator`).
+Some generator-specific property blocks use `*-generator` names (for example `sql-generator`, `java-generator`, `typescript-generator`, `shacl-generator`, `schema-generator`, `bikeshed-generator`).
 
 Example with adapter pinning:
 
@@ -85,6 +86,41 @@ generators:
   java-generator:
     output-directory: "target/generated/java"
     package-name: "be.vlaanderen.omgeving.generated"
+```
+
+### Bikeshed generator
+
+The `bikeshed` generator produces a [Bikeshed](https://tabatkins.github.io/bikeshed/) (`.bs`) specification source file documenting all classes and their properties. The resulting file can be processed by the `bikeshed` CLI tool or the [online API](https://api.csswg.org/bikeshed/) to produce a W3C-style HTML specification.
+
+```yaml
+generators:
+  bikeshed-generator:
+    output-file: "target/ontology.bs"
+    title: "My Ontology"
+    status: "ED"                      # LS | ED | WD | CR | PR | REC
+    shortname: "my-ontology"          # slug used in the TR URL (optional)
+    editor-name: "Jane Doe"
+    editor-email: "jane@example.org"
+    editor-affiliation: "My Organisation"
+    abstract-text: "This specification describes…"  # optional; falls back to rdfs:comment
+```
+
+Run it from the CLI:
+
+```bash
+java -jar target/oddtoolkit.jar \
+  --generator=bikeshed \
+  --config-file=config.yml
+```
+
+Then convert the generated `.bs` file to HTML:
+
+```bash
+# Using the bikeshed CLI (pip install bikeshed)
+bikeshed spec target/ontology.bs target/ontology.html
+
+# Or using the online API
+curl https://api.csswg.org/bikeshed/ -F file=@target/ontology.bs > target/ontology.html
 ```
 
 ## `adapters` section

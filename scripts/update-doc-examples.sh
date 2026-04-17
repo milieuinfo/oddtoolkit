@@ -28,6 +28,8 @@ cp "$CACHE_DIR/shacl/schema.ttl" "$OUTPUTS_DIR/schema.ttl"
 cp "$CACHE_DIR/java/Exploitatie.java" "$OUTPUTS_DIR/Exploitatie.java"
 cp "$CACHE_DIR/typescript/exploitatie.model.ts" "$OUTPUTS_DIR/exploitatie.model.ts"
 cp "$CACHE_DIR/dataframe/frame.json" "$OUTPUTS_DIR/frame.json"
+cp "$CACHE_DIR/bikeshed/ontology.bs" "$OUTPUTS_DIR/ontology.bs"
+cp "$CACHE_DIR/bikeshed/ontology.html" "$OUTPUTS_DIR/ontology.html"
 
 # Keep the legacy location in sync to avoid breaking existing references.
 cp "$OUTPUTS_DIR/class-diagram.mmd" "$LEGACY_EXAMPLES_DIR/class-diagram.mmd"
@@ -37,6 +39,8 @@ cp "$OUTPUTS_DIR/schema.ttl" "$LEGACY_EXAMPLES_DIR/schema.ttl"
 cp "$OUTPUTS_DIR/Exploitatie.java" "$LEGACY_EXAMPLES_DIR/Exploitatie.java"
 cp "$OUTPUTS_DIR/exploitatie.model.ts" "$LEGACY_EXAMPLES_DIR/exploitatie.model.ts"
 cp "$OUTPUTS_DIR/frame.json" "$LEGACY_EXAMPLES_DIR/frame.json"
+cp "$OUTPUTS_DIR/ontology.bs" "$LEGACY_EXAMPLES_DIR/ontology.bs"
+cp "$OUTPUTS_DIR/ontology.html" "$LEGACY_EXAMPLES_DIR/ontology.html"
 
 cp "$CACHE_DIR/class-diagram/class-diagram.png" "$IMAGES_DIR/class-diagram-test.png"
 cp "$CACHE_DIR/er-diagram/er-diagram.png" "$IMAGES_DIR/er-diagram-test.png"

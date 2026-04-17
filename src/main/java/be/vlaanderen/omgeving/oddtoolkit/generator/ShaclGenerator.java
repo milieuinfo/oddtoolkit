@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * SHACL generator that builds shapes from the ontology
+ * Generates SHACL shapes from the ontology.
  */
 public class ShaclGenerator extends BaseGenerator {
 
@@ -114,7 +114,6 @@ public class ShaclGenerator extends BaseGenerator {
   public void run() {
     super.run();
     Model shacl = generateShacl();
-    // Save to file
     if (getOutputFile() != null) {
       logger.info("Writing SHACL shapes to {}", getOutputFile());
       saveToFile(getOutputFile(), shacl);
@@ -125,7 +124,6 @@ public class ShaclGenerator extends BaseGenerator {
 
   protected void saveToFile(String outputFile, Model shacl) {
     try {
-      // Ensure parent directories exist
       Path outputPath = java.nio.file.Paths.get(outputFile);
       Files.createDirectories(outputPath.getParent());
       shacl.write(new FileOutputStream(outputFile), "TURTLE");
@@ -139,8 +137,8 @@ public class ShaclGenerator extends BaseGenerator {
   }
 
   /**
-   * Generate SHACL shapes from the ontology's inferred model. Uses inferredModel if present,
-   * otherwise falls back to the raw model.
+   * Generates SHACL shapes from the ontology model. Uses the raw model (inferredModel is not
+   * consulted here; callers may substitute it via {@link OntologyInfo#setModel(Model)}).
    */
   private Model generateShacl() {
     Model ontology = ontologyInfo.getModel();
@@ -157,7 +155,6 @@ public class ShaclGenerator extends BaseGenerator {
         .sorted(Map.Entry.comparingByKey(Comparator.nullsLast(String::compareTo)))
         .forEach(entry -> shacl.setNsPrefix(entry.getKey(), entry.getValue()));
 
-    // iterate over all classes in the ontology and create node shapes
     List<Resource> classes = ontology.listResourcesWithProperty(RDF.type, OWL.Class)
         .toList()
         .stream()
@@ -169,7 +166,6 @@ public class ShaclGenerator extends BaseGenerator {
     return shacl;
   }
 
-  // Helper to create shacl property in a model
   private Property shaclProp(String local, Model m) {
     return m.createProperty(SH + local);
   }
@@ -192,7 +188,7 @@ public class ShaclGenerator extends BaseGenerator {
         }
       }
     }
-    // if prop has owl:inverseOf -> return a blank node with sh:inversePath inv
+    // if prop has owl:inverseOf, return a blank node with sh:inversePath
     Statement invStmt = prop.getProperty(OWL.inverseOf);
     if (invStmt != null && invStmt.getObject().isResource()) {
       Resource inv = invStmt.getResource();
@@ -200,7 +196,6 @@ public class ShaclGenerator extends BaseGenerator {
       b.addProperty(shaclProp("inversePath", shacl), inv);
       return b;
     }
-    // otherwise use the property URI
     if (prop.isURIResource()) {
       return shacl.createResource(prop.getURI());
     }
@@ -254,7 +249,6 @@ public class ShaclGenerator extends BaseGenerator {
       valueKind = new SingleValue("__none__", false);
     }
 
-    // Compute min count
     Integer min = intValue(restriction, OWL.cardinality);
     if (min == null) {
       min = intValue(restriction, OWL.minCardinality);
@@ -265,7 +259,6 @@ public class ShaclGenerator extends BaseGenerator {
       min = 1;
     }
 
-    // Compute max count
     Integer max = intValue(restriction, OWL.cardinality);
     if (max == null) {
       max = intValue(restriction, OWL.maxCardinality);

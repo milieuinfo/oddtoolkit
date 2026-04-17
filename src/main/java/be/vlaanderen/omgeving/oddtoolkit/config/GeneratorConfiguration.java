@@ -1,6 +1,7 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
 import be.vlaanderen.omgeving.oddtoolkit.adapter.AbstractAdapter;
+import be.vlaanderen.omgeving.oddtoolkit.generator.BikeshedGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ClassDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ClassGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
@@ -101,6 +102,16 @@ public class GeneratorConfiguration {
     List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("typescript"));
     return new TypescriptGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
         typescriptGeneratorProperties);
+  }
+
+  public BikeshedGenerator bikeshedGenerator(OntologyInfo ontologyInfo,
+      GeneratorProperties generatorProperties,
+      BikeshedGeneratorProperties bikeshedGeneratorProperties,
+      Map<String, AbstractAdapter<?>> adapterBeans) {
+    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans,
+        generatorProperties.adaptersFor("bikeshed"));
+    return new BikeshedGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
+        bikeshedGeneratorProperties);
   }
 
   private List<AbstractAdapter<?>> selectAdapters(Map<String, AbstractAdapter<?>> adapterBeans,

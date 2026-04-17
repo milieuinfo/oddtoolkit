@@ -219,13 +219,10 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   }
 
   private void extractTables() {
-    // Extract tables from concrete classes
     this.classes
         .forEach(concreteClass -> addTable(new Table(concreteClass)));
-    // Extract tables from interfaces
     this.interfaces
         .forEach(interfaceClass -> addTable(new Table(interfaceClass)));
-    // Now extract styles
     tables.forEach(this::extractStyles);
     tables.sort(Comparator.comparingInt(t -> -t.getClassInfo().getSuperClasses().size()));
   }
@@ -578,7 +575,6 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   }
 
   protected void addTable(Table table) {
-    // Check if there is table with the same name
     if (tables.stream().anyMatch(t -> t.getName().equals(table.getName()))) {
       throw new IllegalArgumentException("Duplicate table name: " + table.getName());
     }
@@ -637,9 +633,7 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     }
 
     public void setColumns(List<Column> columns) {
-      // Clear existing columns
       getAttributes().removeIf(a -> a instanceof Column);
-      // Add new columns
       getAttributes().addAll(columns);
     }
 

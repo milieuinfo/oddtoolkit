@@ -65,11 +65,9 @@ public class JavaGenerator extends SchemaGenerator {
   }
 
   protected void prepareFileNames() {
-    // Prepare file names for all classes, interfaces and enums
     getClasses().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".java"));
     getInterfaces().forEach(clazz -> fileNames.put(clazz, "I" + clazz.getName() + ".java"));
     getEnums().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".java"));
-    // Prepare name mapping for all classes, interfaces and enums
     getClasses().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
     getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), "I" + clazz.getName()));
     getEnums().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
@@ -95,12 +93,10 @@ public class JavaGenerator extends SchemaGenerator {
 
       String fileName = clazz.getName() + ".java";
       StringBuilder builder = new StringBuilder();
-      // Package declaration
       builder.append("package ").append(getPackageName()).append(";\n\n");
       boolean isInterface = clazz instanceof Interface;
       boolean isEnum = clazz instanceof Enum;
 
-      // Begin with imports
       getDependencies(clazz)
           // Skip dependencies in the same package
           .stream()
@@ -110,9 +106,7 @@ public class JavaGenerator extends SchemaGenerator {
               dep -> builder.append("import ").append(dep.getLeft()).append('.')
                   .append(dep.getRight())
                   .append(";\n"));
-      // Add default imports
       if (!isInterface) {
-        // If no properties, we can skip JSON annotations and Lombok imports
         boolean hasProperties = !clazz.getAttributes().isEmpty();
         if (hasProperties) {
           builder.append("import com.fasterxml.jackson.annotation.JsonProperty;\n");
@@ -142,7 +136,6 @@ public class JavaGenerator extends SchemaGenerator {
       }
       builder.append("\n");
 
-      // Add comments
       builder.append("/**\n");
       builder.append(" * ").append(clazz.getName()).append("\n");
       builder.append(" * <a href=\"").append(clazz.getUri()).append("\">")
@@ -165,7 +158,6 @@ public class JavaGenerator extends SchemaGenerator {
         }
       }
 
-      // Determine if it extends or implements other classes/interfaces
       String extendsClause = "";
       if (clazz.getExtendsClass() != null) {
         extendsClause = " extends " + nameMapping.get(clazz.getExtendsClass().getName());
@@ -183,13 +175,11 @@ public class JavaGenerator extends SchemaGenerator {
           .append(extendsClause).append(implementsClause)
           .append(" {\n");
       if (clazz instanceof Enum enumClazz) {
-        // For enums, we can add the enum values as constants
         enumClazz.getValues().forEach(value -> {
           builder.append("\t").append(value.getName()).append(" = \"").append(value.getUri()).append("\"").append(",\n");
         });
       }
       clazz.getAttributes().forEach(prop -> {
-        // Add comments for the property
         builder.append("\t// ").append("<a href=\"").append(prop.getUri()).append("\">")
             .append(prop.getPropertyInfo().getName()).append("</a>\n");
 
@@ -198,7 +188,6 @@ public class JavaGenerator extends SchemaGenerator {
           return;
         }
 
-        // Add JSON annotations
         boolean isArray = prop.getCardinality().isToMany();
         String dataType = isArray ? "List<" + getJavaType(prop.getDataType()).getRight() + ">" : getJavaType(
             prop.getDataType()).getRight();
@@ -250,7 +239,6 @@ public class JavaGenerator extends SchemaGenerator {
               }
             }
           } else if (prop.getRange() == null) {
-            // Atomic attribute - check if it's a merge-join-tables discriminator column
             String columnName = equivalentColumn.getName();
             String mergeJoinTableAttributeName = getSchemaGeneratorProperties().getMergeJoinTables()
                 .getAttributeName();
@@ -260,12 +248,10 @@ public class JavaGenerator extends SchemaGenerator {
             }
 
             if (isMergeJoinTablesColumn(equivalentTable, columnName, mergeJoinTableAttributeName)) {
-              // This is a merge-join-tables discriminator column - treat as regular column with enum type
               builder.append("\t@Column(name = \"").append(columnName)
                   .append("\", nullable = ").append(equivalentColumn.isNullable())
                   .append(", insertable = true, updatable = true)\n");
             } else {
-              // Regular atomic attribute
               builder.append("\t@Column(name = \"").append(columnName)
                   .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
             }
@@ -361,7 +347,6 @@ public class JavaGenerator extends SchemaGenerator {
   }
 
   protected List<Pair<String, String>> getDependencies(Clazz clazz) {
-    // For Java, we can determine dependencies based on the data types of the attributes
     Set<Pair<String, String>> dependencies = new HashSet<>(clazz.getAttributes().stream()
         .map(attr -> getJavaType(attr.getDataType()))
         .filter(pair -> !pair.getLeft().startsWith("java.lang"))
@@ -399,7 +384,6 @@ public class JavaGenerator extends SchemaGenerator {
   }
 
   protected Pair<String, String> getJavaType(DataType dataType) {
-    // First check if it's a known primitive type
     return switch (dataType.getUri()) {
       case "http://www.w3.org/2001/XMLSchema#string" -> getJavaPackageAndClassName(String.class);
       case "http://www.w3.org/2001/XMLSchema#integer" -> getJavaPackageAndClassName(Integer.class);
@@ -430,15 +414,11 @@ public class JavaGenerator extends SchemaGenerator {
   }
 
   /**
-   * Check if a column is a merge-join-tables discriminator column.
-   * These columns are added by the merge-join-tables feature to distinguish between
-   * different many-to-many relationships to the same target table.
+   * Checks whether the given column is a merge-join-tables discriminator column. Such columns
+   * appear only in JOIN tables and their name matches the configured attribute name.
    */
   private boolean isMergeJoinTablesColumn(Table table, String columnName,
       String mergeJoinTableAttributeName) {
-    // A column is a merge-join-tables column if:
-    // 1. The table is a JOIN table
-    // 2. The column name matches the configured merge-join-tables attribute name
     return table.getTableType() == TableType.JOIN
         && columnName.equals(mergeJoinTableAttributeName);
   }

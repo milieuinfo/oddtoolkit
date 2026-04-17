@@ -18,13 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base class for all generators.
- * Provides common structure and configuration handling for generator implementations.
- *
- * Custom generators should extend this class and:
- * 1. Implement the {@link #generate()} method with generator logic
- * 2. Override {@link #getName()} to provide a unique identifier
- * 3. Optionally override {@link #validate()} for custom validation
+ * Abstract base class for all generators. Subclasses must implement {@link #run()} with their
+ * specific generation logic, and may override {@link #getName()}, {@link #getDescription()}, and
+ * {@link #validate()}.
  */
 public abstract class BaseGenerator {
   private static final Logger logger = LoggerFactory.getLogger(BaseGenerator.class);
@@ -77,10 +73,7 @@ public abstract class BaseGenerator {
   }
 
   /**
-   * Execute the generation logic.
-   * Implementation should handle all generation steps and error handling.
-   *
-   * @throws Exception if generation fails
+   * Delegates to {@link #run()}. Subclasses typically override {@link #run()} directly.
    */
   public void generate() throws Exception {
     run();
@@ -124,7 +117,6 @@ public abstract class BaseGenerator {
    * @return a list of ClassInfo objects representing the classes
    */
   public List<ClassInfo> getOntologyClasses() {
-    // Get all classes defined in the ontology and filter them based on the provided scope
     return ontologyInfo.getClasses().stream()
         .filter(c -> c.getScope() == Scope.ONTOLOGY)
         .sorted(CLASS_INFO_ORDER)
@@ -157,10 +149,8 @@ public abstract class BaseGenerator {
   }
 
   /**
-   * Get the property concept for a given property URI
-   *
-   * @param propertyUri the URI of the property
-   * @return the PropertyConceptInfo object representing the property concept, or null if not found
+   * Returns the {@link PropertyConceptInfo} whose equivalents contain the given property URI,
+   * or {@code null} if none is found.
    */
   public PropertyConceptInfo getPropertyConceptForProperty(String propertyUri) {
     return conceptSchemeInfo.getPropertyConcepts().stream()
@@ -170,10 +160,8 @@ public abstract class BaseGenerator {
   }
 
   /**
-   * Get the class concept for a given class URI
-   *
-   * @param classUri the URI of the class
-   * @return the ClassConceptInfo object representing the class concept, or null if not found
+   * Returns the {@link ClassConceptInfo} whose equivalents contain the given class URI,
+   * or {@code null} if none is found.
    */
   public ClassConceptInfo getClassConceptForClass(String classUri) {
     return conceptSchemeInfo.getClassConcepts().stream()

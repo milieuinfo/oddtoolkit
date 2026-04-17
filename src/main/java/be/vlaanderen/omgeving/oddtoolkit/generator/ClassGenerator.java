@@ -47,16 +47,12 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   /**
-   * Get the name and label for a class, if a class concept is defined for the class, use the name and label from the class concept
-   * otherwise use the name and label from the class info
-   *
-   * @param classInfo the class info for which to get the name and label
-   * @return a pair of name and label for the class
+   * Returns the name and label for a class. If a {@link ClassConceptInfo} is mapped to this class,
+   * its name/label takes precedence over the ontology-level values.
    */
   protected Pair<String, String> getClassNameAndLabel(ClassInfo classInfo) {
     String name = classInfo.getName();
     String label = classInfo.getLabel() != null ? classInfo.getLabel() : name;
-    // Check concept class info
     ClassConceptInfo cci = getClassConceptForClass(classInfo.getUri());
     return getStringPair(name, label, cci);
   }
@@ -64,7 +60,6 @@ public class ClassGenerator extends BaseGenerator {
   protected Pair<String, String> getPropertyNameAndLabel(PropertyInfo propertyInfo) {
     String name = propertyInfo.getName();
     String label = propertyInfo.getLabel() != null ? propertyInfo.getLabel() : name;
-    // Check concept property info
     PropertyConceptInfo pci = getPropertyConceptForProperty(propertyInfo.getUri());
     return getStringPair(name, label, pci);
   }
@@ -99,7 +94,7 @@ public class ClassGenerator extends BaseGenerator {
   @Override
   public void run() {
     super.run();
-    // Reset internal state so repeated invocations do not append into immutable snapshots.
+    // Reset internal state so repeated invocations produce a clean result.
     classes = new ArrayList<>();
     interfaces = new ArrayList<>();
     enums = new ArrayList<>();
@@ -108,7 +103,6 @@ public class ClassGenerator extends BaseGenerator {
     extractEnums();
     extractMetadataClasses();
     extractRelations();
-    // Apply the filters in order
     applyFilters();
     updateRanges();
     extractDataTypes();
@@ -262,7 +256,6 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   private void updateRanges() {
-    // Loop through all attributes of all classes and interfaces and update the range to the nearest class or interface
     List<Clazz> completeList = new ArrayList<>();
     completeList.addAll(classes);
     completeList.addAll(interfaces);
@@ -324,7 +317,6 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   protected void extractDataTypes() {
-    // Loop through all attributes of all classes and interfaces and set the data type based on the range of the property
     List<Clazz> completeList = new ArrayList<>();
     completeList.addAll(classes);
     completeList.addAll(interfaces);
@@ -336,15 +328,11 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   protected void extractRelations() {
-    // Loop through the classes and interfaces and set the range of the properties to the nearest class or interface
     for (Clazz clazz : classes) {
       for (Attribute attribute : clazz.getAttributes()) {
         if (attribute.getPropertyInfo() != null
             && attribute.getPropertyInfo() instanceof PropertyInfo propertyInfo) {
-          if (propertyInfo.getRange() != null && !propertyInfo
-              .getRange()
-              .isEmpty()) {
-            // Handle all range URIs to support union types
+          if (propertyInfo.getRange() != null && !propertyInfo.getRange().isEmpty()) {
             List<Clazz> rangeClasses = new ArrayList<>();
             for (String rangeUri : propertyInfo.getRange()) {
               ClassInfo rangeClass = getNearestClass(rangeUri);
@@ -356,7 +344,6 @@ public class ClassGenerator extends BaseGenerator {
               }
             }
 
-            // Set the range classes list
             if (!rangeClasses.isEmpty()) {
               attribute.setRangeClasses(rangeClasses);
               // For backwards compatibility, set range to the first class
@@ -611,14 +598,12 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   protected void filterInterfaces() {
-    // Only keep interfaces that are directly used by concrete classes
     this.interfaces = interfaces
         .stream()
         .filter(i -> classes.stream()
             .flatMap(c -> c.getAttributes().stream())
             .anyMatch(p -> p.getRange() != null && p.getRange().getUri().equals(i.getUri())))
         .toList();
-    // Also filter interfaces that are only used as a superclass of only one concrete class
     this.interfaces = interfaces
         .stream()
         .filter(i -> classes.stream()
@@ -626,7 +611,6 @@ public class ClassGenerator extends BaseGenerator {
                 .anyMatch(ci -> ci.getUri().equals(i.getUri())))
             .count() > 1)
         .toList();
-    // Filter the used filters in classes to only include the interfaces that are still kept
     this.classes = classes
         .stream()
         .peek(c -> {
@@ -665,13 +649,9 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   protected void filterInheritedProperties() {
-    // Filter the properties of all classes that extend another class (not interface)
-    // to remove properties that are already defined in the super class
-    // The properties will be removed from the subclass
     this.classes = classes
         .stream()
         .map(c -> {
-          // Check the super classes and see which properties are defined
           List<ClassInfo> superClasses = c.getClassInfo().getSuperClasses()
               .stream().filter(this::isConcreteClass)
               .toList();
@@ -694,9 +674,6 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   protected void filterSuperClasses() {
-    // Remove super classes that have a super class themselves
-    // e.g. if A is a subclass of B + C and B is a subclass of C
-    // then we can remove C as a super class of A
     this.classes = classes
         .stream()
         .map(c -> {
@@ -704,18 +681,14 @@ public class ClassGenerator extends BaseGenerator {
           if (superClasses == null) {
             return c;
           }
-          // For every super class, check if there are other super classes that are subclasses of it
-          // if so, we can remove it from the list of super classes
           Clazz superClass = superClasses.stream()
               .filter(sc -> superClasses.stream()
-                  // Get the class from (getClasses())
                   .map(other -> getAllClasses().stream()
                       .filter(cc -> cc.getUri().equals(other.getUri()))
                       .findFirst()
                       .orElse(null)).filter(Objects::nonNull)
                   .filter(other -> !other.equals(sc))
                   .noneMatch(other -> other.isSubClassOf(sc.getUri())))
-              // Super class should be a concrete class
               .filter(sc -> classes.stream()
                   .anyMatch(cc -> cc.getUri().equals(sc.getUri())))
               .map(this::getClass)
@@ -729,26 +702,21 @@ public class ClassGenerator extends BaseGenerator {
 
 
   protected void filterEnums() {
-    // Remove enums from concrete classes
     this.classes = classes
         .stream()
         .filter(c -> !isEnum(c.getClassInfo()))
         .toList();
     this.enums.forEach(enumInfo -> {
-      // Clear all properties
       enumInfo.setAttributes(new ArrayList<>());
-      // Get a list of all classes that are subclasses of the enum class
       List<ClassInfo> subclasses = new ArrayList<>();
       getSubClasses(enumInfo.getClassInfo())
           .stream()
-          // Assume the class does not have any properties; otherwise it would not be an enum subclass
-          // Ignore extra attributes that are added by default to all classes
+          // Skip subclasses that have domain-specific properties (they're not pure enum values)
           .filter(c -> c.getProperties().isEmpty() || c.getProperties().stream()
               .allMatch(p -> p.isIdentifier() || getOntologyConfiguration().getExtraProperties()
                   .stream()
                   .anyMatch(ep -> ep.getUri().equals(p.getUri()))))
           .forEach(subclasses::add);
-      // Get a list of all "classes" that are individuals of the enum class
       enumInfo.getClassInfo().getIndividuals()
           .stream()
           .map(i -> new ClassInfo(enumInfo.getClassInfo().getScope(), i))
@@ -762,7 +730,6 @@ public class ClassGenerator extends BaseGenerator {
             return enumValue;
           })
           .toList());
-      // Remove the subclasses from the concrete classes and interfaces
       this.classes = classes
           .stream()
           .filter(c -> !subclasses.contains(c.getClassInfo()))
@@ -774,11 +741,14 @@ public class ClassGenerator extends BaseGenerator {
     });
   }
 
+  /**
+   * Returns the nearest concrete class, interface, or enum for the given class URI,
+   * or {@code null} if none is found.
+   */
   public ClassInfo getNearestClass(String classUri) {
     if (classUri == null) {
       return null;
     }
-    // Loop through all classes, the nearest class is the
     ClassInfo classInfo = getAllClasses()
         .stream()
         .filter(c -> c.getUri().equals(classUri))
@@ -788,6 +758,7 @@ public class ClassGenerator extends BaseGenerator {
       return null;
     }
     return getNearestClass(classInfo);
+  }
   }
 
   protected String toEnumValueName(String enumValueName, String enumClassName) {
@@ -823,17 +794,13 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   /**
-   * Get the nearest class or interface for a given class.
-   *
-   * @param classInfo the class for which to find the nearest class or interface
-   * @return the nearest class or interface, or null if none found
+   * Returns the nearest concrete class, interface, or enum for the given class, walking up the
+   * hierarchy when the class itself is not directly represented.
    */
   public ClassInfo getNearestClass(ClassInfo classInfo) {
-    // First check if the class itself is a concrete class or interface
     if (isConcreteClass(classInfo) || isInterface(classInfo) || isEnum(classInfo)) {
       return classInfo;
     }
-    // Loop through the interfaces and concrete classes to see if its a super class
     for (Interface interfaceInfo : interfaces) {
       if (interfaceInfo.getClassInfo().isSubClassOf(classInfo.getUri())) {
         return interfaceInfo.getClassInfo();
@@ -910,7 +877,6 @@ public class ClassGenerator extends BaseGenerator {
     if (classInfo == null) {
       return null;
     }
-    // Search in classes, interfaces and enums
     List<Clazz> completeList = new ArrayList<>();
     completeList.addAll(classes);
     completeList.addAll(interfaces);
