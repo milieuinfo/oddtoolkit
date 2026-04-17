@@ -1,0 +1,2379 @@
+<pre class='metadata'>
+Title: RIE-IEPR Ontology
+Shortname: ontology
+Status: LS
+Level: 1
+URL: null
+Date: 2026-04-17
+Editor: ODDToolkit, Vlaamse overheid
+Abstract: Specification generated from null.
+</pre>
+
+Introduction {#introduction}
+============
+
+This document is a machine-generated specification of the ontology <a href="null">RIE-IEPR Ontology</a>.
+
+Generated on 2026-04-17.
+
+Namespaces {#namespaces}
+==========
+
+The following namespace is used throughout this specification:
+
+: Ontology namespace
+:: <code>null</code>
+
+External ontologies referenced:
+
+: http://qudt.org/schema/qudt/
+:: <code>null</code>
+: http://dbpedia.org/ontology/
+:: <code>null</code>
+: http://www.w3.org/ns/locn#
+:: <code>null</code>
+: http://www.w3.org/ns/adms#
+:: <code>null</code>
+: http://purl.org/net/p-plan#
+:: <code>null</code>
+: http://www.w3.org/ns/sosa/
+:: <code>null</code>
+: http://www.w3.org/ns/prov#
+:: <code>null</code>
+: http://www.w3.org/2004/02/skos/core#
+:: <code>null</code>
+: http://www.opengis.net/ont/geosparql#
+:: <code>null</code>
+: http://www.w3.org/ns/ssn/
+:: <code>null</code>
+: http://www.w3.org/ns/org#
+:: <code>null</code>
+: http://www.w3.org/ns/sosa/prov
+:: <code>null</code>
+: http://xmlns.com/foaf/0.1/
+:: <code>null</code>
+
+Classes {#classes}
+=======
+
+## <dfn>ExterneIdentificator</dfn> ## {#class-externeidentificator}
+
+: <b>IRI</b>
+:: <code><a href="http://www.w3.org/ns/adms#Identifier">http://www.w3.org/ns/adms#Identifier</a></code>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="ExterneIdentificator">notation</dfn></td>
+          <td><code><a href="http://www.w3.org/2004/02/skos/core#notation">http://www.w3.org/2004/02/skos/core#notation</a></code></td>
+          <td><a href="http://www.w3.org/2000/01/rdf-schema#Datatype"><code>Datatype</code></a></td>
+          <td>1..1</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="ExterneIdentificator">schemeAgency</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#schemeAgency">http://www.w3.org/ns/adms#schemeAgency</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>The name of the agency responsible for issuing the identifier</td>
+        </tr>
+        <tr>
+          <td><dfn for="ExterneIdentificator">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Status</dfn> ## {#class-status}
+
+: <b>IRI</b>
+:: <code><a href="http://www.w3.org/ns/adms#Status">http://www.w3.org/ns/adms#Status</a></code>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Status">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Adres</dfn> ## {#class-adres}
+
+: <b>IRI</b>
+:: <code><a href="http://www.w3.org/ns/locn#Address">http://www.w3.org/ns/locn#Address</a></code>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Adres">postCode</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/locn#postCode">http://www.w3.org/ns/locn#postCode</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>The post code (a.k.a postal code, zip code etc.). Post codes are common elements in many countries' postal address systems. The domain of locn:postCode is locn:Address.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Adres">postName</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/locn#postName">http://www.w3.org/ns/locn#postName</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>The key postal division of the address, usually the city. (INSPIRE's definition is &quot;One or more names created and maintained for postal purposes to identify a subdivision of addresses and postal delivery points.&quot;). The domain of locn:postName is locn:Address.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Adres">thoroughfare</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/locn#thoroughfare">http://www.w3.org/ns/locn#thoroughfare</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>An address component that represents the name of a passage or way through from one location to another. A thoroughfare is not necessarily a road, it might be a waterway or some other feature. The domain of locn:thoroughfare is locn:Address.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Adres">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Aangifte</dfn> ## {#class-aangifte}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte</a></code>
+
+Een aangifte is een document dat wordt ingediend bij de overheid.
+
+: **Sub-class of**
+:: <a href="https://data.vlaanderen.be/ns/dossier#Stuk">Stuk</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Aangifte">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een aangifte heeft een datum van indiening.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">informatieclassificatie</dfn></td>
+          <td><code><a href="https://data.vlaanderen.be/ns/dossier#informatieclassificatie">https://data.vlaanderen.be/ns/dossier#informatieclassificatie</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een aangifte heeft een informatie classificatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">isPartOf</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/isPartOf">http://purl.org/dc/terms/isPartOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>Een aangifte kan deel zijn van een andere aangifte.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">subject</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/subject">http://purl.org/dc/terms/subject</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Observatie"><code>Observatie</code></a> | <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>1..*</td>
+          <td>Een aangifte heeft betrekking tot meerdere observaties.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">vlaanderenId</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#vlaanderenId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#vlaanderenId</a></code></td>
+          <td></td>
+          <td>1..1</td>
+          <td>Een unieke identificatie binnen de context van Vlaanderen, gebruikt voor het identificeren van entiteiten zoals aangiften.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Aangifte">wasAssociatedWith</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasAssociatedWith">http://www.w3.org/ns/prov#wasAssociatedWith</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een aangifte heeft optioneel een auteur (die verschillend kan zijn dan de indiener).</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Abstract Emissiepunt</dfn> ## {#class-abstractemissiepunt}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#AbstractEmissiepunt">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#AbstractEmissiepunt</a></code>
+
+Een abstract emissiepunt is een conceptueel emissiepunt dat niet noodzakelijk een vaste locatie heeft, maar wel een functionele rol vervult in het proces.
+
+: **Sub-class of**
+:: <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissiepunt">Emissiepunt</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Abstract Emissiepunt">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Exploitant Contactpersoon</dfn> ## {#class-contactpersoon}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Contactpersoon">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Contactpersoon</a></code>
+
+Een exploitant contactpersoon is een persoon die optreedt als contactpersoon voor een exploitant.
+
+: **Sub-class of**
+:: <a href="http://xmlns.com/foaf/0.1/Person">Person</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">comment</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#comment">http://www.w3.org/2000/01/rdf-schema#comment</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een opmerking hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">hasRole</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/org#hasRole">http://www.w3.org/ns/org#hasRole</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon moet een functie hebben binnen de organisatie</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">mbox</dfn></td>
+          <td><code><a href="http://xmlns.com/foaf/0.1/mbox">http://xmlns.com/foaf/0.1/mbox</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een e-mailadres hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">memberOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/org#memberOf">http://www.w3.org/ns/org#memberOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a> | <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitant"><code>Exploitant</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">name</dfn></td>
+          <td><code><a href="http://xmlns.com/foaf/0.1/name">http://xmlns.com/foaf/0.1/name</a></code></td>
+          <td></td>
+          <td>1..*</td>
+          <td>Een exploitant contactpersoon moet een naam hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">phone</dfn></td>
+          <td><code><a href="http://xmlns.com/foaf/0.1/phone">http://xmlns.com/foaf/0.1/phone</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een telefoonnummer hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant Contactpersoon">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant contactpersoon kan een geldigheid einde hebben</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Emissie</dfn> ## {#class-emissie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissie</a></code>
+
+Een emissie is een specifiek resultaat dat betrekking heeft op het uitstoten of lozen van stoffen aan emissiepunten over of op een bepaalde periode of momentopname.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Result">Result</a>
+:: <a href="http://www.w3.org/ns/prov#Entity">Entity</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Emissie">isResultOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/sosa/isResultOf">http://www.w3.org/ns/sosa/isResultOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/sosa/Observation"><code>Observation</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Emissie Procedure</dfn> ## {#class-emissieprocedure}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#EmissieProcedure">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#EmissieProcedure</a></code>
+
+Een emissie procedure is een specifieke procedure die betrekking heeft op het uitstoten of lozen van stoffen aan emissiepunten.
+
+: **Sub-class of**
+:: <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#TransportProcedure">Transport Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Emissie Procedure">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Emissiepunt</dfn> ## {#class-emissiepunt}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissiepunt">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissiepunt</a></code>
+
+Een emissiepunt is een specifiek punt waar stoffen de installatie verlaten en in de omgeving worden uitgestoten.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Emissiepunt">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een emissiepunt moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een emissiepunt mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">hasProperty</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasProperty">http://www.w3.org/ns/ssn/hasProperty</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap"><code>SysteemEigenschap</code></a></td>
+          <td>0..*</td>
+          <td>Een emissiepunt kan meerdere eigenschappen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">hasSubSystem</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasSubSystem">http://www.w3.org/ns/ssn/hasSubSystem</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..*</td>
+          <td>Een emissiepunt kan meerdere objecten bevatten.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een emissiepunt heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een emissiepunt moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een emissiepunt moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een emissiepunt moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een emissiepunt moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een emissiepunt kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een emissiepunt kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Emissiepunt">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een emissiepunt kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Exploitant</dfn> ## {#class-exploitant}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitant">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitant</a></code>
+
+Een exploitant is een entiteit die een milieuimpact heeft.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/prov#Agent">Agent</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Exploitant">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">address</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/locn#address">http://www.w3.org/ns/locn#address</a></code></td>
+          <td><a href="http://www.w3.org/ns/locn#Address"><code>Address</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitant moet een adres hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">classification</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/org#classification">http://www.w3.org/ns/org#classification</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een exploitant moet een hoofdactiviteit hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant kan een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">hasMember</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/org#hasMember">http://www.w3.org/ns/org#hasMember</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Contactpersoon"><code>Contactpersoon</code></a></td>
+          <td>0..*</td>
+          <td>Een exploitant kan meerdere contactpersonen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant kan een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant kan een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitant">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitant kan een geldigheid einde hebben</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Exploitatie</dfn> ## {#class-exploitatie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie</a></code>
+
+Een exploitatie is de uitrol van middelen door een exploitant op een exploitatie locatie leidend tot een milieueffect.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/Deployment">Deployment</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Exploitatie">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">deployedOnPlatform</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/deployedOnPlatform">http://www.w3.org/ns/ssn/deployedOnPlatform</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatielocatie"><code>Exploitatielocatie</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie wordt op een bepaalde exploitatie locatie uitgevoerd</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">deployedSystem</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/deployedSystem">http://www.w3.org/ns/ssn/deployedSystem</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..*</td>
+          <td>Een exploitatie zet systemen in</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">hasMember</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/org#hasMember">http://www.w3.org/ns/org#hasMember</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Contactpersoon"><code>Contactpersoon</code></a></td>
+          <td>0..*</td>
+          <td>Een exploitatie kan meerdere contactpersonen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een exploitatie kan externe identificaties hebben (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">implements</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/implements">http://www.w3.org/ns/ssn/implements</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie implementeert een proces</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatie moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatie heeft een status</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatie">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatie kan een geldigheid einde hebben</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Exploitatielocatie</dfn> ## {#class-exploitatielocatie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatielocatie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatielocatie</a></code>
+
+Een exploitatielocatie is een specifieke geografische locatie waar een exploitant zijn processen uitvoert.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Platform">Platform</a>
+:: <a href="http://www.opengis.net/ont/geosparql#Feature">Feature</a>
+:: <a href="http://www.w3.org/ns/prov#Entity">Entity</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Exploitatielocatie">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">address</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/locn#address">http://www.w3.org/ns/locn#address</a></code></td>
+          <td><a href="http://www.w3.org/ns/locn#Address"><code>Address</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan een adres hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">comment</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#comment">http://www.w3.org/2000/01/rdf-schema#comment</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan een beschrijving hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatielocatie moet een datum hebben waarop het is ingegeven</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">hadPrimarySource</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#hadPrimarySource">http://www.w3.org/ns/prov#hadPrimarySource</a></code></td>
+          <td><a href="http://www.w3.org/ns/org#Site"><code>Site</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan overeenkomen met één vestiging (VKBO)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>1..1</td>
+          <td>Een exploitatielocatie moet exact 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een exploitatielocatie heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">inDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/inDeployment">http://www.w3.org/ns/ssn/inDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatielocatie moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatielocatie moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">wasAttributedTo</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasAttributedTo">http://www.w3.org/ns/prov#wasAttributedTo</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitant"><code>Exploitant</code></a></td>
+          <td>1..1</td>
+          <td>Een exploitatielocatie moet gekoppeld zijn aan exact één exploitant</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">wasInfluencedBy</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasInfluencedBy">http://www.w3.org/ns/prov#wasInfluencedBy</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan optioneel beïnvloed zijn door aan een org:Site of ander type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Exploitatielocatie">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatielocatie"><code>Exploitatielocatie</code></a></td>
+          <td>0..1</td>
+          <td>Een exploitatielocatie kan een revisie zijn van een andere exploitatie locatie (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Filter</dfn> ## {#class-filter}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Filter">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Filter</a></code>
+
+Een filter is een specifiek systeem dat wordt gebruikt om de kwaliteit van de uitstoot te verbeteren door het verwijderen of verminderen van schadelijke stoffen.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Filter">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een systeem moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een systeem mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een systeem heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een systeem moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een systeem moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een systeem moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een systeem moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een systeem kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een systeem kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Filter">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een systeem kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Installatie</dfn> ## {#class-installatie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Installatie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Installatie</a></code>
+
+Een installatie is infrastructuur of een verzameling van infrastructuur op een bepaalde locatie die een specifieke functie vervult.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Installatie">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">comment</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#comment">http://www.w3.org/2000/01/rdf-schema#comment</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een installatie kan een beschrijving hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een installatie moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een installatie mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">hasProperty</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasProperty">http://www.w3.org/ns/ssn/hasProperty</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap"><code>SysteemEigenschap</code></a></td>
+          <td>0..*</td>
+          <td>Een installatie kan meerdere eigenschappen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">hasSubSystem</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasSubSystem">http://www.w3.org/ns/ssn/hasSubSystem</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..*</td>
+          <td>Een installatie kan meerdere objecten bevatten.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een installatie heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">ingediend</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ingediend">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ingediend</a></code></td>
+          <td></td>
+          <td></td>
+          <td>Een installatie kan een referentie hebben naar een aangifte.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een installatie moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een installatie moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een installatie moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een installatie moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een installatie kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een installatie kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Installatie">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een installatie kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Meetinstrument</dfn> ## {#class-meetinstrument}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetInstrument">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetInstrument</a></code>
+
+Een meetinstrument is een specifiek apparaat of systeem dat wordt gebruikt om metingen uit te voeren op meetpunten.
+
+: **Sub-class of**
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Meetinstrument">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een meetinstrument moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een meetinstrument mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een meetinstrument heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een meetinstrument moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een meetinstrument moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een meetinstrument moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een meetinstrument moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een meetinstrument kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een meetinstrument kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetinstrument">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een meetinstrument kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Meetprocedure</dfn> ## {#class-meetprocedure}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetProcedure">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetProcedure</a></code>
+
+Een meetprocedure is een specifieke procedure die wordt gebruikt om metingen uit te voeren op meetpunten.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Procedure">Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Meetprocedure">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Meetpunt</dfn> ## {#class-meetpunt}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Meetpunt">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Meetpunt</a></code>
+
+Een meetpunt is een specifiek punt waar metingen worden uitgevoerd om de kwaliteit van de uitstoot of de omgeving te controleren.
+
+: **Sub-class of**
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Meetpunt">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een meetpunt moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een meetpunt mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">hasProperty</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasProperty">http://www.w3.org/ns/ssn/hasProperty</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap"><code>SysteemEigenschap</code></a></td>
+          <td>0..*</td>
+          <td>Een meetpunt kan meerdere eigenschappen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">hasSubSystem</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasSubSystem">http://www.w3.org/ns/ssn/hasSubSystem</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetInstrument"><code>MeetInstrument</code></a></td>
+          <td>0..*</td>
+          <td>Een meetpunt kan meetinstrumenten hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een meetpunt heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een meetpunt moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een meetpunt moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een meetpunt moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een meetpunt moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een meetpunt kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een meetpunt kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Meetpunt">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een meetpunt kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Observatie</dfn> ## {#class-observatie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Observatie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Observatie</a></code>
+
+Een observatie is een waarneming of meting die is uitgevoerd op een meetpunt.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Observation">Observation</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Observatie">hasFeatureOfInterest</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/sosa/hasFeatureOfInterest">http://www.w3.org/ns/sosa/hasFeatureOfInterest</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Meetpunt"><code>Meetpunt</code></a></td>
+          <td>1..1</td>
+          <td>Een observatie moet gekoppeld zijn aan exact één meetpunt</td>
+        </tr>
+        <tr>
+          <td><dfn for="Observatie">hasResult</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/sosa/hasResult">http://www.w3.org/ns/sosa/hasResult</a></code></td>
+          <td><a href="http://www.w3.org/ns/sosa/Result"><code>Result</code></a></td>
+          <td>0..1</td>
+          <td>Een observatie moet een resultaat hebben.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Observatie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Observatie">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Onttrekking</dfn> ## {#class-onttrekking}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekking">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekking</a></code>
+
+Een onttrekking is een specifiek resultaat dat betrekking heeft op het winnen of bemonsteren van grondstoffen aan onttrekkingspunten over of op een bepaalde periode of momentopname.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Result">Result</a>
+:: <a href="http://www.w3.org/ns/prov#Entity">Entity</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Onttrekking">isResultOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/sosa/isResultOf">http://www.w3.org/ns/sosa/isResultOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/sosa/Observation"><code>Observation</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekking">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Onttrekking Procedure</dfn> ## {#class-onttrekkingprocedure}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#OnttrekkingProcedure">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#OnttrekkingProcedure</a></code>
+
+Een onttrekking procedure is een specifieke procedure die betrekking heeft op het transport van grondstoffen binnen een proces.
+
+: **Sub-class of**
+:: <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#TransportProcedure">Transport Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Onttrekking Procedure">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Onttrekkingspunt</dfn> ## {#class-onttrekkingspunt}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekkingspunt">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekkingspunt</a></code>
+
+Een onttrekkingspunt is een punt waar grondstoffen worden gewonnen of bemonsterd (onttrekking).
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/System">System</a>
+:: <a href="http://www.opengis.net/ont/geosparql#SpatialObject">Spatial Object</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een onttrekkingspunt moet een creatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">depth</dfn></td>
+          <td><code><a href="http://dbpedia.org/ontology/depth">http://dbpedia.org/ontology/depth</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een onttrekkingspunt kan een diepte hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">hasDeployment</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasDeployment">http://www.w3.org/ns/ssn/hasDeployment</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"><code>Exploitatie</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">hasGeometry</dfn></td>
+          <td><code><a href="http://www.opengis.net/ont/geosparql#hasGeometry">http://www.opengis.net/ont/geosparql#hasGeometry</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een systeem mag max 1 geometrie hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">hasProperty</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasProperty">http://www.w3.org/ns/ssn/hasProperty</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap"><code>SysteemEigenschap</code></a></td>
+          <td>0..*</td>
+          <td>Een onttrekkingspunt kan meerdere eigenschappen hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">hasSubSystem</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/hasSubSystem">http://www.w3.org/ns/ssn/hasSubSystem</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Filter"><code>Filter</code></a></td>
+          <td>0..*</td>
+          <td>Een onttrekkingspunt kan filters hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">identifier</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#identifier">http://www.w3.org/ns/adms#identifier</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Identifier"><code>Identifier</code></a></td>
+          <td>0..*</td>
+          <td>Een onttrekkingspunt heeft externe identificaties (optioneel)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>1..1</td>
+          <td>Een onttrekkingspunt moet een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een onttrekkingspunt moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een onttrekkingspunt moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een onttrekkingspunt moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een systeem kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een onttrekkingspunt kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Onttrekkingspunt">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a></td>
+          <td>0..1</td>
+          <td>Een onttrekkingspunt kan een revisie zijn van een andere systemen (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Proces</dfn> ## {#class-proces}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces</a></code>
+
+Een (milieu)proces is een door de gebruiker in te vullen industrieel proces op een bepaalde locatie bestaande uit meerdere procedurestappen die het proces beschrijven. Een proces kan hiërarchisch opgebouwd zijn als een plan met substappen.
+
+: **Sub-class of**
+:: <a href="http://purl.org/net/p-plan#Plan">Plan</a>
+:: <a href="http://purl.org/net/p-plan#Step">Step</a>
+:: <a href="http://www.w3.org/ns/sosa/Procedure">Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Proces">aangifte</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>0..1</td>
+          <td>De aangifte die gerelateerd is aan een exploitatie of observatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">comment</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#comment">http://www.w3.org/2000/01/rdf-schema#comment</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan een beschrijving hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">created</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/created">http://purl.org/dc/terms/created</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een proces moet een datum hebben waarop het is ingegeven</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">hasInputVar</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#hasInputVar">http://purl.org/net/p-plan#hasInputVar</a></code></td>
+          <td><a href="http://purl.org/net/p-plan#Variable"><code>Variable</code></a></td>
+          <td>0..*</td>
+          <td>Een proces mag minstens één inputvariabele hebben (stof)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">hasOutputVar</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#hasOutputVar">http://purl.org/net/p-plan#hasOutputVar</a></code></td>
+          <td><a href="http://purl.org/net/p-plan#Variable"><code>Variable</code></a></td>
+          <td>0..*</td>
+          <td>Een proces mag minstens één outputvariabele hebben (stof)</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">implementedBy</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/ssn/implementedBy">http://www.w3.org/ns/ssn/implementedBy</a></code></td>
+          <td><a href="http://www.w3.org/ns/ssn/System"><code>System</code></a> | <a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Installatie"><code>Installatie</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan optioneel een variable die een systeem representeert gebruiken</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">isPrecededBy</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#isPrecededBy">http://purl.org/net/p-plan#isPrecededBy</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>0..*</td>
+          <td>Een proces mag een of meer andere processen als voorgaande stap hebben.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">isStepOfPlan</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#isStepOfPlan">http://purl.org/net/p-plan#isStepOfPlan</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan deel uitmaken van een ander proces</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">issued</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/issued">http://purl.org/dc/terms/issued</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan een geldigheid start hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een proces moet een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">modified</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/modified">http://purl.org/dc/terms/modified</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een proces moet een modificatie datum hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">rubriek</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#rubriek">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#rubriek</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Rubriek"><code>Rubriek</code></a></td>
+          <td>0..*</td>
+          <td>De rubriek die van toepassing is op een proces of installatie.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">status</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/adms#status">http://www.w3.org/ns/adms#status</a></code></td>
+          <td><a href="http://www.w3.org/ns/adms#Status"><code>Status</code></a></td>
+          <td>1..1</td>
+          <td>Een proces moet een enkele status hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td><a href="http://www.w3.org/ns/sosa/Procedure"><code>Procedure</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan zijn afgeleid van een (generieke) procedure (optioneel). Max 1 omdat een proces slechts van 1 procedure afgeleid kan zijn en deze procedure een verzameling van andere procedures zou moeten zijn.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">valid</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/valid">http://purl.org/dc/terms/valid</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#date"><code>date</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan een geldigheid einde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces">wasRevisionOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasRevisionOf">http://www.w3.org/ns/prov#wasRevisionOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>0..1</td>
+          <td>Een proces kan een revisie zijn van een ander proces (optioneel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Proces variabele</dfn> ## {#class-procesvariabele}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ProcesVariabele">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ProcesVariabele</a></code>
+
+Een proces variabele is een variabel gegeven die als input of output van een proces dient.
+
+: **Sub-class of**
+:: <a href="http://purl.org/net/p-plan#Variable">Variable</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Proces variabele">hasUnit</dfn></td>
+          <td><code><a href="http://qudt.org/schema/qudt/hasUnit">http://qudt.org/schema/qudt/hasUnit</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een proces variabele kan een eenheid hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">isInputVarOf</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#isInputVarOf">http://purl.org/net/p-plan#isInputVarOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">isOutputVarOf</dfn></td>
+          <td><code><a href="http://purl.org/net/p-plan#isOutputVarOf">http://purl.org/net/p-plan#isOutputVarOf</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"><code>Proces</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">label</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#label">http://www.w3.org/2000/01/rdf-schema#label</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een proces variabele kan een benaming hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">numericValue</dfn></td>
+          <td><code><a href="http://qudt.org/schema/qudt/numericValue">http://qudt.org/schema/qudt/numericValue</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#decimal"><code>decimal</code></a></td>
+          <td>0..1</td>
+          <td>Een proces variabele kan een waarde hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een proces variabele kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Proces variabele">uuid</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>UUID</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Productievolume</dfn> ## {#class-productievolume}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Productievolume">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Productievolume</a></code>
+
+Een productie volume is een specifiek resultaat dat betrekking heeft op de hoeveelheid geproduceerde goederen of diensten binnen een proces over of op een bepaalde periode.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Result">Result</a>
+:: <a href="http://www.w3.org/ns/prov#Entity">Entity</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Productievolume">isResultOf</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/sosa/isResultOf">http://www.w3.org/ns/sosa/isResultOf</a></code></td>
+          <td><a href="http://www.w3.org/ns/sosa/Observation"><code>Observation</code></a></td>
+          <td>0..*</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><dfn for="Productievolume">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Rubriek</dfn> ## {#class-rubriek}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Rubriek">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Rubriek</a></code>
+
+Een rubriek is een specifieke classificatie die wordt gebruikt om activiteiten te categoriseren volgens de regelgeving.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/2004/02/skos/core#Concept">Concept</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Rubriek">definition</dfn></td>
+          <td><code><a href="http://www.w3.org/2004/02/skos/core#definition">http://www.w3.org/2004/02/skos/core#definition</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een rubriek kan een beschrijving hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Rubriek">notation</dfn></td>
+          <td><code><a href="http://www.w3.org/2004/02/skos/core#notation">http://www.w3.org/2004/02/skos/core#notation</a></code></td>
+          <td><a href="http://www.w3.org/2000/01/rdf-schema#Datatype"><code>Datatype</code></a></td>
+          <td>1..1</td>
+          <td>Een rubriek moet een code hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Rubriek">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>1..1</td>
+          <td>Een rubriek kan een typering hebben via dct:type</td>
+        </tr>
+        <tr>
+          <td><dfn for="Rubriek">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Systeem Eigenschap</dfn> ## {#class-systeemeigenschap}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap</a></code>
+
+Een systeem eigenschap is een specifieke eigenschap van een systeem, zoals de hoogte van de schouw.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/ssn/Property">Property</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">hasUnit</dfn></td>
+          <td><code><a href="http://qudt.org/schema/qudt/hasUnit">http://qudt.org/schema/qudt/hasUnit</a></code></td>
+          <td></td>
+          <td>0..1</td>
+          <td>Een systeem eigenschap kan een eenheid hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">parameter</dfn></td>
+          <td><code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#parameter">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#parameter</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>De parameter die wordt gebruikt bij een eigenschap of meting.</td>
+        </tr>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">range</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#range">http://www.w3.org/2000/01/rdf-schema#range</a></code></td>
+          <td><a href="http://www.w3.org/2000/01/rdf-schema#Datatype"><code>Datatype</code></a></td>
+          <td>1..1</td>
+          <td>Een systeem eigenschap moet een datatype hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">type</dfn></td>
+          <td><code><a href="http://purl.org/dc/terms/type">http://purl.org/dc/terms/type</a></code></td>
+          <td></td>
+          <td>1..1</td>
+          <td>Een systeem eigenschap moet een typering hebben</td>
+        </tr>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Systeem Eigenschap">value</dfn></td>
+          <td><code><a href="http://www.w3.org/2000/01/rdf-schema#value">http://www.w3.org/2000/01/rdf-schema#value</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>0..1</td>
+          <td>Een systeem eigenschap kan een waarde hebben</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Transactie</dfn> ## {#class-transactie}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Transactie">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Transactie</a></code>
+
+Een transactie is een proces van indienen, verwerken en goedkeuren van documenten door de rapporteringsplichtige.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/prov#Activity">Activity</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Transactie">endedAtTime</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#endedAtTime">http://www.w3.org/ns/prov#endedAtTime</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>0..1</td>
+          <td>Een transactie heeft een eind datum waarop de transactie is beëindigd</td>
+        </tr>
+        <tr>
+          <td><dfn for="Transactie">genereert</dfn></td>
+          <td><code><a href="https://data.vlaanderen.be/ns/dossier#genereert">https://data.vlaanderen.be/ns/dossier#genereert</a></code></td>
+          <td><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte"><code>Aangifte</code></a></td>
+          <td>1..*</td>
+          <td>Een transactie genereert een of meerdere aangiften</td>
+        </tr>
+        <tr>
+          <td><dfn for="Transactie">startedAtTime</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#startedAtTime">http://www.w3.org/ns/prov#startedAtTime</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#dateTime"><code>dateTime</code></a></td>
+          <td>1..1</td>
+          <td>Een transactie heeft een start datum waarop de transactie is gestart</td>
+        </tr>
+        <tr>
+          <td><dfn for="Transactie">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+        <tr>
+          <td><dfn for="Transactie">wasAssociatedWith</dfn></td>
+          <td><code><a href="http://www.w3.org/ns/prov#wasAssociatedWith">http://www.w3.org/ns/prov#wasAssociatedWith</a></code></td>
+          <td><a href="http://www.w3.org/ns/prov#Agent"><code>Agent</code></a></td>
+          <td>1..1</td>
+          <td>Een transactie heeft een verantwoordelijke agent</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Transport Procedure</dfn> ## {#class-transportprocedure}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#TransportProcedure">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#TransportProcedure</a></code>
+
+Een transport procedure is een specifieke procedure die betrekking heeft op het transport van stoffen binnen of buiten een proces.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Procedure">Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Transport Procedure">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
+## <dfn>Verwerkings Procedure</dfn> ## {#class-verwerkingprocedure}
+
+: <b>IRI</b>
+:: <code><a href="https://data.riepr.omgeving.vlaanderen.be/ns/riepr#VerwerkingProcedure">https://data.riepr.omgeving.vlaanderen.be/ns/riepr#VerwerkingProcedure</a></code>
+
+Een verwerkings procedure is een specifieke procedure die betrekking heeft op de verwerking van stoffen binnen een proces.
+
+: **Sub-class of**
+:: <a href="http://www.w3.org/ns/sosa/Procedure">Procedure</a>
+
+: **Properties**
+::
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>IRI</th>
+          <th>Range</th>
+          <th>Cardinality</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><dfn for="Verwerkings Procedure">uri</dfn></td>
+          <td><code><a href="http://example.org/vocab/uri">http://example.org/vocab/uri</a></code></td>
+          <td><a href="http://www.w3.org/2001/XMLSchema#string"><code>string</code></a></td>
+          <td>1..1</td>
+          <td>URI</td>
+        </tr>
+      </tbody>
+    </table>
+
