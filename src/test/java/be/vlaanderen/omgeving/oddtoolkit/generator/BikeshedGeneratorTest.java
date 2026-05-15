@@ -32,7 +32,7 @@ public class BikeshedGeneratorTest {
 
     assertThat(content).contains("<pre class='metadata'>");
     assertThat(content).contains("</pre>");
-    assertThat(content).contains("Title: RIEPR Ontology");
+    assertThat(content).contains("Title: RIE-IEPR Ontology");
     assertThat(content).contains("Status: LS");
     assertThat(content).contains("Editor: ODDToolkit");
   }

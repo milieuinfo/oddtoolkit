@@ -149,7 +149,7 @@ public class BikeshedGenerator extends BaseGenerator {
         .append(sanitizeAnchor(classInfo.getName())).append("}\n\n");
 
     // IRI
-    sb.append(": <b>IRI</b>\n");
+    sb.append(": **IRI**\n");
     if (classInfo.getComment() != null && !classInfo.getComment().isBlank()) {
       sb.append(classInfo.getComment()).append("\n\n");
     }
