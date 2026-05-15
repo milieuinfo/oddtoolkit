@@ -759,7 +759,6 @@ public class ClassGenerator extends BaseGenerator {
     }
     return getNearestClass(classInfo);
   }
-  }
 
   protected String toEnumValueName(String enumValueName, String enumClassName) {
     String enumConstantName = toSnakeCase(enumValueName).toUpperCase();

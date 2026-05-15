@@ -45,7 +45,7 @@ public class DataFrameGenerator extends BaseGenerator {
   public void run() {
     super.run();
     prepare();
-    generate();
+    writeFrame();
   }
 
   public void prepare() {
@@ -68,7 +68,7 @@ public class DataFrameGenerator extends BaseGenerator {
         .toList();
   }
 
-  public void generate() {
+  public void writeFrame() {
     context.put("uri", "@id");
     ObjectNode typeContext = objectMapper.createObjectNode();
     typeContext.put("@type", "@id");

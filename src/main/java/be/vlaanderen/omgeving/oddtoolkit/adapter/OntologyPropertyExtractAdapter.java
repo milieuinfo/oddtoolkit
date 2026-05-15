@@ -45,7 +45,10 @@ public class OntologyPropertyExtractAdapter extends AbstractAdapter<OntologyInfo
   private void determineInverseProperties(ClassInfo classInfo, OntologyInfo ontologyInfo) {
     // Loop through the properties and find the URI of the inverse property (if any) and set it in the property info
     // Use the inferred model to find the inverse properties based on the owl:inverseOf property
-    Model inferredModel = ontologyInfo.getInferredModel();
+    // Fall back to the base model when the OWL reasoner is disabled (inferredModel is null)
+    Model inferredModel = ontologyInfo.getInferredModel() != null
+        ? ontologyInfo.getInferredModel()
+        : ontologyInfo.getModel();
     classInfo.getProperties().forEach(propertyInfo -> {
       Resource propertyResource = propertyInfo.getResource();
       if (propertyResource != null) {

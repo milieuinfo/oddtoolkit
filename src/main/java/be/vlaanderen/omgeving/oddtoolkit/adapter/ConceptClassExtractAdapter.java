@@ -6,6 +6,7 @@ import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
@@ -33,10 +34,15 @@ public class ConceptClassExtractAdapter extends AbstractAdapter<OntologyInfo> {
     if (conceptSchemeInfo.getClassConcepts() == null) {
       return info;
     }
+    // Prefer the active model so that OWL restrictions defined on the equivalent class
+    // (e.g. in riepr.ttl) can be picked up later by OntologyPropertyExtractAdapter.
+    Model activeModel = info.getInferredModel() != null ? info.getInferredModel() : info.getModel();
     conceptSchemeInfo.getClassConcepts().forEach(concept -> {
       if (info.getClassByUri(concept.getUri()) == null) {
-        ClassInfo classInfo = new ClassInfo(Scope.ONTOLOGY, concept.getResource());
-        classInfo.setUri(concept.getEquivalents().getFirst());
+        String equivalentUri = concept.getEquivalents().getFirst();
+        Resource equivalentResource = activeModel.createResource(equivalentUri);
+        ClassInfo classInfo = new ClassInfo(Scope.ONTOLOGY, equivalentResource);
+        classInfo.setUri(equivalentUri);
         extractProperties(info, classInfo, conceptSchemeInfo);
         info.addClass(classInfo);
       }
@@ -49,9 +55,10 @@ public class ConceptClassExtractAdapter extends AbstractAdapter<OntologyInfo> {
     // Extract all properties from the inferred model that have as
     // a domain the class and add them to the class info (if not already present)
 
-    // Create resource from classinfo URI
-    Resource objectResource = info.getInferredModel().createResource(classInfo.getUri());
-    info.getInferredModel().listStatements(null, RDFS.domain, objectResource)
+    // Create resource from classinfo URI — fall back to base model when reasoner is disabled
+    Model activeModel = info.getInferredModel() != null ? info.getInferredModel() : info.getModel();
+    Resource objectResource = activeModel.createResource(classInfo.getUri());
+    activeModel.listStatements(null, RDFS.domain, objectResource)
         .forEachRemaining(statement -> {
           // Extract the property and add it to the class info
           Property property = statement.getSubject().as(Property.class);
