@@ -72,6 +72,9 @@ generators:
 
   schema-generator:
     join-table-name-pattern: "{source_table}_{target_table}"
+    source-column-name-pattern: "{source_table}_id"
+    target-column-name-pattern: "{target_table}_id"
+
     # Create stable identity tables for classes that have more than one primary key
     identity-tables:
       enabled: true

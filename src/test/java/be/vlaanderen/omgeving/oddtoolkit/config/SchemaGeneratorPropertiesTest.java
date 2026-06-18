@@ -16,6 +16,30 @@ class SchemaGeneratorPropertiesTest {
   }
 
   @Test
+  void defaultJoinTableColumnsHaveSourceAndTargetPatterns() {
+    SchemaGeneratorProperties.JoinTableColumns columns =
+        new SchemaGeneratorProperties().getJoinTableColumns();
+
+    assertEquals("source_{column}", columns.getSourceColumnNamePattern());
+    assertEquals("target_{column}", columns.getTargetColumnNamePattern());
+  }
+
+  @Test
+  void flatJoinTableColumnAccessorsDelegateToNestedConfiguration() {
+    SchemaGeneratorProperties properties = new SchemaGeneratorProperties();
+
+    properties.setSourceColumnNamePattern("{source_table}_id");
+    properties.setTargetColumnNamePattern("{target_table}_id");
+
+    assertEquals("{source_table}_id",
+        properties.getJoinTableColumns().getSourceColumnNamePattern());
+    assertEquals("{target_table}_id",
+        properties.getJoinTableColumns().getTargetColumnNamePattern());
+    assertEquals("{source_table}_id", properties.getSourceColumnNamePattern());
+    assertEquals("{target_table}_id", properties.getTargetColumnNamePattern());
+  }
+
+  @Test
   void excludedPairMatchesInBothDirections() {
     SchemaGeneratorProperties.ExcludedPair excludedPair = new SchemaGeneratorProperties.ExcludedPair();
     excludedPair.setSourceUri("urn:class:a");

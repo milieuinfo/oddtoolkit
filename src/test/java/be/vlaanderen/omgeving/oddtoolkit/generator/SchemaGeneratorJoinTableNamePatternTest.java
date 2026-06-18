@@ -13,6 +13,10 @@ class SchemaGeneratorJoinTableNamePatternTest {
   void runtimeConfigurationLoadsJoinTablePatternFromYaml() {
     assertEquals("{source_table}_{target_table}",
         generator.getSchemaGeneratorProperties().getJoinTableNamePattern());
+    assertEquals("{source_table}_id",
+        generator.getSchemaGeneratorProperties().getJoinTableColumns().getSourceColumnNamePattern());
+    assertEquals("{target_table}_id",
+        generator.getSchemaGeneratorProperties().getJoinTableColumns().getTargetColumnNamePattern());
   }
 
   @Test

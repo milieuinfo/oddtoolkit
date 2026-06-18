@@ -86,4 +86,44 @@ class ConfigurationBinderTest {
 
     assertEquals("jt_{source_table}_{target_table}", bound.getJoinTableNamePattern());
   }
+
+  @Test
+  void bindSupportsFlatJoinTableColumnPatternAliases() {
+    Map<String, Object> root = new LinkedHashMap<>();
+    Map<String, Object> generators = new LinkedHashMap<>();
+    Map<String, Object> schemaGenerator = new LinkedHashMap<>();
+    schemaGenerator.put("source-column-name-pattern", "{source_table}_id");
+    schemaGenerator.put("target-column-name-pattern", "{target_table}_id");
+    generators.put("schema-generator", schemaGenerator);
+    root.put("generators", generators);
+
+    SchemaGeneratorProperties bound = ConfigurationBinder.bind(root,
+        SchemaGeneratorProperties.class, new SchemaGeneratorProperties());
+
+    assertEquals("{source_table}_id",
+        bound.getJoinTableColumns().getSourceColumnNamePattern());
+    assertEquals("{target_table}_id",
+        bound.getJoinTableColumns().getTargetColumnNamePattern());
+  }
+
+  @Test
+  void bindSupportsNestedJoinTableColumnPatterns() {
+    Map<String, Object> root = new LinkedHashMap<>();
+    Map<String, Object> generators = new LinkedHashMap<>();
+    Map<String, Object> schemaGenerator = new LinkedHashMap<>();
+    Map<String, Object> joinTableColumns = new LinkedHashMap<>();
+    joinTableColumns.put("source-column-name-pattern", "{source_table}_{column}");
+    joinTableColumns.put("target-column-name-pattern", "{target_table}_{column}");
+    schemaGenerator.put("join-table-columns", joinTableColumns);
+    generators.put("schema-generator", schemaGenerator);
+    root.put("generators", generators);
+
+    SchemaGeneratorProperties bound = ConfigurationBinder.bind(root,
+        SchemaGeneratorProperties.class, new SchemaGeneratorProperties());
+
+    assertEquals("{source_table}_{column}",
+        bound.getJoinTableColumns().getSourceColumnNamePattern());
+    assertEquals("{target_table}_{column}",
+        bound.getJoinTableColumns().getTargetColumnNamePattern());
+  }
 }

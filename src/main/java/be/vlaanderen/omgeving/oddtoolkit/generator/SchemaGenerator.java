@@ -24,6 +24,7 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   private static final String SOURCE_TABLE_PLACEHOLDER = "{source_table}";
   private static final String TARGET_TABLE_PLACEHOLDER = "{target_table}";
   private static final String RELATION_NAME_PLACEHOLDER = "{relation_name}";
+  private static final String COLUMN_PLACEHOLDER = "{column}";
 
   private final List<Enum> schemaEnums = new ArrayList<>();
   private final List<Table> tables = new ArrayList<>();
@@ -330,6 +331,29 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     return resolveJoinTableName(sourceTableName, targetTableName, "relation", false);
   }
 
+  /**
+   * Resolves the column name inside a join table using the configured pattern.
+   *
+   * <p>Supported placeholders: {@code {source_table}}, {@code {target_table}}, {@code {column}}.
+   *
+   * @param pattern         the name pattern (e.g. {@code "source_{column}"} or
+   *                        {@code "{source_table}_{column}"})
+   * @param sourceTableName the name of the source (from) table
+   * @param targetTableName the name of the target (to) table
+   * @param columnName      the original identifier column name
+   * @return the resolved, snake_cased column name
+   */
+  protected String resolveJoinColumnName(String pattern, String sourceTableName,
+      String targetTableName, String columnName) {
+    String resolvedPattern = (pattern == null || pattern.isBlank())
+        ? "source_{column}"
+        : pattern;
+    return toSnakeCase(resolvedPattern
+        .replace(SOURCE_TABLE_PLACEHOLDER, sourceTableName)
+        .replace(TARGET_TABLE_PLACEHOLDER, targetTableName)
+        .replace(COLUMN_PLACEHOLDER, columnName)).toLowerCase();
+  }
+
   private boolean shouldAppendRelationNameForSelfRelation(Relation relation,
       List<Relation> relations) {
     if (relation.getFrom() == null || relation.getTo() == null
@@ -371,9 +395,15 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       }
 
       Column fromIdentityColumn = fromIdentifierColumn.copy();
-      fromIdentityColumn.setName("source_" + fromIdentityColumn.getName());
+      fromIdentityColumn.setName(resolveJoinColumnName(
+          schemaGeneratorProperties.getJoinTableColumns().getSourceColumnNamePattern(),
+          relation.getFrom().getName(), relation.getTo().getName(),
+          fromIdentifierColumn.getName()));
       Column toIdentityColumn = toIdentifierColumn.copy();
-      toIdentityColumn.setName("target_" + toIdentityColumn.getName());
+      toIdentityColumn.setName(resolveJoinColumnName(
+          schemaGeneratorProperties.getJoinTableColumns().getTargetColumnNamePattern(),
+          relation.getFrom().getName(), relation.getTo().getName(),
+          toIdentifierColumn.getName()));
       joinColumns.add(fromIdentityColumn);
       joinColumns.add(toIdentityColumn);
 
