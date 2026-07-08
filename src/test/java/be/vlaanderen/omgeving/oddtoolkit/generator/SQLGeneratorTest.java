@@ -21,8 +21,8 @@ public class SQLGeneratorTest {
 
     String generatedSql = Files.readString(Path.of("target/test-cache/sql/schema.sql"));
     assertTrue(generatedSql.contains("CREATE TABLE proces_proces_volgt_op ("));
-    assertTrue(generatedSql.contains("CREATE TABLE exploitant_contactpersoon ("));
+    assertTrue(generatedSql.contains("CREATE TABLE meetpunt_filter ("));
     assertTrue(generatedSql.contains("CREATE TABLE aangifte_exploitatie ("));
-    assertTrue(generatedSql.contains("CREATE TABLE aangifte_observatie ("));
+    assertTrue(generatedSql.contains("CREATE TABLE emissie_observatie ("));
   }
 }

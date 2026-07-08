@@ -59,4 +59,27 @@ class SchemaGeneratorJoinTableNamePatternTest {
 
     assertEquals("proces_proces_volgt_op", joinTableName);
   }
+
+  @Test
+  void disambiguateSelfReferencingColumnNameQualifiesCollidingTargetColumn() {
+    String sourceColumnName = generator.resolveJoinColumnName("{source_table}_id",
+        "proces", "proces", "uuid");
+    String targetColumnName = generator.resolveJoinColumnName("{target_table}_id",
+        "proces", "proces", "uuid");
+
+    String disambiguated = generator.disambiguateSelfReferencingColumnName(
+        targetColumnName, sourceColumnName, "volgt_op_proces", "proces");
+
+    assertEquals("proces_id", sourceColumnName);
+    assertEquals("proces_id", targetColumnName);
+    assertEquals("volgt_op_proces_id", disambiguated);
+  }
+
+  @Test
+  void disambiguateSelfReferencingColumnNameLeavesNonCollidingNamesUntouched() {
+    String disambiguated = generator.disambiguateSelfReferencingColumnName(
+        "target_uuid", "source_uuid", "volgt_op_proces", "proces");
+
+    assertEquals("target_uuid", disambiguated);
+  }
 }

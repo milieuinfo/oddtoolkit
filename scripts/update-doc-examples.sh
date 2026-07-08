@@ -18,8 +18,12 @@ mkdir -p \
   "$LEGACY_EXAMPLES_DIR" \
   "$IMAGES_DIR"
 
-cp "$TEST_EXAMPLES_DIR/ns/riepr/riepr.ttl" "$ONTOLOGY_DIR/ns/riepr/riepr.ttl"
-cp "$TEST_EXAMPLES_DIR/id/concept/riepr/riepr.ttl" "$ONTOLOGY_DIR/id/concept/riepr/riepr.ttl"
+if [[ -f "$TEST_EXAMPLES_DIR/ns/riepr/riepr.ttl" ]]; then
+  cp "$TEST_EXAMPLES_DIR/ns/riepr/riepr.ttl" "$ONTOLOGY_DIR/ns/riepr/riepr.ttl"
+fi
+if [[ -f "$TEST_EXAMPLES_DIR/id/concept/riepr/riepr.ttl" ]]; then
+  cp "$TEST_EXAMPLES_DIR/id/concept/riepr/riepr.ttl" "$ONTOLOGY_DIR/id/concept/riepr/riepr.ttl"
+fi
 
 cp "$CACHE_DIR/class-diagram/class-diagram.mmd" "$OUTPUTS_DIR/class-diagram.mmd"
 cp "$CACHE_DIR/er-diagram/er-diagram.mmd" "$OUTPUTS_DIR/er-diagram.mmd"
@@ -28,6 +32,7 @@ cp "$CACHE_DIR/shacl/schema.ttl" "$OUTPUTS_DIR/schema.ttl"
 cp "$CACHE_DIR/java/Exploitatie.java" "$OUTPUTS_DIR/Exploitatie.java"
 cp "$CACHE_DIR/typescript/exploitatie.model.ts" "$OUTPUTS_DIR/exploitatie.model.ts"
 cp "$CACHE_DIR/dataframe/frame.json" "$OUTPUTS_DIR/frame.json"
+cp "$CACHE_DIR/odcs/contract.json" "$OUTPUTS_DIR/contract.json"
 cp "$CACHE_DIR/bikeshed/ontology.bs" "$OUTPUTS_DIR/ontology.bs"
 cp "$CACHE_DIR/bikeshed/ontology.html" "$OUTPUTS_DIR/ontology.html"
 
@@ -39,6 +44,7 @@ cp "$OUTPUTS_DIR/schema.ttl" "$LEGACY_EXAMPLES_DIR/schema.ttl"
 cp "$OUTPUTS_DIR/Exploitatie.java" "$LEGACY_EXAMPLES_DIR/Exploitatie.java"
 cp "$OUTPUTS_DIR/exploitatie.model.ts" "$LEGACY_EXAMPLES_DIR/exploitatie.model.ts"
 cp "$OUTPUTS_DIR/frame.json" "$LEGACY_EXAMPLES_DIR/frame.json"
+cp "$OUTPUTS_DIR/contract.json" "$LEGACY_EXAMPLES_DIR/contract.json"
 cp "$OUTPUTS_DIR/ontology.bs" "$LEGACY_EXAMPLES_DIR/ontology.bs"
 cp "$OUTPUTS_DIR/ontology.html" "$LEGACY_EXAMPLES_DIR/ontology.html"
 

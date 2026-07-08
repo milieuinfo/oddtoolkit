@@ -18,28 +18,28 @@ public class ClassGeneratorUnionTypesTest {
       TypescriptGenerator.class);
 
   @Test
-  void aangifteHasUnionTypeForSubjectProperty() {
+  void meetpuntHasUnionTypeForHasSubSystemProperty() {
     generator.run();
 
-    // Find the Aangifte class
-    ClassGenerator.Clazz aangifte = generator.getClasses().stream()
-        .filter(c -> "Aangifte".equals(c.getName()))
+    // Find the Meetpunt class
+    ClassGenerator.Clazz meetpunt = generator.getClasses().stream()
+        .filter(c -> "Meetpunt".equals(c.getName()))
         .findFirst()
         .orElse(null);
 
-    assertNotNull(aangifte, "Aangifte class should exist");
+    assertNotNull(meetpunt, "Meetpunt class should exist");
 
-    // Find the onderwerp (subject) attribute
-    ClassGenerator.Attribute onderwerp = aangifte.getAttributes().stream()
-        .filter(a -> "onderwerp".equals(a.getName()))
+    // Find the heeftSubSysteem (hasSubSystem) attribute
+    ClassGenerator.Attribute heeftSubSysteem = meetpunt.getAttributes().stream()
+        .filter(a -> "heeftSubSysteem".equals(a.getName()))
         .findFirst()
         .orElse(null);
 
-    assertNotNull(onderwerp, "onderwerp attribute should exist");
-    assertTrue(onderwerp.isUnionType(), "onderwerp should be a union type");
+    assertNotNull(heeftSubSysteem, "heeftSubSysteem attribute should exist");
+    assertTrue(heeftSubSysteem.isUnionType(), "heeftSubSysteem should be a union type");
 
-    // Verify that rangeClasses contains both Exploitatie and Observatie
-    List<ClassGenerator.Clazz> rangeClasses = onderwerp.getRangeClasses();
+    // Verify that rangeClasses contains both MeetInstrument and Filter
+    List<ClassGenerator.Clazz> rangeClasses = heeftSubSysteem.getRangeClasses();
     assertNotNull(rangeClasses, "rangeClasses should not be null");
     assertTrue(rangeClasses.size() >= 2, "rangeClasses should contain at least 2 types");
 
@@ -47,7 +47,7 @@ public class ClassGeneratorUnionTypesTest {
         .map(ClassGenerator.Clazz::getName)
         .toList();
 
-    assertTrue(rangeClassNames.contains("Exploitatie"), "rangeClasses should contain Exploitatie");
-    assertTrue(rangeClassNames.contains("Observatie"), "rangeClasses should contain Observatie");
+    assertTrue(rangeClassNames.contains("MeetInstrument"), "rangeClasses should contain MeetInstrument");
+    assertTrue(rangeClassNames.contains("Filter"), "rangeClasses should contain Filter");
   }
 }

@@ -20,30 +20,30 @@ public class TypescriptGeneratorUnionTypesTest {
       TypescriptGenerator.class);
 
   @Test
-  void aangifteModelHasUnionTypeInTypescript() throws IOException {
+  void meetpuntModelHasUnionTypeInTypescript() throws IOException {
     generator.run();
 
-    // Read the generated aangifte.model.ts file
-    Path aangiftePath = Paths.get("target/test-cache/typescript/aangifte.model.ts");
-    String content = Files.readString(aangiftePath);
+    // Read the generated meetpunt.model.ts file
+    Path meetpuntPath = Paths.get("target/test-cache/typescript/meetpunt.model.ts");
+    String content = Files.readString(meetpuntPath);
 
-    assertNotNull(content, "aangifte.model.ts should be generated");
+    assertNotNull(content, "meetpunt.model.ts should be generated");
 
     // Verify that the union type is in the generated TypeScript code (order-independent)
-    boolean hasExpectedUnion = content.contains("(Exploitatie | Observatie)[]")
-        || content.contains("(Observatie | Exploitatie)[]");
+    boolean hasExpectedUnion = content.contains("(MeetInstrument | Filter)[]")
+        || content.contains("(Filter | MeetInstrument)[]");
     assertTrue(hasExpectedUnion,
-        "Generated TypeScript should contain a union type for Exploitatie and Observatie");
+        "Generated TypeScript should contain a union type for MeetInstrument and Filter");
 
     // Verify that both types are imported
-    assertTrue(content.contains("import { Exploitatie }"),
-        "Generated TypeScript should import Exploitatie");
-    assertTrue(content.contains("import { Observatie }"),
-        "Generated TypeScript should import Observatie");
+    assertTrue(content.contains("import { MeetInstrument }"),
+        "Generated TypeScript should import MeetInstrument");
+    assertTrue(content.contains("import { Filter }"),
+        "Generated TypeScript should import Filter");
 
     // Verify that the decorator uses one of the union members for JSON marshalling
-    boolean hasExpectedDecorator = content.contains("@jsonArrayMember(() => Exploitatie")
-        || content.contains("@jsonArrayMember(() => Observatie");
+    boolean hasExpectedDecorator = content.contains("@jsonArrayMember(() => MeetInstrument")
+        || content.contains("@jsonArrayMember(() => Filter");
     assertTrue(hasExpectedDecorator,
         "Generated TypeScript should use a union member in @jsonArrayMember decorator");
   }

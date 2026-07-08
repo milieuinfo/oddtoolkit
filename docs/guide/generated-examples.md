@@ -13,7 +13,7 @@ The examples used in this page are stored in stable docs paths:
 Run the generator tests and then sync the committed documentation examples:
 
 ```bash
-./mvnw -Dtest='*GeneratorTest,DataFrameGeneratorTest,ClassGeneratorTest,ERDiagramGeneratorTest,SQLGeneratorTest,JavaGeneratorTest,TypescriptGeneratorTest,ShaclGeneratorTest,BikeshedGeneratorTest' test
+./mvnw -Dtest='*GeneratorTest,DataFrameGeneratorTest,ClassGeneratorTest,ERDiagramGeneratorTest,SQLGeneratorTest,JavaGeneratorTest,TypescriptGeneratorTest,ShaclGeneratorTest,BikeshedGeneratorTest,ODCSGeneratorTest' test
 ./scripts/update-doc-examples.sh
 ```
 
@@ -74,6 +74,14 @@ Run the generator tests and then sync the committed documentation examples:
 
 ```json
 <<< ../examples/riepr/outputs/frame.json
+```
+
+## ODCS example (`docs/examples/riepr/outputs/contract.json`)
+
+This is the generated Open Data Contract Standard file from `ODCSGeneratorTest`.
+
+```json
+<<< ../examples/riepr/outputs/contract.json
 ```
 
 ## Bikeshed example (`docs/examples/riepr/outputs/ontology.bs`)

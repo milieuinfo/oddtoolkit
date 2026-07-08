@@ -1,190 +1,130 @@
 # Configuration
 
-ODDToolkit reads configuration from a YAML file. Settings can be overridden via CLI flags, environment variables (`ODD_*`), or the config file itself.
+ODDToolkit reads configuration from a YAML file and optional CLI overrides.
 
 ## Resolution order
 
-1. **CLI flags** – `--generator`, `--ontology-file`, `--config-file`, etc.  
-2. **Environment variables** – prefixed with `ODD_` when supported  
-3. **Config file values** (passed via `--config-file`)  
-4. **In-code defaults**
+Highest to lowest priority:
 
----
+1. CLI flags (`--generator`, `--ontology-file`, `--concepts-file`, ...)
+2. Environment variables (`ODD_*`)  
+3. Config file (`--config-file`)
+4. Defaults in code (in-memory when no explicit configuration exists)
 
 ## Top-level sections
 
-| YAML Section    | Purpose                                          
------------------+-----------------------------------------------------------               
-ontology         Ontology inputs, concepts, enum classes and property constraints   
-generators       Per-generator settings with adapter selection  
-adapters         Adapter enablement toggles (optional section)  
+- `ontology`: ontology inputs and model-specific behavior
+- `generators`: per-generator settings and adapter selection  
+- `adapters`: adapter enablement and adapter-specific settings
 
----
+## Minimal example
+
+```yaml
+ontology:
+  ontology-file-path: "src/test/resources/examples/ns/riepr/riepr.ttl"
+  concepts-file-path: "src/test/resources/examples/id/concept/riepr/riepr.ttl"
+
+generators:
+  class-diagram:
+    output-file: "target/class-diagram.mmd"
+  sql-generator:
+    output-file: "target/schema.sql"
+```
 
 ## `ontology` section
 
-Common keys for ontology configuration:
+Common keys:
 
-| Key                 | Description                                                                   
--------------------- +-----------------------------------------------------------------------------    
-ontology-file-path  Path to RDF TTL file defining classes and properties in the domain model     
-concepts-file-path  Optional concepts/ttl definitions for custom property constraints             
-enum-classes        Define enumeration values as class metadata                                   
-temporal-properties Timestamps from ontology used (dc:created, dc:modified)      
-extra-properties    Marked identifiers using `isIdentifier` flag                                  
+- `ontology-file-path`: Path to RDF (TTL) ontology file containing classes and properties  
+- `concepts-file-path`: Optional concepts/ttl definitions for custom property constraints  
+- `enum-classes`: Defines enumeration values in the Ontology specification metadata
+- `temporal-properties`: Properties representing creation/modification timestamps on entities
+- `extra-properties`: Marked as identifier columns when used with `isIdentifier: true` flag 
+- `override-datatypes`: Maps between XSD datatypes and SQL equivalents (string -> varchar etc)
+- `surrogate-keys`: Replaces composite primary keys (classes with more than one identifier
+  property, e.g. a natural key combined with temporal/versioning properties) with a single
+  generated surrogate key. Disabled by default.
 
-Example:  
+Example:
 
-```yaml  
-ontology:    
-  
-  ontology-file-path: "path/to/ontology.ttl"                                 
-        
-      concepts-file-path: "path/concepts.ttl" 
-       
-          temporal-properties:                                            
-              - "http://purl.org/dc/terms/created                         
-              - "http://purl.org/dc/terms/modified                   
-                 
-            override-datatypes:                                          
-                - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"     
-                  override: "http://www.w3.org/2001/XMLSchema#string"
-
+```yaml
+ontology:
+  ontology-file-path: "path/to/ontology.ttl"  
+  concepts-file-path: "path/to/concepts.ttl"
+  temporal-properties:
+    - "http://purl.org/dc/terms/created"    # Creation timestamp property URI 
+                                      for datetime fields in generated database columns    
+    - "http://purl.org/dc/terms/modified"   # Modification timestamp tracking updates  
+  override-datatypes:                        # Custom datatype overrides per column definition
+    - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"      # Original OWL datatype URI 
+      override: "http://www.w3.org/2001/XMLSchema#string"       # SQL VARCHAR equivalent  
+  surrogate-keys:
+    enabled: true               # When a class has more than one identifier property, replace
+                                 # them with a single generated key instead of a composite one
+    name: "id"                  # Name of the generated surrogate key attribute/column
+    datatype: "http://www.w3.org/2001/XMLSchema#string"
 ```
-
-
----
 
 ## `generators` section  
 
-ODDToolkit provides multiple code generators for different target formats (MMD, SQL and Java). Generator names recognized by CLI flags include class-diagram, er-diagram, sql, shacl, java, typescript bikeshed all etc.
+Generators available and their names recognized by CLI flags:
 
-Additional specialized generator options:  
-- `-generator`: SQL dialect-specific configuration    
-- `java-generator`, `typescript-generator` - Code generation package settings   
-- **bikeshed-generator** (new) W3C Bikeshed specification and output formats support     
-- `schema-generator Controls join table naming for many-to-many relations  
+| Generator Name | Description | Default Output Format |
+|---------------|-------------|----------------------|
+| class-diagram | Mermaid markdown format for UML-like diagrams | `.mmd` / stdout     |   
+| er-diagram    | ER diagram generator using PlantUML syntax       | `.pu`, .pp          | 
+| sql           | SQL schema generation with JOINs and FK constraints   | `.sql               `     
+| shacl         | SHACL constraint definitions for data validation  | `.shacl             `     
+| java          | Java POJO code generation from ontology classes      | `.java              `    
+| typescript    | TypeScript interfaces/models                          | `.ts                `      
+| bikeshed      W3C Bikeshed specification source with full HTML/ODT support       | **.bs** / stdout    |
+| all           Special mode for outputting multiple files at once   N/A                      |  
 
-### Bikeshed generator: HTML/ODT/EPUB exports
+Some generator-specific property blocks use `-generator` suffixes to configure behavior per type:  
+- `sql-generator`: SQL options, dialect selection and naming conventions used across database schemas  
+- `java-generator`, `typescript-generator`: Code generation settings (package name, file paths etc) 
+- `bikeshed-generator Bikeshed documentation configuration including metadata blocks, status codes for W3C workflow compliance
+- `schema-generator` - controls SQL join table generation and M:N relation handling  
 
-The bikeshed generator produces standardized `.bs` source files that can be converted to multiple popular document formats (HTML, ODT LibreOffice documents EPUB digital publications). The resulting specifications are fully W3C standards-compliant per working group publication rules.  
+### Bikeshed Generator Support for HTML/ODT/EPUB Exports
 
-```yaml  
-generators:          
-  bikeshed-generator:                                                     
-    # Path for output Bikeshed source file (.bs specification)    
-        omit this to write generated content directly to STDOUT         
-       
-      ## Title appears at top of specifications (default is from ontology label)   
-          title: My Environmental Data Ontology                          
-              
-              status: ED                           Working Group publication stage      
-                                                   Valid codes LS Living Standard,                
-                                                     Editor Draft as default for new specs             
-                                                    WD Proposed Recommendation etc                  
-           
-                shortname: my-environment-data     Used in W3C TR URL generation                        
-                                                      Optional defaults to sanitized URI local name                 
-                      
-                      editor-name: Jane Doe             Primary contributor contact                   
-                        editor-email:jane@example.org      Required under W3C standards process                          
-                            editor-affiliation: MyOrg    Affiliated organisation name
-                                
-                              abstract-text:          |              
-                                  This specification describes how ODDToolkit                         
-                                 enables ontology-driven code generation for                       
-                             environmental data management scenarios.                               
-                     
-```
+The **Bikeshed generator** produces a [tabatkins.github.io](https://tabatkins.github.io/bikeshed/) (`.bs`) specification source file documenting all ontology classes, properties and their cardinality constraints. The generated `.bs` file can be converted by the Bikeshed command-line tool or W3C online API into:
 
-#### Output formats available  
+  - **HTML** output with full CSS styling  
+  - **ODT** LiberoOffice documents from bikeshed ODT format libraries
+  - **EPUB** digital publications through standard EPub conversion workflows after HTML generation  
 
-| Format  | How to generate                                    | Use case                                          
----------+--------------------------------------------------- +------------------------------    
-.bs       Direct from `-generator bikeshed`                Raw spec source without external tools             
-HTML      `bikeshed spec file.html` or via W3C API        Publication-ready with CSS styling         
-ODT/EPUB   Generate HTML first then convert              Documents suitable for Office workflows         
+#### Configuration Example
 
-
----
-
-### Schema generator: Join column patterns  
-
-Configure SQL schema generation including join table naming conventions and identity tables support. 
-
-Supported placeholders in all pattern strings below allow customizing generated names per ontology model semantics used within project teams developing environmental data domains with ODDToolkit integration into their tooling pipelines currently being explored by stakeholders from multiple government agencies working on this open source initiative together to improve interoperability standards across regions  
-
-| Placeholder             | Meaning                                              Example output                      
--------------------------+------------------------------------------------------ +----------------------------------                        
-{source_table}           Table name referencing "from" side               `exploitatie_uuid`                  
-{target_table}        Referencing table for "to" relationship            `activiteit_id`                     
-{column}                   Original property identifier from domain model         source_  
-```yaml          
-generators:                          
-  schema-generator:                             
-    join-table-name-pattern: "{source_table}_{target_table}"   
-    # Example results in exploitatie_activit_join                  
-                                        
-      source-column-name-pattern: "source_{column}_id"         
-        target-column-name-pattern:"target_col_id"            
-      
+```yaml
+generators:
+  bikeshed-generator:    
+    # Output file path (omit this when stdout is sufficient for piping or capturing logs)  
+    output-file: "target/ontology.bs"   
     
-          identity-tables:                           
-              enabled: true                                
-                table-name-suffix: "identity_"          
-                      
-            merge-join-tables                          
-                enabled:true                                  Defaults to merging all M:N           
-                                                      exclude specific relations  
+    ## Bibliographic Information as Required by W3C Standards Development Process
+    title: My Ontology Specification     Optional spec title parameter defaults to ontology label if present otherwise falls back to local name segment from URI path when empty string passed
+    
+    status: ED                          Working Group publication status code  
+                                        Valid values accepted at generation time for proper catalog submission compliance include LS Living Standard, Editor's Draft ED as default fallback WD working draft CR Proposed Recommendation PR Public Review REC Recommended Specification
+                                        
+                                            Defaults to "ED" if not explicitly configured
+
+    shortname: my-ontology              Short unique identifier slug used in TR URL construction example https://www.w3.org/TR/my-ontology/    
+                                         Optional parameter; defaults to lowercase sanitized ontology URI local name when omitted  
+                                          Sanitization replaces special characters beyond allowed a-z0-9 and hyphen for web-safe URLs
+                                            
+    editor-name: Jane Doe               Editor contact person information required in W3C publication documents 
+                                        For multi-stakeholder groups list primary contributor with email suffix optional parameter
+    
+    editor-email: jane@example.org      Required editorial contact per W3C TR requirements at https://www.w3.org/publish/topics/TR/  
+                                        
+                                        Without valid editor email address generated spec violates standards process compliance
+
+    editor-affiliation: Organization Name          Affiliated organization or consortium name backing this specification development work under their governance
+    
+    abstract-text: |                    Optional custom introduction text to appear in documentation metadata block
+      This specification describes how ODDToolkit enables ontology-driven code generation for environmental data modeling scenarios.  
+      
+                                      Falls back automatically to rdfs:comment property value from original Ontology file when left empty or not defined
 ```
-
-
-#### Example results with custom patterns
-
-| Pattern                            | Result example (exploitatie → activiteit)              
------------------------------------- +------------------------------------------------------
-`rel_{source_table}_{target_tabl }` `exploitation_activities_join                       
-                                      `"entity_{"}" -> entity_uuid                     
-"`relationship_\{table}_id"   relationship_activity_id                             
-"{toTable}_"                     activity_locality_relation                          
-``` 
-
-
-#### Identity table configuration
-
-Enable identity tables when entities have composite identifiers (multi-valued properties): 
-
-| Property | Default value | Description                                           
----------- +---------------+------------------------------------------------------                 
-enabled     true                        Automatically generate for multi-identifier concepts        
-tableNameSuffix `identity_`   Appended to base entity name                            
-
-
----
-
-
-## Using the generator with ODDToolkit CLI
-
-```bash  
-java -jar /path/to/target/oddtoolkit.jar --generator=bikeshed \
-  --config-file=path/to/config.yml      
-                                                        
-    # Generates bikeshed source file (target/output.bs) 
-                                                            
-```
-
-Then convert to HTML:  
-
-   bashcurl https://api.csswg.org/bikeshed/ -F "@file=target/ontology-bs" > target/html.html  
-   
-  
-
-
----
-
-
-## Summary of changes and features added since initial implementation
-1. **Bikeshed generator integration** – Produces W3C standard .bs format supporting HTML ODT EPUB output formats for document workflows in government agencies using this open source toolkit for environmental data ontology-driven generation projects currently under development by teams from multiple Belgian federal regions including VLAIO and the Flemish Community working on improving interoperability standards        
-2. **Join column name patterns** – Customizable naming conventions with placeholders supporting semantic meaning across join relationships between entities within domain models being developed     
-3. **Identity table handling** – Automatic generation for multi-valued properties in ontology definitions  
-4. **Schema generator enhancements** Merging of many-to-many joins when enabled to reduce redundancy while preserving relationship cardinality information needed end-users querying generated databases through BI tools or direct SQL queries from application developers building data applications based on ODDToolkit-generated schemas  

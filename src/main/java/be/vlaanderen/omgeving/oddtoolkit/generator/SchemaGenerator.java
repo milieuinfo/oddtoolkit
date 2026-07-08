@@ -11,14 +11,19 @@ import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.atlas.lib.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Getter
 public abstract class SchemaGenerator extends DiagramGenerator {
+  private static final Logger logger = LoggerFactory.getLogger(SchemaGenerator.class);
   private static final String DEFAULT_IDENTIFIER_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#id";
   private static final String DEFAULT_JOIN_TABLE_NAME_PATTERN = "rel_{source_table}_{target_table}";
   private static final String SOURCE_TABLE_PLACEHOLDER = "{source_table}";
@@ -49,6 +54,42 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     extractTables();
     extractTableRelations();
     stabilizeSchemaOrdering();
+    validateSchema();
+  }
+
+  /**
+   * Validates the generated tables before any output is written, so structural problems
+   * (e.g. two columns ending up with the same name) are reported with the offending table
+   * and likely cause instead of being silently emitted as invalid SQL/code.
+   *
+   * @throws IllegalStateException describing every problem found, if any
+   */
+  protected void validateSchema() {
+    List<String> issues = new ArrayList<>();
+    for (Table table : tables) {
+      Map<String, List<String>> columnsByNormalizedName = new LinkedHashMap<>();
+      for (Column column : table.getColumns()) {
+        String normalizedName = column.getName() == null ? "" : column.getName().toLowerCase();
+        columnsByNormalizedName.computeIfAbsent(normalizedName, k -> new ArrayList<>())
+            .add(column.getName());
+      }
+      columnsByNormalizedName.forEach((normalizedName, columnNames) -> {
+        if (columnNames.size() > 1) {
+          String cause = table.getTableType() == TableType.JOIN
+              ? " This commonly happens on join tables for self-referencing relations where "
+                  + "the source/target column name patterns resolve to the same name."
+              : "";
+          issues.add("table '" + table.getName() + "' has " + columnNames.size()
+              + " columns named '" + columnNames.getFirst() + "'." + cause);
+        }
+      });
+    }
+    if (!issues.isEmpty()) {
+      String message = "Schema generation produced an invalid schema:\n  - "
+          + String.join("\n  - ", issues);
+      logger.error(message);
+      throw new IllegalStateException(message);
+    }
   }
 
   private void stabilizeSchemaOrdering() {
@@ -187,6 +228,11 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   }
 
   private void updateIdentifierReferences() {
+    // Relations pointing at a class with a composite key must reference its identity table
+    // instead, since that table (not the composite-keyed one) holds the stable identifier.
+    // Outgoing relations from the composite-keyed table are left untouched: the referencing
+    // column physically lives on that table, not on the identity table, so there is nothing to
+    // redirect there.
     tables.stream().filter(t -> t.getExtendsClass() != null
             && ((Table) t.getExtendsClass()).getTableType() == TableType.IDENTITY)
         .forEach(table -> tables.forEach(otherTable -> otherTable.getRelations().forEach(relation -> {
@@ -198,17 +244,6 @@ public abstract class SchemaGenerator extends DiagramGenerator {
             }
             relation.setTo(parentTable);
             relation.setToColumn(parentIdentifierColumn);
-          } else if (relation.getFrom().equals(table) && !relation.getTo().equals(table.getExtendsClass())) {
-            Table parentTable = (Table) table.getExtendsClass();
-            Column parentIdentifierColumn = findIdentifierColumn(parentTable, false);
-            if (parentIdentifierColumn == null) {
-              return;
-            }
-            relation.setFrom(parentTable);
-            relation.setToColumn(parentIdentifierColumn);
-            // Move the relation to the correct table instance
-            relation.getFrom().getRelations().remove(relation);
-            parentTable.getRelations().add(relation);
           }
         })));
   }
@@ -354,6 +389,22 @@ public abstract class SchemaGenerator extends DiagramGenerator {
         .replace(COLUMN_PLACEHOLDER, columnName)).toLowerCase();
   }
 
+  /**
+   * Disambiguates a join column name that collides with the other join column of the same
+   * relation. This happens for self-referencing relations (e.g. {@code Proces volgt_op Proces}),
+   * where {@code {source_table}} and {@code {target_table}} resolve to the same table name and
+   * therefore produce identical column names. The colliding name is qualified with the relation
+   * name instead (e.g. {@code proces_id} -> {@code volgt_op_proces_id}).
+   */
+  protected String disambiguateSelfReferencingColumnName(String columnName, String otherColumnName,
+      String relationName, String targetTableName) {
+    if (!columnName.equals(otherColumnName)) {
+      return columnName;
+    }
+    String relationQualifier = normalizeJoinTableRelationName(relationName, targetTableName);
+    return toSnakeCase(relationQualifier + "_" + columnName).toLowerCase();
+  }
+
   private boolean shouldAppendRelationNameForSelfRelation(Relation relation,
       List<Relation> relations) {
     if (relation.getFrom() == null || relation.getTo() == null
@@ -400,10 +451,12 @@ public abstract class SchemaGenerator extends DiagramGenerator {
           relation.getFrom().getName(), relation.getTo().getName(),
           fromIdentifierColumn.getName()));
       Column toIdentityColumn = toIdentifierColumn.copy();
-      toIdentityColumn.setName(resolveJoinColumnName(
-          schemaGeneratorProperties.getJoinTableColumns().getTargetColumnNamePattern(),
-          relation.getFrom().getName(), relation.getTo().getName(),
-          toIdentifierColumn.getName()));
+      toIdentityColumn.setName(disambiguateSelfReferencingColumnName(
+          resolveJoinColumnName(
+              schemaGeneratorProperties.getJoinTableColumns().getTargetColumnNamePattern(),
+              relation.getFrom().getName(), relation.getTo().getName(),
+              toIdentifierColumn.getName()),
+          fromIdentityColumn.getName(), relation.getName(), relation.getTo().getName()));
       joinColumns.add(fromIdentityColumn);
       joinColumns.add(toIdentityColumn);
 

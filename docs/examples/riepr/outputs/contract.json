@@ -1,0 +1,1767 @@
+{
+  "$schema" : "https://raw.githubusercontent.com/opendatamesh-initiative/odcs-spec/main/schemas/odcs-v0.1.0-alpha.json",
+  "info" : {
+    "name" : "RIE-IEPR Data Contract",
+    "version" : "1.0.0",
+    "description" : "Open Data Contract for RIE-IEPR ontology",
+    "issued" : "2026-06-19T11:00:15.043615Z",
+    "updated" : "2026-06-19T11:00:15.043660Z",
+    "status" : "PUBLISHED"
+  },
+  "apis" : [ {
+    "$ref" : "#/components/apis/ontology"
+  } ],
+  "schemas" : {
+    "Identifier" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Identifier",
+      "description" : "This class is based on the UN/CEFACT Identifier complex type defined in See Section 5.8 of Core Components Data Type Catalogue Version 3.1 (http://www.unece.org/fileadmin/DAM/cefact/codesfortrade/CCTS/CCTS-DTCatalogueVersion3p1.pdf) In RDF this is expressed using the following properties: - the content string should be provided using skos:notation, datatyped with the identifier scheme (inclduing the version number if appropriate); - use dcterms:creator to link to a class describing the agency that manages the identifier scheme or adms:schemaAgency to provide the name as a literal. Although not part of the ADMS conceptual model, it may be useful to provide further properties to the Identifier class such as dcterms:created to provide the date on which the identifier was issued.",
+      "$id" : "http://www.w3.org/ns/adms#Identifier",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "schemeagency" : {
+          "description" : "The name of the agency responsible for issuing the identifier",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/adms#schemeAgency",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Status" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Status",
+      "$id" : "http://www.w3.org/ns/adms#Status",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Address" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Address",
+      "description" : "An \"address representation\" as conceptually defined by the INSPIRE Address Representation data type. The locn:addressId property may be used to link this locn:Address to other representations.",
+      "$id" : "http://www.w3.org/ns/locn#Address",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "postcode" : {
+          "description" : "The post code (a.k.a postal code, zip code etc.). Post codes are common elements in many countries' postal address systems. The domain of locn:postCode is locn:Address.",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/locn#postCode",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "postname" : {
+          "description" : "The key postal division of the address, usually the city. (INSPIRE's definition is \"One or more names created and maintained for postal purposes to identify a subdivision of addresses and postal delivery points.\"). The domain of locn:postName is locn:Address.",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/locn#postName",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "thoroughfare" : {
+          "description" : "An address component that represents the name of a passage or way through from one location to another. A thoroughfare is not necessarily a road, it might be a waterway or some other feature. The domain of locn:thoroughfare is locn:Address.",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/locn#thoroughfare",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Aangifte" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Aangifte",
+      "description" : "Een aangifte is een document dat wordt ingediend bij de overheid.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Aangifte",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een aangifte heeft een datum van indiening.",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "ispartof" : {
+          "description" : "Een aangifte kan deel zijn van een andere aangifte.",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/isPartOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "subject" : {
+          "description" : "Een aangifte heeft betrekking tot een enkele exploitatie.",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/subject",
+          "minItems" : 1
+        },
+        "wasassociatedwith" : {
+          "description" : "Een aangifte heeft optioneel een auteur (die verschillend kan zijn dan de indiener).",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/prov#wasAssociatedWith",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "vlaanderenid" : {
+          "description" : "Een unieke identificatie binnen de context van Vlaanderen, gebruikt voor het identificeren van entiteiten zoals aangiften.",
+          "type" : "string",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#vlaanderenId",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "informatieclassificatie" : {
+          "description" : "Een aangifte heeft een informatie classificatie.",
+          "type" : "string",
+          "$id" : "https://data.vlaanderen.be/ns/dossier#informatieclassificatie",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri", "created", "subject", "vlaanderenid" ]
+    },
+    "AbstractEmissiepunt" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "AbstractEmissiepunt",
+      "description" : "Een abstract emissiepunt is een conceptueel emissiepunt dat niet noodzakelijk een vaste locatie heeft, maar wel een functionele rol vervult in het proces.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#AbstractEmissiepunt",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Contactpersoon" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Contactpersoon",
+      "description" : "Een exploitant contactpersoon is een persoon die optreedt als contactpersoon voor een exploitant.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Contactpersoon",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een exploitant contactpersoon kan een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "issued" : {
+          "description" : "Een exploitant contactpersoon kan een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "modified" : {
+          "description" : "Een exploitant contactpersoon kan een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een exploitant contactpersoon kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "comment" : {
+          "description" : "Een exploitant contactpersoon kan een opmerking hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#comment",
+          "maxItems" : 1
+        },
+        "label" : {
+          "description" : "Een exploitant contactpersoon moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "hasrole" : {
+          "description" : "Een exploitant contactpersoon moet een functie hebben binnen de organisatie",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/org#hasRole",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "memberof" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/org#memberOf",
+          "minItems" : 0
+        },
+        "mbox" : {
+          "description" : "Een exploitant contactpersoon kan een e-mailadres hebben",
+          "type" : "string",
+          "$id" : "http://xmlns.com/foaf/0.1/mbox",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "name" : {
+          "description" : "Een exploitant contactpersoon moet een naam hebben",
+          "type" : "string",
+          "$id" : "http://xmlns.com/foaf/0.1/name",
+          "minItems" : 1
+        },
+        "phone" : {
+          "description" : "Een exploitant contactpersoon kan een telefoonnummer hebben",
+          "type" : "string",
+          "$id" : "http://xmlns.com/foaf/0.1/phone",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "name", "uuid" ]
+    },
+    "Emissie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Emissie",
+      "description" : "Een emissie is een specifiek resultaat dat betrekking heeft op het uitstoten of lozen van stoffen aan emissiepunten over of op een bepaalde periode of momentopname.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "isresultof" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/sosa/isResultOf",
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "EmissieProcedure" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "EmissieProcedure",
+      "description" : "Een emissie procedure is een specifieke procedure die betrekking heeft op het uitstoten of lozen van stoffen aan emissiepunten.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#EmissieProcedure",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Emissiepunt" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Emissiepunt",
+      "description" : "Een emissiepunt is een specifiek punt waar stoffen de installatie verlaten en in de omgeving worden uitgestoten.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Emissiepunt",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een emissiepunt moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een emissiepunt moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een emissiepunt moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een emissiepunt kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een emissiepunt kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een emissiepunt mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een emissiepunt moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een emissiepunt heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een emissiepunt moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een emissiepunt kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "hasproperty" : {
+          "description" : "Een emissiepunt kan meerdere eigenschappen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasProperty",
+          "minItems" : 0
+        },
+        "hassubsystem" : {
+          "description" : "Een emissiepunt kan meerdere objecten bevatten.",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasSubSystem",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status", "uuid" ]
+    },
+    "Exploitant" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Exploitant",
+      "description" : "Een exploitant is een entiteit die een milieuimpact heeft.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitant",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een exploitant kan een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "issued" : {
+          "description" : "Een exploitant kan een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "modified" : {
+          "description" : "Een exploitant kan een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een exploitant kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een exploitant moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "address" : {
+          "description" : "Een exploitant moet een adres hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/locn#address",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "classification" : {
+          "description" : "Een exploitant moet een hoofdactiviteit hebben",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/org#classification",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasmember" : {
+          "description" : "Een exploitant kan meerdere contactpersonen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/org#hasMember",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "address", "uuid" ]
+    },
+    "Exploitatie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Exploitatie",
+      "description" : "Een exploitatie is de uitrol van middelen door een exploitant op een exploitatie locatie leidend tot een milieueffect.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een exploitatie moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een exploitatie moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een exploitatie moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "valid" : {
+          "description" : "Een exploitatie kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een exploitatie moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een exploitatie kan externe identificaties hebben (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een exploitatie heeft een status",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "hasmember" : {
+          "description" : "Een exploitatie kan meerdere contactpersonen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/org#hasMember",
+          "minItems" : 0
+        },
+        "deployedonplatform" : {
+          "description" : "Een exploitatie wordt op een bepaalde exploitatie locatie uitgevoerd",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/deployedOnPlatform",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "deployedsystem" : {
+          "description" : "Een exploitatie zet systemen in",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/deployedSystem",
+          "minItems" : 0
+        },
+        "implements" : {
+          "description" : "Een exploitatie implementeert een proces",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/implements",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status", "deployedonplatform", "implements", "uuid" ]
+    },
+    "Exploitatielocatie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Exploitatielocatie",
+      "description" : "Een exploitatielocatie is een specifieke geografische locatie waar een exploitant zijn processen uitvoert.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatielocatie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een exploitatielocatie moet een datum hebben waarop het is ingegeven",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een exploitatielocatie moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een exploitatielocatie moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "valid" : {
+          "description" : "Een exploitatielocatie kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een exploitatielocatie moet exact 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "comment" : {
+          "description" : "Een exploitatielocatie kan een beschrijving hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#comment",
+          "maxItems" : 1
+        },
+        "label" : {
+          "description" : "Een exploitatielocatie moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een exploitatielocatie heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "address" : {
+          "description" : "Een exploitatielocatie kan een adres hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/locn#address",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hadprimarysource" : {
+          "description" : "Een exploitatielocatie kan overeenkomen met één vestiging (VKBO)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#hadPrimarySource",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "wasattributedto" : {
+          "description" : "Een exploitatielocatie moet gekoppeld zijn aan exact één exploitant",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasAttributedTo",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasinfluencedby" : {
+          "description" : "Een exploitatielocatie kan optioneel beïnvloed zijn door aan een org:Site of ander type",
+          "type" : "string",
+          "$id" : "http://www.w3.org/ns/prov#wasInfluencedBy",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "wasrevisionof" : {
+          "description" : "Een exploitatielocatie kan een revisie zijn van een andere exploitatie locatie (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "indeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/inDeployment",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "hasgeometry", "wasattributedto", "uuid" ]
+    },
+    "Filter" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Filter",
+      "description" : "Een filter is een specifiek systeem dat wordt gebruikt om de kwaliteit van de uitstoot te verbeteren door het verwijderen of verminderen van schadelijke stoffen.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Filter",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een systeem moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een systeem moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een systeem moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een systeem kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een systeem kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een systeem mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een systeem moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een systeem heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een systeem moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een systeem kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status" ]
+    },
+    "Installatie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Installatie",
+      "description" : "Een installatie is infrastructuur of een verzameling van infrastructuur op een bepaalde locatie die een specifieke functie vervult.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Installatie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een installatie moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een installatie moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een installatie moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een installatie kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een installatie kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een installatie mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "comment" : {
+          "description" : "Een installatie kan een beschrijving hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#comment",
+          "maxItems" : 1
+        },
+        "label" : {
+          "description" : "Een installatie moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een installatie heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een installatie moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een installatie kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "hasproperty" : {
+          "description" : "Een installatie kan meerdere eigenschappen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasProperty",
+          "minItems" : 0
+        },
+        "hassubsystem" : {
+          "description" : "Een installatie kan meerdere objecten bevatten.",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasSubSystem",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "ingediend" : {
+          "description" : "Een installatie kan een referentie hebben naar een aangifte.",
+          "type" : "string",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ingediend"
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status", "uuid" ]
+    },
+    "MeetInstrument" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "MeetInstrument",
+      "description" : "Een meetinstrument is een specifiek apparaat of systeem dat wordt gebruikt om metingen uit te voeren op meetpunten.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetInstrument",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een meetinstrument moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een meetinstrument moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een meetinstrument moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een meetinstrument kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een meetinstrument kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een meetinstrument mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een meetinstrument moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een meetinstrument heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een meetinstrument moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een meetinstrument kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status" ]
+    },
+    "MeetProcedure" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "MeetProcedure",
+      "description" : "Een meetprocedure is een specifieke procedure die wordt gebruikt om metingen uit te voeren op meetpunten.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#MeetProcedure",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Meetpunt" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Meetpunt",
+      "description" : "Een meetpunt is een specifiek punt waar metingen worden uitgevoerd om de kwaliteit van de uitstoot of de omgeving te controleren.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Meetpunt",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een meetpunt moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een meetpunt moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een meetpunt moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een meetpunt kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een meetpunt kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een meetpunt mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een meetpunt moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een meetpunt heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een meetpunt moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een meetpunt kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "hasproperty" : {
+          "description" : "Een meetpunt kan meerdere eigenschappen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasProperty",
+          "minItems" : 0
+        },
+        "hassubsystem" : {
+          "description" : "Een meetpunt kan meetinstrumenten hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasSubSystem",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status", "uuid" ]
+    },
+    "Observatie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Observatie",
+      "description" : "Een observatie is een waarneming of meting die is uitgevoerd op een meetpunt.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Observatie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "hasfeatureofinterest" : {
+          "description" : "Een observatie moet gekoppeld zijn aan exact één meetpunt",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/sosa/hasFeatureOfInterest",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "hasresult" : {
+          "description" : "Een observatie moet een resultaat hebben.",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/sosa/hasResult",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "hasfeatureofinterest", "uuid" ]
+    },
+    "Onttrekking" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Onttrekking",
+      "description" : "Een onttrekking is een specifiek resultaat dat betrekking heeft op het winnen of bemonsteren van grondstoffen aan onttrekkingspunten over of op een bepaalde periode of momentopname.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekking",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "isresultof" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/sosa/isResultOf",
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "OnttrekkingProcedure" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "OnttrekkingProcedure",
+      "description" : "Een onttrekking procedure is een specifieke procedure die betrekking heeft op het transport van grondstoffen binnen een proces.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#OnttrekkingProcedure",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Onttrekkingspunt" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Onttrekkingspunt",
+      "description" : "Een onttrekkingspunt is een punt waar grondstoffen worden gewonnen of bemonsterd (onttrekking).",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Onttrekkingspunt",
+      "properties" : {
+        "depth" : {
+          "description" : "Een onttrekkingspunt kan een diepte hebben",
+          "type" : "string",
+          "$id" : "http://dbpedia.org/ontology/depth",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een onttrekkingspunt moet een creatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een onttrekkingspunt moet een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "modified" : {
+          "description" : "Een onttrekkingspunt moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een systeem kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een onttrekkingspunt kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasgeometry" : {
+          "description" : "Een systeem mag max 1 geometrie hebben",
+          "type" : "string",
+          "$id" : "http://www.opengis.net/ont/geosparql#hasGeometry",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "label" : {
+          "description" : "Een onttrekkingspunt moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "identifier" : {
+          "description" : "Een onttrekkingspunt heeft externe identificaties (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#identifier",
+          "minItems" : 0
+        },
+        "status" : {
+          "description" : "Een onttrekkingspunt moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een onttrekkingspunt kan een revisie zijn van een andere systemen (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasdeployment" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasDeployment",
+          "minItems" : 0
+        },
+        "hasproperty" : {
+          "description" : "Een onttrekkingspunt kan meerdere eigenschappen hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasProperty",
+          "minItems" : 0
+        },
+        "hassubsystem" : {
+          "description" : "Een onttrekkingspunt kan filters hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/hasSubSystem",
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "created", "issued", "modified", "status", "uuid" ]
+    },
+    "Proces" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Proces",
+      "description" : "Een (milieu)proces is een door de gebruiker in te vullen industrieel proces op een bepaalde locatie bestaande uit meerdere procedurestappen die het proces beschrijven. Een proces kan hiërarchisch opgebouwd zijn als een plan met substappen.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "created" : {
+          "description" : "Een proces moet een datum hebben waarop het is ingegeven",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/created",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "issued" : {
+          "description" : "Een proces kan een geldigheid start hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/issued",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "modified" : {
+          "description" : "Een proces moet een modificatie datum hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/modified",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een proces kan zijn afgeleid van een (generieke) procedure (optioneel). Max 1 omdat een proces slechts van 1 procedure afgeleid kan zijn en deze procedure een verzameling van andere procedures zou moeten zijn.",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "valid" : {
+          "description" : "Een proces kan een geldigheid einde hebben",
+          "type" : "object",
+          "$id" : "http://purl.org/dc/terms/valid",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "hasinputvar" : {
+          "description" : "Een proces mag minstens één inputvariabele hebben (stof)",
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#hasInputVar",
+          "minItems" : 0
+        },
+        "hasoutputvar" : {
+          "description" : "Een proces mag minstens één outputvariabele hebben (stof)",
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#hasOutputVar",
+          "minItems" : 0
+        },
+        "isprecededby" : {
+          "description" : "Een proces mag een of meer andere processen als voorgaande stap hebben.",
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#isPrecededBy",
+          "minItems" : 0
+        },
+        "isstepofplan" : {
+          "description" : "Een proces kan deel uitmaken van een ander proces",
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#isStepOfPlan",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "comment" : {
+          "description" : "Een proces kan een beschrijving hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#comment",
+          "maxItems" : 1
+        },
+        "label" : {
+          "description" : "Een proces moet een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "status" : {
+          "description" : "Een proces moet een enkele status hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/adms#status",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasrevisionof" : {
+          "description" : "Een proces kan een revisie zijn van een ander proces (optioneel)",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasRevisionOf",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "implementedby" : {
+          "description" : "Een proces kan optioneel een variable die een systeem representeert gebruiken",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/ssn/implementedBy",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "aangifte" : {
+          "description" : "De aangifte die gerelateerd is aan een exploitatie of observatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#aangifte",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "rubriek" : {
+          "description" : "De rubriek die van toepassing is op een proces of installatie.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#rubriek",
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri", "created", "modified", "status", "uuid" ]
+    },
+    "ProcesVariabele" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "ProcesVariabele",
+      "description" : "Een proces variabele is een variabel gegeven die als input of output van een proces dient.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#ProcesVariabele",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een proces variabele kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "isinputvarof" : {
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#isInputVarOf",
+          "minItems" : 0
+        },
+        "isoutputvarof" : {
+          "type" : "object",
+          "$id" : "http://purl.org/net/p-plan#isOutputVarOf",
+          "minItems" : 0
+        },
+        "hasunit" : {
+          "description" : "Een proces variabele kan een eenheid hebben",
+          "type" : "string",
+          "$id" : "http://qudt.org/schema/qudt/hasUnit",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "numericvalue" : {
+          "description" : "Een proces variabele kan een waarde hebben",
+          "type" : "object",
+          "$id" : "http://qudt.org/schema/qudt/numericValue",
+          "maxItems" : 1
+        },
+        "label" : {
+          "description" : "Een proces variabele kan een benaming hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#label",
+          "maxItems" : 1
+        },
+        "uuid" : {
+          "description" : "UUID",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "uuid" ]
+    },
+    "Productievolume" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Productievolume",
+      "description" : "Een productie volume is een specifiek resultaat dat betrekking heeft op de hoeveelheid geproduceerde goederen of diensten binnen een proces over of op een bepaalde periode.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Productievolume",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "isresultof" : {
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/sosa/isResultOf",
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "Rubriek" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Rubriek",
+      "description" : "Een rubriek is een specifieke classificatie die wordt gebruikt om activiteiten te categoriseren volgens de regelgeving.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Rubriek",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een rubriek kan een typering hebben via dct:type",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "definition" : {
+          "description" : "Een rubriek kan een beschrijving hebben",
+          "type" : "string",
+          "$id" : "http://www.w3.org/2004/02/skos/core#definition",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "notation" : {
+          "description" : "Een rubriek moet een code hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2004/02/skos/core#notation",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "type", "notation" ]
+    },
+    "SysteemEigenschap" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "SysteemEigenschap",
+      "description" : "Een systeem eigenschap is een specifieke eigenschap van een systeem, zoals de hoogte van de schouw.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#SysteemEigenschap",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "type" : {
+          "description" : "Een systeem eigenschap moet een typering hebben",
+          "type" : "string",
+          "$id" : "http://purl.org/dc/terms/type",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "hasunit" : {
+          "description" : "Een systeem eigenschap kan een eenheid hebben",
+          "type" : "string",
+          "$id" : "http://qudt.org/schema/qudt/hasUnit",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "range" : {
+          "description" : "Een systeem eigenschap moet een datatype hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#range",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "value" : {
+          "description" : "Een systeem eigenschap kan een waarde hebben",
+          "type" : "object",
+          "$id" : "http://www.w3.org/2000/01/rdf-schema#value",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "parameter" : {
+          "description" : "De parameter die wordt gebruikt bij een eigenschap of meting.",
+          "type" : "object",
+          "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#parameter",
+          "maxItems" : 1,
+          "minItems" : 0
+        }
+      },
+      "required" : [ "uri", "type", "range" ]
+    },
+    "Transactie" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "Transactie",
+      "description" : "Een transactie is een proces van indienen, verwerken en goedkeuren van documenten door de rapporteringsplichtige.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Transactie",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "endedattime" : {
+          "description" : "Een transactie heeft een eind datum waarop de transactie is beëindigd",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#endedAtTime",
+          "maxItems" : 1,
+          "minItems" : 0
+        },
+        "startedattime" : {
+          "description" : "Een transactie heeft een start datum waarop de transactie is gestart",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#startedAtTime",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "wasassociatedwith" : {
+          "description" : "Een transactie heeft een verantwoordelijke agent",
+          "type" : "object",
+          "$id" : "http://www.w3.org/ns/prov#wasAssociatedWith",
+          "maxItems" : 1,
+          "minItems" : 1
+        },
+        "genereert" : {
+          "description" : "Een transactie genereert een of meerdere aangiften",
+          "type" : "object",
+          "$id" : "https://data.vlaanderen.be/ns/dossier#genereert",
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri", "startedattime", "wasassociatedwith", "genereert" ]
+    },
+    "TransportProcedure" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "TransportProcedure",
+      "description" : "Een transport procedure is een specifieke procedure die betrekking heeft op het transport van stoffen binnen of buiten een proces.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#TransportProcedure",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    },
+    "VerwerkingProcedure" : {
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "type" : "object",
+      "title" : "VerwerkingProcedure",
+      "description" : "Een verwerkings procedure is een specifieke procedure die betrekking heeft op de verwerking van stoffen binnen een proces.",
+      "$id" : "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#VerwerkingProcedure",
+      "properties" : {
+        "uri" : {
+          "description" : "URI",
+          "type" : "object",
+          "$id" : "http://example.org/vocab/uri",
+          "maxItems" : 1,
+          "minItems" : 1
+        }
+      },
+      "required" : [ "uri" ]
+    }
+  }
+}

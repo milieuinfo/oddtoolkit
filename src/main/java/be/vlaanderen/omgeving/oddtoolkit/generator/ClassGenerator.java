@@ -25,9 +25,13 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Getter
 public class ClassGenerator extends BaseGenerator {
+
+  private static final Logger logger = LoggerFactory.getLogger(ClassGenerator.class);
 
   protected List<Clazz> classes = new ArrayList<>();
   protected List<Interface> interfaces = new ArrayList<>();
@@ -104,9 +108,104 @@ public class ClassGenerator extends BaseGenerator {
     extractMetadataClasses();
     extractRelations();
     applyFilters();
+    applySurrogateKeys();
+    applyIdentifierFallbacks();
     updateRanges();
     extractDataTypes();
     stabilizeOrdering();
+  }
+
+  /**
+   * When {@code ontology.surrogate-keys.enabled} is set, replaces composite primary keys
+   * (classes with more than one identifier attribute) with a single generated surrogate key,
+   * demoting the original identifier attributes to regular, non-key attributes.
+   */
+  private void applySurrogateKeys() {
+    be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration.SurrogateKeys config =
+        getOntologyConfiguration().getSurrogateKeys();
+    if (config == null || !config.isEnabled()) {
+      return;
+    }
+    List<Clazz> completeList = new ArrayList<>();
+    completeList.addAll(classes);
+    completeList.addAll(interfaces);
+    completeList.forEach(clazz -> applySurrogateKey(clazz, config));
+  }
+
+  private void applySurrogateKey(Clazz clazz,
+      be.vlaanderen.omgeving.oddtoolkit.config.OntologyConfiguration.SurrogateKeys config) {
+    List<Attribute> primaryKeys = clazz.getAttributes().stream()
+        .filter(Attribute::isPrimaryKey)
+        .toList();
+    if (primaryKeys.size() <= 1) {
+      return;
+    }
+    primaryKeys.forEach(attribute -> attribute.setPrimaryKey(false));
+
+    String namespace = clazz.getClassInfo().getResource().getNameSpace();
+    PropertyInfo surrogatePropertyInfo = new PropertyInfo(clazz.getClassInfo().getScope(),
+        getOntologyInfo().getModel().createResource(namespace + config.getName()));
+    surrogatePropertyInfo.setName(config.getName());
+    surrogatePropertyInfo.setIdentifier(true);
+    surrogatePropertyInfo.setCardinalityTo(new PropertyInfo.Cardinality());
+    surrogatePropertyInfo.getCardinalityTo().setMin(1);
+    surrogatePropertyInfo.getCardinalityTo().setMax(1);
+    surrogatePropertyInfo.setCardinalityFrom(new PropertyInfo.Cardinality());
+
+    Attribute surrogateAttribute = new Attribute();
+    surrogateAttribute.setName(config.getName());
+    surrogateAttribute.setPropertyInfo(surrogatePropertyInfo);
+    surrogateAttribute.setCardinality(Cardinality.ONE_TO_ONE);
+    surrogateAttribute.setDomain(clazz);
+    surrogateAttribute.setPrimaryKey(true);
+    surrogateAttribute.setNullable(false);
+    surrogateAttribute.setDataType(new DataType(null, config.getDatatype()));
+
+    List<Attribute> updatedAttributes = new ArrayList<>();
+    updatedAttributes.add(surrogateAttribute);
+    updatedAttributes.addAll(clazz.getAttributes());
+    clazz.setAttributes(updatedAttributes);
+  }
+
+  /**
+   * A class only gets an identifier attribute via a {@code hydra:search} template, or via
+   * {@code ontology.extra-properties}/{@code ontology.override-properties} configuration. When
+   * none of those apply, every attribute ends up with {@code primaryKey=false} and the generated
+   * table would silently end up without a {@code PRIMARY KEY}. Falls back to the class's "uri"
+   * attribute (present on every class via the conventional {@code uri} extra property) and logs
+   * a warning so the gap stays visible instead of failing silently downstream (e.g. missing
+   * PRIMARY KEY clauses, or foreign keys that can't resolve to this table at all).
+   */
+  private void applyIdentifierFallbacks() {
+    List<Clazz> completeList = new ArrayList<>();
+    completeList.addAll(classes);
+    completeList.addAll(interfaces);
+    completeList.forEach(this::applyIdentifierFallback);
+  }
+
+  private void applyIdentifierFallback(Clazz clazz) {
+    boolean hasPrimaryKey = clazz.getAttributes().stream().anyMatch(Attribute::isPrimaryKey);
+    if (hasPrimaryKey) {
+      return;
+    }
+    Attribute uriAttribute = clazz.getAttributes().stream()
+        .filter(attribute -> "uri".equalsIgnoreCase(attribute.getName()))
+        .findFirst()
+        .orElse(null);
+    if (uriAttribute == null) {
+      logger.warn("Class '{}' ({}) has no identifier property and no 'uri' attribute to fall "
+              + "back to; the generated table will have no primary key. Configure a "
+              + "hydra:search template or an identifier in "
+              + "ontology.extra-properties/override-properties.",
+          clazz.getName(), clazz.getUri());
+      return;
+    }
+    uriAttribute.setPrimaryKey(true);
+    uriAttribute.setNullable(false);
+    logger.warn("Class '{}' ({}) has no identifier property; falling back to '{}' as the "
+            + "primary key. Configure a hydra:search template or an identifier in "
+            + "ontology.extra-properties/override-properties to use a proper identifier instead.",
+        clazz.getName(), clazz.getUri(), uriAttribute.getName());
   }
 
   private void stabilizeOrdering() {
@@ -261,6 +360,19 @@ public class ClassGenerator extends BaseGenerator {
     completeList.addAll(interfaces);
     completeList.addAll(enums);
     completeList.forEach(clazz -> clazz.getAttributes().forEach(attribute -> {
+      if (attribute.getRangeClasses() != null && !attribute.getRangeClasses().isEmpty()) {
+        List<Clazz> updatedRangeClasses = attribute.getRangeClasses().stream()
+            .map(rangeClazz -> {
+              ClassInfo nearestClass = getNearestClass(rangeClazz.getClassInfo());
+              return nearestClass != null ? findNeareast(nearestClass) : rangeClazz;
+            })
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        if (!updatedRangeClasses.isEmpty()) {
+          attribute.setRangeClasses(updatedRangeClasses);
+        }
+      }
       if (attribute.getRange() != null) {
         ClassInfo nearestClass = getNearestClass(attribute.getRange().getClassInfo());
         if (nearestClass != null) {
@@ -297,7 +409,9 @@ public class ClassGenerator extends BaseGenerator {
             // Create an additional attribute
             Attribute datatypeAttribute = new Attribute();
             datatypeAttribute.setPropertyInfo(p);
-            datatypeAttribute.setName("datatype");
+            // Derive from the original attribute name so this doesn't collide with it
+            // (e.g. when the property itself happens to be named "datatype").
+            datatypeAttribute.setName(attribute.getName() + "_datatype");
             datatypeAttribute.setDomain(clazz);
             datatypeAttribute.setCardinality(Cardinality.ONE_TO_ONE);
             datatypeAttribute.setDataType(new DataType("String", XSD.xstring.getURI()));
@@ -345,6 +459,7 @@ public class ClassGenerator extends BaseGenerator {
             }
 
             if (!rangeClasses.isEmpty()) {
+              rangeClasses = dedupeAncestorRanges(rangeClasses, propertyInfo);
               attribute.setRangeClasses(rangeClasses);
               // For backwards compatibility, set range to the first class
               attribute.setRange(rangeClasses.getFirst());
@@ -355,6 +470,44 @@ public class ClassGenerator extends BaseGenerator {
         }
       }
     }
+  }
+
+  /**
+   * When a property's range spans both a class and one of its own subclasses (e.g. two separate
+   * OWL restrictions on the same property, one {@code someValuesFrom ssn:System} and another
+   * {@code someValuesFrom :Installatie} where {@code :Installatie rdfs:subClassOf ssn:System}),
+   * only the most general (ancestor) class is kept. A descendant is always also an instance of
+   * its ancestor, so the ancestor's table is a valid target for every value, while keeping both
+   * would attach two competing relations to the same physical column.
+   */
+  private List<Clazz> dedupeAncestorRanges(List<Clazz> rangeClasses, PropertyInfo propertyInfo) {
+    List<Clazz> result = new ArrayList<>();
+    for (Clazz candidate : rangeClasses) {
+      if (result.stream().anyMatch(existing -> isStrictAncestor(existing, candidate))) {
+        logger.debug("Dropping redundant range '{}' for property '{}': it is a subclass already "
+                + "covered by a more general range in the same restriction.",
+            candidate.getUri(), propertyInfo.getUri());
+        continue;
+      }
+      List<Clazz> supersededByCandidate = result.stream()
+          .filter(existing -> isStrictAncestor(candidate, existing))
+          .toList();
+      supersededByCandidate.forEach(existing -> logger.debug(
+          "Dropping redundant range '{}' for property '{}': it is a subclass already covered by "
+              + "the more general range '{}'.",
+          existing.getUri(), propertyInfo.getUri(), candidate.getUri()));
+      result.removeAll(supersededByCandidate);
+      result.add(candidate);
+    }
+    return result;
+  }
+
+  private boolean isStrictAncestor(Clazz ancestor, Clazz descendant) {
+    if (ancestor == descendant || ancestor.getClassInfo() == null || descendant.getClassInfo() == null
+        || ancestor.getUri() == null) {
+      return false;
+    }
+    return descendant.getClassInfo().isSubClassOf(ancestor.getUri());
   }
 
   @SuppressWarnings("unchecked")

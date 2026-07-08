@@ -31,6 +31,20 @@ public class OntologyConfiguration {
 
   private MetadataClasses metadataClasses = new MetadataClasses();
 
+  // Replace composite primary keys (classes with more than one identifier property,
+  // e.g. a natural key combined with temporal/versioning properties) with a single
+  // generated surrogate key.
+  // YAML key: ontology.surrogate-keys
+  private SurrogateKeys surrogateKeys = new SurrogateKeys();
+
+  @Getter
+  @Setter
+  public static class SurrogateKeys {
+    private boolean enabled = false;
+    private String name = "id";
+    private String datatype = "http://www.w3.org/2001/XMLSchema#string";
+  }
+
   @Getter
   @Setter
   public static class MetadataClasses {

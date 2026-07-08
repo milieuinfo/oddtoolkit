@@ -69,6 +69,11 @@ generators:
     status: "LS"
     editor-name: "ODDToolkit"
     editor-affiliation: "Vlaamse overheid"
+  odcs-generator:
+    output-file: "target/test-cache/odcs/contract.json"
+    contract-name: "RIE-IEPR Data Contract"
+    contract-version: "1.0.0"
+    contract-description: "Open Data Contract for RIE-IEPR ontology"
 
   schema-generator:
     join-table-name-pattern: "{source_table}_{target_table}"

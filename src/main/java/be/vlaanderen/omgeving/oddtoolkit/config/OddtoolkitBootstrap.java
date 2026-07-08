@@ -20,6 +20,7 @@ import be.vlaanderen.omgeving.oddtoolkit.generator.ClassGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ERDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.JavaGenerator;
+import be.vlaanderen.omgeving.oddtoolkit.generator.ODCSGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.SQLGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ShaclGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.TypescriptGenerator;
@@ -71,8 +72,10 @@ public final class OddtoolkitBootstrap {
         ShaclGeneratorProperties.class, new ShaclGeneratorProperties());
     TypescriptGeneratorProperties typescriptGeneratorProperties = bindAnnotated(rootConfiguration,
         TypescriptGeneratorProperties.class, new TypescriptGeneratorProperties());
-    BikeshedGeneratorProperties bikeshedGeneratorProperties = bindAnnotated(rootConfiguration,
-        BikeshedGeneratorProperties.class, new BikeshedGeneratorProperties());
+     BikeshedGeneratorProperties bikeshedGeneratorProperties = bindAnnotated(rootConfiguration,
+         BikeshedGeneratorProperties.class, new BikeshedGeneratorProperties());
+     ODCSGeneratorProperties odcsGeneratorProperties = bindAnnotated(rootConfiguration,
+         ODCSGeneratorProperties.class, new ODCSGeneratorProperties());
 
     OntologyInfo ontologyInfo = new OntologyInfo(ontologyConfiguration);
     Map<String, AbstractAdapter<?>> adapterBeans = createAdapterBeans(rootConfiguration, ontologyInfo,
@@ -98,22 +101,25 @@ public final class OddtoolkitBootstrap {
     JavaGenerator javaGenerator = generatorConfiguration.javaGenerator(ontologyInfo,
         generatorProperties, diagramGeneratorProperties, schemaGeneratorProperties,
         javaGeneratorProperties, adapterBeans);
-    TypescriptGenerator typescriptGenerator = generatorConfiguration.typescriptGenerator(ontologyInfo,
-        generatorProperties, typescriptGeneratorProperties, adapterBeans);
-    BikeshedGenerator bikeshedGenerator = generatorConfiguration.bikeshedGenerator(ontologyInfo,
-        generatorProperties, bikeshedGeneratorProperties, adapterBeans);
+     TypescriptGenerator typescriptGenerator = generatorConfiguration.typescriptGenerator(ontologyInfo,
+         generatorProperties, typescriptGeneratorProperties, adapterBeans);
+     BikeshedGenerator bikeshedGenerator = generatorConfiguration.bikeshedGenerator(ontologyInfo,
+         generatorProperties, bikeshedGeneratorProperties, adapterBeans);
+      ODCSGenerator odcsGenerator = generatorConfiguration.odcsGenerator(ontologyInfo,
+          generatorProperties, odcsGeneratorProperties, diagramGeneratorProperties, schemaGeneratorProperties, adapterBeans);
 
-    DefaultGeneratorRegistry registry = new DefaultGeneratorRegistry();
-    registry.register(dataFrameGenerator.getName(), dataFrameGenerator);
-    registry.register(classGenerator.getName(), classGenerator);
-    registry.register(classDiagramGenerator.getName(), classDiagramGenerator);
-    registry.register(erDiagramGenerator.getName(), erDiagramGenerator);
-    registry.register(sqlGenerator.getName(), sqlGenerator);
-    registry.register(shaclGenerator.getName(), shaclGenerator);
-    registry.register(javaGenerator.getName(), javaGenerator);
-    registry.register(typescriptGenerator.getName(), typescriptGenerator);
-    registry.register(bikeshedGenerator.getName(), bikeshedGenerator);
-    return registry;
+     DefaultGeneratorRegistry registry = new DefaultGeneratorRegistry();
+     registry.register(dataFrameGenerator.getName(), dataFrameGenerator);
+     registry.register(classGenerator.getName(), classGenerator);
+     registry.register(classDiagramGenerator.getName(), classDiagramGenerator);
+     registry.register(erDiagramGenerator.getName(), erDiagramGenerator);
+     registry.register(sqlGenerator.getName(), sqlGenerator);
+     registry.register(shaclGenerator.getName(), shaclGenerator);
+     registry.register(javaGenerator.getName(), javaGenerator);
+     registry.register(typescriptGenerator.getName(), typescriptGenerator);
+     registry.register(bikeshedGenerator.getName(), bikeshedGenerator);
+     registry.register(odcsGenerator.getName(), odcsGenerator);
+     return registry;
   }
 
   private static <T> T bindAnnotated(Map<String, Object> root, Class<T> type, T defaultValue) {

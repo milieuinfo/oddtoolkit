@@ -99,8 +99,8 @@ public class ClassGeneratorTest {
         .map(ClassGenerator.EnumValue::getName)
         .toList();
 
-    assertTrue(enumValues.contains("TRANSPORT"),
-        "Expected TRANSPORT_PROCEDURE to be trimmed to TRANSPORT");
+    assertTrue(enumValues.contains("VERWERKING"),
+        "Expected VERWERKING_PROCEDURE to be trimmed to VERWERKING");
     assertFalse(enumValues.stream().anyMatch(value -> value.endsWith("_PROCEDURE")),
         "Expected redundant enum suffix token to be removed from Procedure enum values");
   }

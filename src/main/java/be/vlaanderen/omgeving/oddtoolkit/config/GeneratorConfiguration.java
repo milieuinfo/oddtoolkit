@@ -7,6 +7,7 @@ import be.vlaanderen.omgeving.oddtoolkit.generator.ClassGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ERDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.JavaGenerator;
+import be.vlaanderen.omgeving.oddtoolkit.generator.ODCSGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.SQLGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ShaclGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.TypescriptGenerator;
@@ -112,6 +113,17 @@ public class GeneratorConfiguration {
         generatorProperties.adaptersFor("bikeshed"));
     return new BikeshedGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
         bikeshedGeneratorProperties);
+  }
+
+  public ODCSGenerator odcsGenerator(OntologyInfo ontologyInfo,
+      GeneratorProperties generatorProperties,
+      ODCSGeneratorProperties odcsGeneratorProperties,
+      DiagramGeneratorProperties diagramGeneratorProperties,
+      SchemaGeneratorProperties schemaGeneratorProperties,
+      Map<String, AbstractAdapter<?>> adapterBeans) {
+    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans, generatorProperties.adaptersFor("odcs"));
+    return new ODCSGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
+        odcsGeneratorProperties, schemaGeneratorProperties, diagramGeneratorProperties);
   }
 
   private List<AbstractAdapter<?>> selectAdapters(Map<String, AbstractAdapter<?>> adapterBeans,
