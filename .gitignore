@@ -37,4 +37,4 @@ docs/node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
 
-.kilo/
+.claude/

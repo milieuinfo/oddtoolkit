@@ -1,0 +1,49 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "18px"}}}%%
+classDiagram
+    direction LR
+
+    %% ssn:System (mapped to EmissionPoint)
+    class ssnSystem["ssn:System"] {
+        rdfs:label
+        adms:status
+        ogc:hasGeometry
+    }
+
+    %% sosa:Platform (mapped to OperationLocation)
+    class sosPlatform["sosa:Platform"] {
+        rdfs:label
+        adms:status
+    }
+
+    %% ssn:Deployment (mapped to Operation)
+    class ssnDeployment["ssn:Deployment"] {
+        rdfs:label
+        adms:status
+    }
+
+    %% prov:Agent (mapped to Operator)
+    class provAgent["prov:Agent"] {
+        rdfs:label
+    }
+
+    %% pplan:Step/Plan (mapped to Process)
+    class pplanStep["pplan:Step"] {
+        rdfs:label
+    }
+
+    class pplanPlan["pplan:Plan"] {
+        rdfs:label
+    }
+
+    ssnSystem --> sosPlatform : isHostedBy
+    sosPlatform --> ssnSystem : hosts
+    sosPlatform --> provAgent : wasAttributedTo
+    ssnDeployment --> sosPlatform : deployedOnPlatform
+    sosPlatform --> ssnDeployment : inDeployment
+    ssnDeployment --> ssnSystem : deployedSystem
+    ssnSystem --> ssnDeployment : hasDeployment
+    pplanStep --> ssnSystem : implementedBy
+    pplanPlan --> pplanStep : hasStep
+    pplanStep --> pplanPlan : isStepOfPlan
+    pplanStep --> pplanStep : isPrecededBy
+    ssnSystem --> pplanStep : implements

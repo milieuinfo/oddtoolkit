@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
 public class TypescriptGenerator extends ClassGenerator {
@@ -25,6 +26,7 @@ public class TypescriptGenerator extends ClassGenerator {
 
   private final Map<Clazz, String> fileNames = new HashMap<>();
   private final Map<String, String> nameMapping = new HashMap<>();
+  private final Set<String> expectedTypescriptFileNames = new HashSet<>();
 
   private final TypescriptGeneratorProperties typescriptGeneratorProperties;
 
@@ -50,12 +52,25 @@ public class TypescriptGenerator extends ClassGenerator {
   }
 
   protected void prepareFileNames() {
+    expectedTypescriptFileNames.clear();
     // Prepare file names for all classes, interfaces and enums
     getClasses().forEach(
-        clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".model.ts"));
+        clazz -> {
+          String fileName = clazz.getName().toLowerCase() + ".model.ts";
+          fileNames.put(clazz, fileName);
+          expectedTypescriptFileNames.add(fileName);
+        });
     getInterfaces().forEach(
-        clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".interface.ts"));
-    getEnums().forEach(clazz -> fileNames.put(clazz, clazz.getName().toLowerCase() + ".enum.ts"));
+        clazz -> {
+          String fileName = clazz.getName().toLowerCase() + ".interface.ts";
+          fileNames.put(clazz, fileName);
+          expectedTypescriptFileNames.add(fileName);
+        });
+    getEnums().forEach(clazz -> {
+      String fileName = clazz.getName().toLowerCase() + ".enum.ts";
+      fileNames.put(clazz, fileName);
+      expectedTypescriptFileNames.add(fileName);
+    });
     // Prepare name mapping for all classes, interfaces and enums
     getClasses().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
     getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
@@ -63,6 +78,9 @@ public class TypescriptGenerator extends ClassGenerator {
   }
 
   protected void generateFile(List<? extends Clazz> classes, @Nullable String type) {
+    if (typescriptGeneratorProperties.isCleanupStaleFiles()) {
+      cleanupStaleTypescriptFiles();
+    }
     classes.forEach(clazz -> {
       String typeDeclaration = "class";
       String originalName = clazz.getName();
@@ -332,6 +350,34 @@ public class TypescriptGenerator extends ClassGenerator {
       Files.writeString(outputPath, content);
     } catch (IOException e) {
       throw new RuntimeException("Failed to save file: " + fileName, e);
+    }
+  }
+
+  private void cleanupStaleTypescriptFiles() {
+    Path outputPath = Paths.get(getBasePath());
+    
+    // Check if the output directory exists before attempting to walk it
+    if (!Files.exists(outputPath)) {
+      return;
+    }
+    
+    try (Stream<Path> files = Files.walk(outputPath)) {
+      files.filter(Files::isRegularFile)
+           .filter(p -> {
+             String name = p.getFileName().toString();
+             return name.endsWith(".model.ts") || name.endsWith(".interface.ts") || name.endsWith(".enum.ts");
+           })
+           .forEach(p -> {
+             String fileName = p.getFileName().toString();
+             if (!expectedTypescriptFileNames.contains(fileName)) {
+               try {
+                 Files.delete(p);
+               } catch (IOException ignored) {
+               }
+             }
+           });
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to cleanup stale files", e);
     }
   }
 

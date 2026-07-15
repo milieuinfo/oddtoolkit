@@ -1,0 +1,30 @@
+# LaTeX build artefacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.dvi
+
+# Generated PDF output
+*.pdf
+!.mermaid/*.pdf
+
+# Minted cache
+_minted/
+*.minted
+
+# TeX font generation logs
+missfont.log

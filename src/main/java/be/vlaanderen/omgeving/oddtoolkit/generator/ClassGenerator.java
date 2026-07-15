@@ -81,9 +81,17 @@ public class ClassGenerator extends BaseGenerator {
   }
 
   public List<Clazz> getClasses() {
+    return classes;
+  }
+
+  /**
+   * Returns all classes including interfaces (for backward compatibility with callers that need the combined list).
+   */
+  public List<Clazz> getAllGeneratedClasses() {
     List<Clazz> allClasses = new ArrayList<>();
     allClasses.addAll(classes);
     allClasses.addAll(interfaces);
+    allClasses.addAll(enums);
     return allClasses;
   }
 
@@ -350,8 +358,7 @@ public class ClassGenerator extends BaseGenerator {
     filterInterfaceProperties();
     filterInheritedProperties();
     filterSuperClasses();
-    getClasses().forEach(this::filterInverseProperties);
-    getInterfaces().forEach(this::filterInverseProperties);
+    getAllGeneratedClasses().forEach(this::filterInverseProperties);
   }
 
   private void updateRanges() {

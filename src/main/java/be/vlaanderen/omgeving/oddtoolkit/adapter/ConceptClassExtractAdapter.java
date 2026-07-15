@@ -6,6 +6,7 @@ import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.Scope;
+import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;

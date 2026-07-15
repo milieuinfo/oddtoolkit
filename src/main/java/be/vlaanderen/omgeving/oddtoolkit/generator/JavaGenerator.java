@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.apache.jena.atlas.lib.Pair;
 import org.jspecify.annotations.Nullable;
 
@@ -33,6 +34,7 @@ public class JavaGenerator extends SchemaGenerator {
 
   private final Map<Clazz, String> fileNames = new HashMap<>();
   private final Map<String, String> nameMapping = new HashMap<>();
+  private final Set<String> expectedJavaFileNames = new HashSet<>();
 
   private final JavaGeneratorProperties generatorProperties;
 
@@ -65,15 +67,31 @@ public class JavaGenerator extends SchemaGenerator {
   }
 
   protected void prepareFileNames() {
-    getClasses().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".java"));
-    getInterfaces().forEach(clazz -> fileNames.put(clazz, "I" + clazz.getName() + ".java"));
-    getEnums().forEach(clazz -> fileNames.put(clazz, clazz.getName() + ".java"));
+    expectedJavaFileNames.clear();
+    getClasses().forEach(clazz -> {
+      String fileName = clazz.getName() + ".java";
+      fileNames.put(clazz, fileName);
+      expectedJavaFileNames.add(fileName);
+    });
+    getInterfaces().forEach(clazz -> {
+      String fileName = "I" + clazz.getName() + ".java";
+      fileNames.put(clazz, fileName);
+      expectedJavaFileNames.add(fileName);
+    });
+    getEnums().forEach(clazz -> {
+      String fileName = clazz.getName() + ".java";
+      fileNames.put(clazz, fileName);
+      expectedJavaFileNames.add(fileName);
+    });
     getClasses().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
     getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), "I" + clazz.getName()));
     getEnums().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
   }
 
   protected void generateFile(List<? extends Clazz> classes, @Nullable String type) {
+    if (generatorProperties.isCleanupStaleFiles()) {
+      cleanupStaleJavaFiles();
+    }
     classes.forEach(clazz -> {
       Table equivalentTable = getTableByClazz(clazz, false);
 
@@ -140,6 +158,9 @@ public class JavaGenerator extends SchemaGenerator {
       builder.append(" * ").append(clazz.getName()).append("\n");
       builder.append(" * <a href=\"").append(clazz.getUri()).append("\">")
           .append(clazz.getClassInfo().getName()).append("</a>\n");
+      if (clazz.getClassInfo().getComment() != null) {
+        builder.append(" * ").append(clazz.getClassInfo().getComment()).append("\n");
+      }
       builder.append(" **/\n");
 
       if (!isInterface && !isEnum) {
@@ -180,8 +201,14 @@ public class JavaGenerator extends SchemaGenerator {
         });
       }
       clazz.getAttributes().forEach(prop -> {
-        builder.append("\t// ").append("<a href=\"").append(prop.getUri()).append("\">")
+        builder.append("\t/**\n");
+        builder.append("\t * ").append(prop.getPropertyInfo().getName()).append("\n");
+        builder.append("\t * <a href=\"").append(prop.getUri()).append("\">")
             .append(prop.getPropertyInfo().getName()).append("</a>\n");
+        if (prop.getPropertyInfo().getComment() != null) {
+          builder.append("\t * ").append(prop.getPropertyInfo().getComment()).append("\n");
+        }
+        builder.append("\t */\n");
 
         if (!isInterface && prop.isUnionType() && prop.getCardinality().equals(Cardinality.MANY_TO_MANY)) {
           appendUnionManyToManyFields(builder, clazz, equivalentTable, prop);
@@ -380,6 +407,31 @@ public class JavaGenerator extends SchemaGenerator {
       Files.writeString(outputPath, content);
     } catch (IOException e) {
       throw new RuntimeException("Failed to save file: " + fileName, e);
+    }
+  }
+
+  private void cleanupStaleJavaFiles() {
+    Path outputPath = Paths.get(getBasePath());
+    
+    // Check if the output directory exists before attempting to walk it
+    if (!Files.exists(outputPath)) {
+      return;
+    }
+    
+    try (Stream<Path> files = Files.walk(outputPath)) {
+      files.filter(Files::isRegularFile)
+           .filter(p -> p.getFileName().toString().endsWith(".java"))
+           .forEach(p -> {
+             String fileName = p.getFileName().toString();
+             if (!expectedJavaFileNames.contains(fileName)) {
+               try {
+                 Files.delete(p);
+               } catch (IOException ignored) {
+               }
+             }
+           });
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to cleanup stale files", e);
     }
   }
 

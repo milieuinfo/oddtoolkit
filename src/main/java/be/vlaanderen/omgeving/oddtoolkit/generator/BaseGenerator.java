@@ -3,6 +3,7 @@ package be.vlaanderen.omgeving.oddtoolkit.generator;
 import be.vlaanderen.omgeving.oddtoolkit.adapter.AbstractAdapter;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
+import be.vlaanderen.omgeving.oddtoolkit.model.ConceptInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyConceptInfo;
@@ -152,12 +153,27 @@ public abstract class BaseGenerator {
    * Returns the {@link PropertyConceptInfo} whose equivalents contain the given property URI,
    * or {@code null} if none is found.
    */
-  public PropertyConceptInfo getPropertyConceptForProperty(String propertyUri) {
-    return conceptSchemeInfo.getPropertyConcepts().stream()
-        .filter(pc -> pc.getEquivalents().contains(propertyUri))
-        .findFirst()
-        .orElse(null);
-  }
+   public PropertyConceptInfo getPropertyConceptForProperty(String propertyUri) {
+     return conceptSchemeInfo.getPropertyConcepts().stream()
+         .filter(pc -> pc.getEquivalents().contains(propertyUri))
+         .findFirst()
+         .orElse(null);
+   }
+
+   /**
+    * Returns a concept info (class or property) whose equivalents contain the given URI,
+    * or {@code null} if none is found.
+    */
+   public ConceptInfo getConceptForPropertyOrClass(String uri) {
+     PropertyConceptInfo pci = getPropertyConceptForProperty(uri);
+     if (pci != null) {
+       return pci;
+     }
+     return conceptSchemeInfo.getClassConcepts().stream()
+         .filter(cc -> cc.getEquivalents().contains(uri))
+         .findFirst()
+         .orElse(null);
+   }
 
   /**
    * Returns the {@link ClassConceptInfo} whose equivalents contain the given class URI,

@@ -1,0 +1,61 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "18px"}}}%%
+classDiagram
+    direction LR
+
+    %% riepr:Exploitant (prov:Agent)
+    class Operator:::agent {
+        +String uuid
+        +LocalDate validFrom
+        String name
+    }
+
+    %% riepr:Exploitatielocatie (sosa:Platform)
+    class OperationLocation:::platform {
+        +String uuid
+        +LocalDate validFrom
+        String name
+        String status
+    }
+
+    %% riepr:Exploitatie (ssn:Deployment)
+    class Operation:::deployment {
+        +String uuid
+        +LocalDate validFrom
+        String name
+        String status
+    }
+
+    %% riepr:Emissiepunt (ssn:System, ogc:SpatialObject)
+    class EmissionPoint:::system {
+        +String uuid
+        +LocalDate validFrom
+        String name
+        String status
+        String geometry
+    }
+
+    %% riepr:Proces (pplan:Step, pplan:Plan, sosa:Procedure)
+    class Process:::plan {
+        +String uuid
+        +LocalDate validFrom
+        String name
+    }
+
+    %% sosa:isHostedBy -> :locatie -> "location"
+    EmissionPoint --> OperationLocation : location
+    %% prov:wasAttributedTo -> :toegewezenAan -> "assignedTo"
+    OperationLocation --> Operator : assignedTo
+    %% ssn:deployedOnPlatform -> :locatie -> "location"
+    Operation --> OperationLocation : location
+    %% ssn:deployedSystem -> :systemen -> "systems"
+    Operation --> EmissionPoint : systems
+    %% ssn:implementedBy -> :systeem -> "system"
+    Process --> EmissionPoint : system
+    %% pplan:isStepOfPlan / pplan:isPrecededBy
+    Process --> Process : partOf / precededBy
+
+    classDef system fill:#4bde2a,stroke:#000000
+    classDef platform fill:#f6ff00,stroke:#000000
+    classDef deployment fill:#ffd966,stroke:#000000
+    classDef agent fill:#ffe680,stroke:#000000
+    classDef plan fill:#ccccff,stroke:#000000

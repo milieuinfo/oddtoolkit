@@ -1,0 +1,32 @@
+\section{Solution and Implementation} \label{sec:solution}
+ODDToolkit\footnote{\url{https://github.com/milieuinfo/oddtoolkit}} is a standalone CLI that combines an OWL ontology~\cite{GRAU2008309}, a SKOS concept scheme~\cite{miles2009skos}, and project-specific generation settings. The ontology remains the formal source model, the SKOS layer provides developer-facing names, and all artefacts are derived from one enriched intermediate representation.
+
+As shown in Figure~\ref{fig:pipeline}, the pipeline has two phases. In \emph{preparation}, the toolkit resolves imports, caches external vocabularies, and applies OWL reasoning with Apache Jena~\cite{carroll2004jena}. It then extracts classes and properties, derives keys from Hydra IRI templates~\cite{lanthaler2013hydra}, interprets cardinality constraints from \texttt{owl:Restriction}, and propagates inverse-property information so relation multiplicities can be reused across generators. The SKOS mapping is applied at this stage, allowing the same ontology predicate to be exposed with developer-oriented names that better match object-oriented and relational conventions~\cite{7332450,10.1007/978-3-030-38919-2_35}.
+
+For example, an OWL class \texttt{:EmissionPoint} can use a Hydra template with \texttt{uuid} and \texttt{validFrom}. ODDToolkit then derives the same composite identity for SQL, while SKOS can rename predicates such as \texttt{dct:issued} to \texttt{validFrom} and \texttt{sosa:isHostedBy} to \texttt{location}. Cardinality constraints can also be applied, a \texttt{[1..1]} restriction becomes a required field and a \texttt{NOT NULL} column.
+
+This also yields a concrete implementation projection. In SQL, the generated table uses a composite primary key over \texttt{uuid} and \texttt{valid\_from}; in Java, the same pair becomes the JPA identity while \texttt{status} remains mandatory and \texttt{geometry} nullable. The same class is also projected to TypeScript and SHACL, so the developer-facing field names and structural constraints stay aligned across code, schema, and validation artefacts.
+
+\begin{figure}[ht]
+  \centering
+  \includemermaid[width=0.72\linewidth]{images/sources/pipeline.mmd}
+  \caption{The ODDToolkit processing pipeline.}
+  \label{fig:pipeline}
+\end{figure}
+
+In \emph{generation}, the enriched model is projected to multiple outputs. The SQL generator turns classes into tables, derives composite keys from Hydra variables, and places foreign keys or join tables from resolved multiplicities. The Java generator emits JPA-oriented entities, the TypeScript generator produces JSON-LD-oriented typed models~\cite{sporny2020jsonld}, the SHACL generator emits validation constraints from the same structural rules~\cite{knublauch2017shacl,10.1145/3487553.3524253}, and the Bikeshed generator creates specification source files that complement ontology-centric documentation such as Widoco~\cite{atkins2024bikeshed,garijo2017widoco}. UML and ER diagrams are generated from the same model, so decisions propagate to both textual and visual outputs that can immediately be used in communication to software teams.
+
+The Java output also preserves ontology-driven polymorphism where it matters. If an inherited parent belongs to an external vocabulary namespace and is actually reused as a relation target by multiple in-scope classes, ODDToolkit emits it as an interface rather than a concrete class; this is why external concepts such as \texttt{ssn:System} can surface as reusable interface types in generated code instead of being flattened away.
+
+ODDToolkit also produces UML and ER diagrams. OWL class hierarchies are rendered as inheritance arrows; object properties become directed associations labelled with the SKOS-derived name. As illustrated in Figure~\ref{fig:class-diagram}, association labels derive from the SKOS concept scheme (e.g.\ \texttt{sosa:isHostedBy} $\rightarrow$ \emph{location}, \texttt{prov:wasAttributedTo} $\rightarrow$ \emph{assignedTo}, \texttt{pplan:isStepOfPlan} and \texttt{pplan:isPrecededBy} $\rightarrow$ \emph{partOf\,/\,precededBy}). 
+
+\begin{figure}[tp]
+  \centering
+  \includemermaid[width=\linewidth]{images/sources/class-diagram-rdf.mmd}
+  \par\medskip
+  \includemermaid[width=\linewidth]{images/sources/class-diagram-excerpt.mmd}
+  \caption{RDF/SOSA/SSN/P-PLAN model (top) and ODDToolkit-generated class diagram (bottom) for the IED ontology.}
+  \label{fig:class-diagram}
+\end{figure}
+
+The main implementation choice is architectural rather than format-specific: all generators consume the same prepared model instead of reinterpreting the ontology independently. This keeps code, schema, validation artefacts, and documentation aligned while allowing new generators to be added without changing the preparation stage.

@@ -44,6 +44,10 @@ Generate Java model only:
 java -jar target/oddtoolkit.jar --generator=java --config-file=src/test/resources/application.yml
 ```
 
+## Markdown file inclusion
+
+ODDToolkit can embed external markdown files into Bikeshed output using flexmark-java for robust GFM parsing. See [Markdown Inclusion Guide](guide/markdown-inclusion.md) for configuration details and supported features.
+
 ## Where outputs go
 
 Output paths come from your config file (`generators.*`).

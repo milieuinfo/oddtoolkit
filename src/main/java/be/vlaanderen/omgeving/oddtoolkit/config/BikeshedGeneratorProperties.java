@@ -1,5 +1,6 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,5 +45,43 @@ public class BikeshedGeneratorProperties {
    * When omitted the ontology {@code rdfs:comment} is used.
    */
   private String abstractText;
+
+  // --- Markdown file inclusion settings ---
+
+  /**
+   * List of markdown file paths to include in the Bikeshed output.
+   * Paths are resolved relative to the project root (working directory).
+   * Files are included in the order specified.
+   */
+  private List<String> markdownFiles;
+
+  /**
+   * Alternative to {@link #markdownFiles}: a directory path whose .md files are
+   * collected and sorted alphabetically for inclusion in the Bikeshed output.
+   * When both {@code markdownFiles} and {@code markdownDirectory} are set,
+   * only {@code markdownFiles} is used (with a warning).
+   */
+  private String markdownDirectory;
+
+  /**
+   * Section title for the combined markdown content section.
+   * Defaults to "Additional Documentation".
+   */
+  private String markdownSectionTitle = "Additional Documentation";
+
+  /**
+   * When true, markdown content is inserted after the Classes section.
+   * When false, it is appended at the very end of the document.
+   * Defaults to true.
+   */
+  private Boolean markdownAppendAfterClasses = true;
+
+  /**
+   * When true, GFM-style pipe tables in markdown are converted to Bikeshed-compatible
+   * {@code <table class="data">} HTML elements. This is necessary because Bikeshed's
+   * native markdown shorthand does not fully support GFM tables.
+   * Defaults to true.
+   */
+  private Boolean markdownConvertTables = true;
 }
 

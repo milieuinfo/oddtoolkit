@@ -59,8 +59,10 @@ generators:
   java-generator:
     package-name: be.vlaanderen.omgeving.riepr.model.structuur
     output-directory: "target/test-cache/java"
+    cleanup-stale-files: true
   typescript-generator:
     output-directory: "target/test-cache/typescript"
+    cleanup-stale-files: true
   data-frame-generator:
     output-file: "target/test-cache/dataframe/frame.json"
   bikeshed-generator:
@@ -69,6 +71,15 @@ generators:
     status: "LS"
     editor-name: "ODDToolkit"
     editor-affiliation: "Vlaamse overheid"
+    
+    # Markdown file inclusion example (uncomment to enable):
+    # markdown-files:
+    #   - "docs/examples/riepr/documentation/afname/README.md"
+    #   - "docs/examples/riepr/documentation/afname/BASISAANNAME.md"
+    # markdown-directory: "docs/examples/riepr/documentation/afname/"
+    # markdown-section-title: "Additional Documentation"
+    # markdown-append-after-classes: true
+    # markdown-convert-tables: true
   odcs-generator:
     output-file: "target/test-cache/odcs/contract.json"
     contract-name: "RIE-IEPR Data Contract"

@@ -141,6 +141,12 @@
     owl:equivalentProperty qudt:numericValue ;
     skos:inScheme <> .
 
+:datatype a skos:Concept ;
+    skos:prefLabel "datatype"@nl ;
+    skos:definition "De eigenschap die het datatype van de waarde van een systeemeigenschap beschrijft."@nl ;
+    owl:equivalentProperty riepr:datatype ;
+    skos:inScheme <> .
+
 :hoogte a skos:Concept ;
 	skos:prefLabel "hoogte"@nl ;
 	skos:altLabel "height"@en ;
@@ -299,6 +305,16 @@
     skos:inScheme <> .
 
 # ---------------------------------------- #
+# Gebeurtenis (Feature of Interest)
+# ---------------------------------------- #
+
+:Gebeurtenis a skos:Concept ;
+    skos:prefLabel "gebeurtenis"@nl ;
+    skos:definition "Een tijdsgebonden voorval dat betrekking heeft op emissie, onttrekking of uitwisseling van stoffen."@nl ;
+    owl:equivalentClass sosa:FeatureOfInterest ;
+    skos:inScheme <> .
+
+# ---------------------------------------- #
 # Observatie
 # ---------------------------------------- #
 
@@ -314,10 +330,25 @@
     owl:equivalentProperty sosa:hasResult ;
     skos:inScheme <> .
 
-:heeftAandachtspunt a skos:Concept ;
-    skos:prefLabel "heeft aandachtspunt"@nl ;
-    skos:definition "De eigenschap die de relatie tussen een proces en een aandachtspunt beschrijft."@nl ;
+:betrekkingTot a skos:Concept ;
+    skos:prefLabel "betrekking tot"@nl ;
+    skos:definition "De eigenschap die de relatie tussen een proces en een gebeurtenis beschrijft."@nl ;
     owl:equivalentProperty sosa:hasFeatureOfInterest ;
+    skos:inScheme <> .
+
+# ---------------------------------------- #
+# Observatie
+# ---------------------------------------- #
+:meetinstrument a skos:Concept ;
+    skos:prefLabel "meetinstrument"@nl ;
+    skos:definition "Een meetinstrument dat gebruikt wordt bij de uitvoering van een observatie."@nl ;
+    owl:equivalentProperty sosa:madeBySensor ;
+    skos:inScheme <> .
+
+:eigenschap a skos:Concept ;
+    skos:prefLabel "eigenschap"@nl ;
+    skos:definition "Een eigenschap die gemeten wordt bij de uitvoering van een observatie."@nl ;
+    owl:equivalentProperty sosa:observedProperty ;
     skos:inScheme <> .
 
 # ---------------------------------------- #

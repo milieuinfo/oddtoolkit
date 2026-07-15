@@ -127,4 +127,88 @@ generators:
       This specification describes how ODDToolkit enables ontology-driven code generation for environmental data modeling scenarios.  
       
                                       Falls back automatically to rdfs:comment property value from original Ontology file when left empty or not defined
+
+  # --- Markdown File Inclusion ---
+  # Include additional markdown documentation files in the Bikeshed output.
+  # This is useful for adding use cases, examples, or domain-specific content
+  # that is not part of the ontology model itself.
+  
+  # Option 1: Explicit list of markdown file paths (resolved relative to project root)
+  markdown-files:
+    - "docs/examples/riepr/documentation/afname/README.md"
+    - "docs/examples/riepr/documentation/afname/BASISAANNAME.md"
+    - "docs/examples/riepr/documentation/afname/GEBRUIKSSCENARIO.md"
+  
+  # Option 2: Directory scan (all .md files collected alphabetically, README.md excluded)
+  # markdown-directory: "docs/examples/riepr/documentation/afname/"
+  
+  # Section title for the combined markdown content (defaults to "Additional Documentation")
+  markdown-section-title: "Afname Use Cases"
+  
+  # Insert markdown section after Classes section (true) or at document end (false)
+  markdown-append-after-classes: true
+  
+  # Convert GFM pipe tables to <table class="data"> HTML for Bikeshed compatibility
+  # Uses flexmark-java (v0.64.8) with TablesExtension for robust GFM table parsing
+  markdown-convert-tables: true
+
+```
+
+### Markdown Inclusion Details
+
+The Bikeshed generator supports embedding external markdown files into the generated `.bs` specification. This feature uses **flexmark-java** (v0.64.8) — a mature CommonMark + GFM parser with full table support — to convert markdown to HTML before insertion.
+
+#### Supported Markdown Features
+
+| Feature | Support | Notes |
+|---------|---------|-------|
+| Headings (`#` through `######`) | ✅ | Converted to Bikeshed heading syntax with anchors |
+| GFM pipe tables | ✅ | Rendered as `<table class="data">` with `<thead>`/`<tbody>` |
+| Code blocks (fenced) | ✅ | Preserved with language hints |
+| Lists (ordered/unordered) | ✅ | Full nesting support via flexmark |
+| Bold / Italic | ✅ | Converted to `<strong>`/`<em>` |
+| Links | ✅ | Standard `[text](url)` syntax |
+| Strikethrough | ✅ | Via GFM extension (`~~text~~`) |
+| Blockquotes | ✅ | Rendered as `<blockquote>` |
+| Horizontal rules | ✅ | Converted to `<hr>` |
+
+#### Configuration Options
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `markdown-files` | `List<String>` | — | Explicit list of markdown file paths (resolved relative to project root) |
+| `markdown-directory` | `String` | — | Alternative: directory path whose `.md` files are collected alphabetically |
+| `markdown-section-title` | `String` | `"Additional Documentation"` | Section title for the combined markdown content |
+| `markdown-append-after-classes` | `Boolean` | `true` | Insert after Classes section (`true`) or at document end (`false`) |
+| `markdown-convert-tables` | `Boolean` | `true` | Convert GFM tables to Bikeshed-compatible HTML via flexmark-java |
+
+#### Usage Notes
+
+- **Mutual exclusivity**: When both `markdown-files` and `markdown-directory` are set, only `markdown-files` is used (a warning is logged).
+- **README.md exclusion**: When using `markdown-directory`, `README.md` files are automatically excluded to avoid duplication.
+- **Section titles**: Each included file's first `#` heading is extracted as the section title. If no heading exists, the filename (without extension) is used.
+- **Table rendering**: GFM pipe tables are converted to `<table class="data">` HTML because Bikeshed's native markdown shorthand does not fully support GFM tables. The conversion uses flexmark-java's `TablesExtension` for robust parsing.
+
+#### Example: RIE-IEPR Afname Documentation
+
+```yaml
+generators:
+  bikeshed-generator:
+    output-file: "target/riepr-ontology.bs"
+    title: "RIE-IEPR Ontology Specification"
+    
+    # Include afname documentation files
+    markdown-files:
+      - "docs/examples/riepr/documentation/afname/README.md"
+      - "docs/examples/riepr/documentation/afname/BASISAANNAME.md"
+      - "docs/examples/riepr/documentation/afname/GEBRUIKSSCENARIO.md"
+      - "docs/examples/riepr/documentation/afname/OBSERVATIES.md"
+      - "docs/examples/riepr/documentation/afname/SYSTEMEN.md"
+    
+    markdown-section-title: "Afname Use Cases and Scenarios"
+    markdown-append-after-classes: true
+    markdown-convert-tables: true
+```
+
+This produces a Bikeshed specification with the ontology classes followed by a section titled "Afname Use Cases and Scenarios" containing all the embedded markdown content with properly rendered tables, code blocks, and headings.
 ```

@@ -1,0 +1,32 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "primaryColor": "#f0f4ff", "primaryBorderColor": "#4466cc", "lineColor": "#555"}}}%%
+flowchart TB
+
+    subgraph inputs["Inputs"]
+        direction LR
+        OWL["OWL Ontology"]
+        SKOS["SKOS Concept Scheme"]
+        CFG["Developer Configuration"]
+    end
+
+    subgraph prep["Preparation"]
+        direction LR
+        EXT["Fetch external\nontologies"] --> INF["OWL Reasoning"]
+        INF --> CLS["Extract classes\n& properties"]
+        CLS --> MAP["Map SKOS\nlabels"]
+        MAP --> KEY["Identify primary\nkeys (Hydra)"]
+        KEY --> OVR["Apply\noverrides"]
+    end
+
+    subgraph gen["Generators"]
+        direction LR
+        G1["Class Diagram"] ~~~ G2["ER Diagram"] ~~~ G3["SQL Schema"]
+        G4["Java / TypeScript"] ~~~ G5["SHACL Shapes"] ~~~ G6["JSON-LD Frame"]
+    end
+
+    inputs --> prep
+    prep --> gen
+
+    classDef inputNode fill:#ddeeff,stroke:#4466cc
+    classDef genNode fill:#eeffee,stroke:#33aa55
+    class OWL,SKOS,CFG inputNode
+    class G1,G2,G3,G4,G5,G6 genNode

@@ -6,6 +6,11 @@ import be.vlaanderen.omgeving.oddtoolkit.model.ClassInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
 import be.vlaanderen.omgeving.oddtoolkit.model.PropertyInfo;
+import be.vlaanderen.omgeving.oddtoolkit.util.MarkdownFileLoader;
+import be.vlaanderen.omgeving.oddtoolkit.util.MarkdownFileLoader.MarkdownSection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +71,52 @@ public class BikeshedGenerator extends BaseGenerator {
     appendIntroduction(sb);
     appendNamespacesSection(sb);
     appendClassesSection(sb);
+
+    // Append markdown content if configured
+    String markdownContent = loadMarkdownContent();
+    if (markdownContent != null && !markdownContent.isBlank()) {
+      if (Boolean.TRUE.equals(properties.getMarkdownAppendAfterClasses())) {
+        // Insert after classes section (already appended)
+        sb.append(markdownContent);
+      } else {
+        // Will be appended at the end via appendMarkdownSection
+      }
+    }
+
+    // Append markdown content at end if not inserted after classes
+    if (!Boolean.TRUE.equals(properties.getMarkdownAppendAfterClasses())) {
+      String markdownContentEnd = loadMarkdownContent();
+      if (markdownContentEnd != null && !markdownContentEnd.isBlank()) {
+        appendMarkdownSection(sb, markdownContentEnd);
+      }
+    }
+
     return sb.toString();
+  }
+
+  /** Load and convert configured markdown files to Bikeshed markup. */
+  private String loadMarkdownContent() {
+    if (properties.getMarkdownFiles() != null && !properties.getMarkdownFiles().isEmpty()) {
+      List<MarkdownSection> sections = MarkdownFileLoader.loadFromFiles(
+          properties.getMarkdownFiles(), properties.getMarkdownSectionTitle());
+      return MarkdownFileLoader.combineSections(sections);
+    }
+
+    if (properties.getMarkdownDirectory() != null && !properties.getMarkdownDirectory().isBlank()) {
+      List<MarkdownSection> sections = MarkdownFileLoader.loadFromDirectory(
+          properties.getMarkdownDirectory(), properties.getMarkdownSectionTitle());
+      return MarkdownFileLoader.combineSections(sections);
+    }
+
+    return "";
+  }
+
+  /** Append a combined markdown section at the end of the document. */
+  private void appendMarkdownSection(StringBuilder sb, String markdownContent) {
+    String title = properties.getMarkdownSectionTitle();
+    String anchor = BikeshedGenerator.sanitizeAnchor(title);
+    sb.append("# ").append(title).append(" # {#").append(anchor).append("}\n\n");
+    sb.append(markdownContent);
   }
 
   private void appendMetadataBlock(StringBuilder sb) {

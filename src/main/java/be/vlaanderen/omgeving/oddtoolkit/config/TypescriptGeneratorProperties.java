@@ -8,4 +8,5 @@ import lombok.Setter;
 @ConfigPrefix("generators.typescript-generator")
 public class TypescriptGeneratorProperties {
   private String outputDirectory;
+  private boolean cleanupStaleFiles = false;
 }

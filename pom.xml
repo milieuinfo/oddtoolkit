@@ -85,6 +85,23 @@
       <version>1.0.0</version>
     </dependency>
 
+    <!-- flexmark-java: CommonMark + GFM markdown parser/renderer -->
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark</artifactId>
+      <version>0.64.8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-tables</artifactId>
+      <version>0.64.8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-gfm-strikethrough</artifactId>
+      <version>0.64.8</version>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -250,4 +267,3 @@
     </plugins>
   </build>
 </project>
-

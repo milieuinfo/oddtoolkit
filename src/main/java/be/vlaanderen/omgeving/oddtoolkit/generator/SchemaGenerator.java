@@ -658,10 +658,77 @@ public abstract class SchemaGenerator extends DiagramGenerator {
   }
 
   protected void addTable(Table table) {
-    if (tables.stream().anyMatch(t -> t.getName().equals(table.getName()))) {
-      throw new IllegalArgumentException("Duplicate table name: " + table.getName());
+    String originalName = table.getName();
+    
+    // Check if a table with the same name already exists
+    if (isTableNameExists(originalName)) {
+      // If duplicate found, generate a unique name based on URI
+      String uniqueName = generateUniqueTableName(originalName, table.getUri());
+      logger.warn("Table name '{}' conflicts with existing table; renamed to '{}'", 
+                  originalName, uniqueName);
+      table.setName(uniqueName);
     }
+    
     tables.add(table);
+  }
+  
+  private boolean isTableNameExists(String name) {
+    return tables.stream().anyMatch(t -> t.getName().equals(name));
+  }
+  
+  private String generateUniqueTableName(String originalName, String uri) {
+    String uniqueName;
+    
+    if (uri != null) {
+      // Extract a meaningful suffix from the URI (e.g., namespace prefix)
+      String uriSuffix = extractUriSuffix(uri);
+      uniqueName = originalName + "_" + uriSuffix;
+      
+      // If still duplicate, try with numeric suffix
+      int suffix = 1;
+      while (isTableNameExists(uniqueName)) {
+        uniqueName = originalName + "_" + uriSuffix + "_" + suffix;
+        suffix++;
+      }
+    } else {
+      // Fallback to numeric suffix
+      int suffix = 1;
+      do {
+        uniqueName = originalName + "_" + suffix;
+        suffix++;
+      } while (isTableNameExists(uniqueName));
+    }
+    
+    return uniqueName;
+  }
+  
+  private String extractUriSuffix(String uri) {
+    // Extract a meaningful suffix from URI for disambiguation
+    // For example: https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Gebeurtenis -> "riepr"
+    //              http://www.w3.org/ns/sosa/FeatureOfInterest -> "sosa"
+    if (uri.contains("#")) {
+      String namespace = uri.substring(0, uri.lastIndexOf('#'));
+      return extractLastSegment(namespace);
+    } else if (uri.contains("/")) {
+      int lastSlash = uri.lastIndexOf('/');
+      if (lastSlash > 0) {
+        String beforeLast = uri.substring(0, lastSlash);
+        return extractLastSegment(beforeLast);
+      }
+    }
+    // Fallback to a simple hash
+    return String.valueOf(Math.abs(uri.hashCode()) % 1000);
+  }
+  
+  private String extractLastSegment(String path) {
+    if (path.endsWith("/")) {
+      path = path.substring(0, path.length() - 1);
+    }
+    int lastSlash = path.lastIndexOf('/');
+    if (lastSlash >= 0 && lastSlash < path.length() - 1) {
+      return path.substring(lastSlash + 1);
+    }
+    return path;
   }
 
   protected enum TableType {

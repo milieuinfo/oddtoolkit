@@ -15,8 +15,14 @@ public class PropertyConceptInfo extends ConceptInfo {
   protected void initializeFromResource(Resource resource) {
     super.initializeFromResource(resource);
     if (resource.hasProperty(OWL2.equivalentProperty)) {
-      // If there are multiple, add all to the list
       resource.listProperties(OWL2.equivalentProperty).forEachRemaining(stmt -> {
+        if (stmt.getObject().isResource()) {
+          getEquivalents().add(stmt.getObject().asResource().getURI());
+        }
+      });
+    }
+    if (resource.hasProperty(OWL2.equivalentClass)) {
+      resource.listProperties(OWL2.equivalentClass).forEachRemaining(stmt -> {
         if (stmt.getObject().isResource()) {
           getEquivalents().add(stmt.getObject().asResource().getURI());
         }

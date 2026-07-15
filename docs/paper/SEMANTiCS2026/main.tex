@@ -1,0 +1,50 @@
+% !TEX program = pdflatex
+% 5 page limit excluding references
+
+\PassOptionsToPackage{sort&compress}{natbib}
+\documentclass{ceurart}
+
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[]{misc/mermaid}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{etoolbox}
+\apptocmd{\thebibliography}{\sloppy}{}{}
+\emergencystretch=2em
+\hbadness=2000  % suppress cosmetic underfull warnings below this threshold
+% \usepackage{draftwatermark}
+% \SetWatermarkText{DRAFT}
+% \SetWatermarkScale{1}
+
+
+\newcommand{\dquote}[1]{``#1''}
+\newcommand{\squote}[1]{`#1'}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+\title{ODDToolkit: An Open-Source Toolkit to Help Bridge the Developer Gap in Ontology Driven Design}
+
+\author[a1]{Maxim Van de Wynckel}
+\author[a1]{Geert Van Haute}
+
+\address[a1]{Department of Environment and Spatial Development, Flemish Government, Belgium}
+
+\copyrightyear{2026}
+\copyrightclause{Copyright for this paper by its authors. Use permitted under Creative Commons License Attribution 4.0 International (CC BY 4.0).}
+\conference{Posters, Demos, Blue Sky, and Tutorials at SEMANTiCS 2026, Sep 2026, Ghent, Belgium}
+
+\maketitle
+
+\input{./sections/00_abstract}
+
+\input{./sections/10_introduction}
+\input{./sections/20_solution}
+\input{./sections/30_example}
+\input{./sections/40_conclusion}
+
+\bibliography{main}
+
+\end{document}

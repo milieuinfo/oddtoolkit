@@ -9,4 +9,5 @@ import lombok.Setter;
 public class JavaGeneratorProperties {
   private String outputDirectory;
   private String packageName = "be.vlaanderen.omgeving.oddtoolkit.generated";
+  private boolean cleanupStaleFiles = false;
 }

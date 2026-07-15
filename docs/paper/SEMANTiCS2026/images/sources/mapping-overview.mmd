@@ -1,0 +1,28 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor':'#f0f4ff','primaryBorderColor':'#3060a0','fontFamily':'Arial','fontSize':'13px'}}}%%
+flowchart LR
+    subgraph OWL["OWL / Vocabulary Input"]
+        direction TB
+        C1["<b>owl:Class</b>"]
+        C2["<b>owl:Restriction</b><br/>minCardinality / maxCardinality"]
+        C3["<b>hydra:IriTemplate</b><br/>variable mapping"]
+        C4["<b>owl:inverseOf</b><br/>(inferred)"]
+        C5["<b>skos:Concept</b><br/>developer label"]
+        C6["<b>rdfs:subClassOf</b><br/>hierarchy"]
+    end
+
+    subgraph Arts["Generated Artefacts"]
+        direction TB
+        A1["Class / Interface /<br/>SQL Table / NodeShape"]
+        A2["Nullable field /<br/>Collection type"]
+        A3["Primary Key<br/>(@Id / SQL PRIMARY KEY)"]
+        A4["Bidirectional<br/>navigation field"]
+        A5["Field / column /<br/>property name"]
+        A6["Inheritance /<br/>Interface implementation"]
+    end
+
+    C1 --> A1
+    C2 --> A2
+    C3 --> A3
+    C4 --> A4
+    C5 --> A5
+    C6 --> A6

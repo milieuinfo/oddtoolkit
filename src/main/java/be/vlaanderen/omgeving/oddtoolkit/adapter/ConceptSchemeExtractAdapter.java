@@ -39,8 +39,19 @@ public class ConceptSchemeExtractAdapter extends AbstractAdapter<ConceptSchemeIn
     conceptIterator.forEachRemaining(concept -> {
       if (concept.hasProperty(OWL2.equivalentClass)) {
         classConcepts.add(new ClassConceptInfo(Scope.CONCEPTS, concept));
-      } else if (concept.hasProperty(OWL2.equivalentProperty)) {
+      }
+      if (concept.hasProperty(OWL2.equivalentProperty)) {
         propertyConcepts.add(new PropertyConceptInfo(Scope.CONCEPTS, concept));
+      } else {
+        // Check if owl:equivalentClass references a property URI (e.g. sosa:madeBySensor)
+        concept.listProperties(OWL2.equivalentClass).forEachRemaining(stmt -> {
+          if (stmt.getObject().isResource()) {
+            String propURI = stmt.getObject().asResource().getURI();
+            if (propURI != null) {
+              propertyConcepts.add(new PropertyConceptInfo(Scope.CONCEPTS, concept));
+            }
+          }
+        });
       }
     });
 
