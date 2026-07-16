@@ -46,7 +46,7 @@ java -jar target/oddtoolkit.jar --generator=java --config-file=src/test/resource
 
 ## Markdown file inclusion
 
-ODDToolkit can embed external markdown files into Bikeshed output using flexmark-java for robust GFM parsing. See [Markdown Inclusion Guide](guide/markdown-inclusion.md) for configuration details and supported features.
+ODDToolkit can embed external markdown files into Bikeshed output using flexmark-java for robust GFM parsing. See [Markdown Inclusion Details](/guide/configuration#markdown-inclusion-details) for configuration details and supported features.
 
 ## Where outputs go
 
