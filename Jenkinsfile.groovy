@@ -1,4 +1,4 @@
-@Library('Cumulus@1.2-stable') _
+@Library('Cumulus@feature/github-push-fixen') _
 
 def nodePodSpec = '''
 spec:
@@ -87,29 +87,32 @@ pipeline {
           }
           steps {
             container('jnlp') {
-              sh '''
-                set -e
-                REPO_URL=$(git config --get remote.origin.url | sed -E "s#https://##" | sed -E "s#.*@##")
-                rm -rf .gh-pages-deploy
-                git clone --depth 1 --branch "$GH_PAGES_BRANCH" \
-                    "https://${GIT_USER_NAME}@${REPO_URL}" .gh-pages-deploy \
-                    || git clone --depth 1 "https://${GIT_USER_NAME}@${REPO_URL}" .gh-pages-deploy
+              script {
+                git.withGitAuth {
+                  sh '''
+                    set -e
+                    REPO_URL=$(git config --get remote.origin.url)
+                    rm -rf .gh-pages-deploy
+                    git clone --depth 1 --branch "$GH_PAGES_BRANCH" "$REPO_URL" .gh-pages-deploy \
+                        || git clone --depth 1 "$REPO_URL" .gh-pages-deploy
 
-                cd .gh-pages-deploy
-                git checkout -B "$GH_PAGES_BRANCH"
-                find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-                cp -R ../docs/.vitepress/dist/. .
+                    cd .gh-pages-deploy
+                    git checkout -B "$GH_PAGES_BRANCH"
+                    find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+                    cp -R ../docs/.vitepress/dist/. .
 
-                git config user.email "ci@jenkins.local"
-                git config user.name "Jenkins CI"
-                git add -A
-                if ! git diff --cached --quiet; then
-                  git commit -m "docs: deploy from ${BUILD_TAG}"
-                  git push origin "$GH_PAGES_BRANCH"
-                else
-                  echo "No changes to deploy"
-                fi
-              '''
+                    git config user.email "$GIT_USER_EMAIL"
+                    git config user.name "$GIT_USER_NAME"
+                    git add -A
+                    if ! git diff --cached --quiet; then
+                      git commit -m "docs: deploy from ${BUILD_TAG}"
+                      git push origin "$GH_PAGES_BRANCH"
+                    else
+                      echo "No changes to deploy"
+                    fi
+                  '''
+                }
+              }
             }
           }
         }
