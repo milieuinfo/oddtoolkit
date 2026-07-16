@@ -1,4 +1,4 @@
-@Library('Cumulus@feature/github-push-fixen') _
+@Library('Cumulus@1.2-stable') _
 
 def nodePodSpec = '''
 spec:
