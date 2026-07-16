@@ -86,36 +86,30 @@ pipeline {
             branch 'main'
           }
           steps {
-            container('node') {
-              withCredentials([usernamePassword(
-                credentialsId: 'github',
-                usernameVariable: 'GIT_USER',
-                passwordVariable: 'GIT_TOKEN'
-              )]) {
-                sh '''
-                  set -e
-                  REPO_URL=$(git config --get remote.origin.url | sed -E "s#https://##" | sed -E "s#.*@##")
-                  rm -rf .gh-pages-deploy
-                  git clone --depth 1 --branch "$GH_PAGES_BRANCH" \
-                      "https://${GIT_USER}:${GIT_TOKEN}@${REPO_URL}" .gh-pages-deploy \
-                      || git clone --depth 1 "https://${GIT_USER}:${GIT_TOKEN}@${REPO_URL}" .gh-pages-deploy
+            container('jnlp') {
+              sh '''
+                set -e
+                REPO_URL=$(git config --get remote.origin.url | sed -E "s#https://##" | sed -E "s#.*@##")
+                rm -rf .gh-pages-deploy
+                git clone --depth 1 --branch "$GH_PAGES_BRANCH" \
+                    "https://${GIT_USER_NAME}@${REPO_URL}" .gh-pages-deploy \
+                    || git clone --depth 1 "https://${GIT_USER_NAME}@${REPO_URL}" .gh-pages-deploy
 
-                  cd .gh-pages-deploy
-                  git checkout -B "$GH_PAGES_BRANCH"
-                  find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-                  cp -R ../docs/.vitepress/dist/. .
+                cd .gh-pages-deploy
+                git checkout -B "$GH_PAGES_BRANCH"
+                find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+                cp -R ../docs/.vitepress/dist/. .
 
-                  git config user.email "ci@jenkins.local"
-                  git config user.name "Jenkins CI"
-                  git add -A
-                  if ! git diff --cached --quiet; then
-                    git commit -m "docs: deploy from ${BUILD_TAG}"
-                    git push origin "$GH_PAGES_BRANCH"
-                  else
-                    echo "No changes to deploy"
-                  fi
-                '''
-              }
+                git config user.email "ci@jenkins.local"
+                git config user.name "Jenkins CI"
+                git add -A
+                if ! git diff --cached --quiet; then
+                  git commit -m "docs: deploy from ${BUILD_TAG}"
+                  git push origin "$GH_PAGES_BRANCH"
+                else
+                  echo "No changes to deploy"
+                fi
+              '''
             }
           }
         }
