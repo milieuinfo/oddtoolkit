@@ -26,7 +26,6 @@ pipeline {
   }
 
   environment {
-    GH_PAGES_CREDENTIALS_ID = 'github-pages-token'
     GH_PAGES_BRANCH         = 'gh-pages'
   }
 
@@ -89,7 +88,6 @@ pipeline {
           steps {
             container('node') {
               withCredentials([usernamePassword(
-                credentialsId: env.GH_PAGES_CREDENTIALS_ID,
                 usernameVariable: 'GIT_USER',
                 passwordVariable: 'GIT_TOKEN'
               )]) {
