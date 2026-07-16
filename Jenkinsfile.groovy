@@ -83,7 +83,10 @@ pipeline {
 
         stage('Deploy docs to GitHub Pages') {
           when {
-            branch 'main'
+            anyOf {
+              branch 'main'
+              branch 'feature/HLPD-81778-test-github'
+            }
           }
           steps {
             container('jnlp') {
