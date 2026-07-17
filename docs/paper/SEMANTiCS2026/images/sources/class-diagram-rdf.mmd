@@ -1,38 +1,33 @@
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "18px"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "12px"}}}%%
 classDiagram
-    direction LR
+    direction TB
 
-    %% ssn:System (mapped to EmissionPoint)
     class ssnSystem["ssn:System"] {
-        rdfs:label
-        adms:status
-        ogc:hasGeometry
+        +label
+        +status
+        +geometry
     }
 
-    %% sosa:Platform (mapped to OperationLocation)
     class sosPlatform["sosa:Platform"] {
-        rdfs:label
-        adms:status
+        +label
+        +status
     }
 
-    %% ssn:Deployment (mapped to Operation)
     class ssnDeployment["ssn:Deployment"] {
-        rdfs:label
-        adms:status
+        +label
+        +status
     }
 
-    %% prov:Agent (mapped to Operator)
     class provAgent["prov:Agent"] {
-        rdfs:label
+        +label
     }
 
-    %% pplan:Step/Plan (mapped to Process)
     class pplanStep["pplan:Step"] {
-        rdfs:label
+        +label
     }
 
     class pplanPlan["pplan:Plan"] {
-        rdfs:label
+        +label
     }
 
     ssnSystem --> sosPlatform : isHostedBy

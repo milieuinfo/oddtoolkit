@@ -1,5 +1,5 @@
 \section{Solution and Implementation} \label{sec:solution}
-ODDToolkit\footnote{\url{https://github.com/milieuinfo/oddtoolkit}} is a standalone CLI that combines an OWL ontology~\cite{GRAU2008309}, a SKOS concept scheme~\cite{miles2009skos}, and project-specific generation settings capturing the architectural choices of the software development teams (e.g.,~how primary keys and cardinality is handled or versioning). The ontology remains the formal source model, the SKOS layer provides business or developer-facing names, and all artefacts are derived from one enriched intermediate representation.
+ODDToolkit\footnote{\url{https://github.com/milieuinfo/oddtoolkit}} is a standalone CLI that combines an OWL ontology~\cite{GRAU2008309}, a SKOS concept scheme~\cite{miles2009skos}, and project-specific settings capturing the architectural choices of the software development teams (e.g.,~handling primary keys and cardinality). The ontology remains the formal source model, the SKOS layer provides business or developer-facing names, and all artefacts are derived from one enriched intermediate representation.
 
 As shown in Figure~\ref{fig:pipeline}, the pipeline has two phases. In \emph{preparation}, the toolkit resolves imports, caches external vocabularies, and applies OWL reasoning with Apache Jena~\cite{carroll2004jena}. It then extracts classes and properties, derives keys from Hydra IRI templates~\cite{lanthaler2013hydra}, interprets cardinality constraints from \texttt{owl:Restriction}, and propagates inverse-property information so relation multiplicities can be reused across generators. The SKOS mapping is applied at this stage, allowing the same ontology predicate to be exposed with developer-oriented names that better match object-oriented and relational conventions~\cite{7332450,10.1007/978-3-030-38919-2_35}.
 
@@ -20,12 +20,20 @@ The Java output also preserves ontology-driven polymorphism where it matters. If
 
 ODDToolkit also produces UML and ER diagrams. OWL class hierarchies are rendered as inheritance arrows; object properties become directed associations labelled with the SKOS-derived name. As illustrated in Figure~\ref{fig:class-diagram}, association labels derive from the SKOS concept scheme (e.g.\ \texttt{sosa:isHostedBy} $\rightarrow$ \emph{location}, \texttt{prov:wasAttributedTo} $\rightarrow$ \emph{assignedTo}, \texttt{pplan:isStepOfPlan} and \texttt{pplan:isPrecededBy} $\rightarrow$ \emph{partOf\,/\,precededBy}). 
 
-\begin{figure}[tp]
-  \centering
-  \includemermaid[width=0.8\linewidth]{images/sources/class-diagram-rdf.mmd}
-  \par\medskip
-  \includemermaid[width=0.8\linewidth]{images/sources/class-diagram-excerpt.mmd}
-  \caption{RDF/SOSA/SSN/P-PLAN model (top) and ODDToolkit-generated class diagram (bottom) for the IED ontology.}
+\begin{figure}[t]
+    \centering
+    \begin{minipage}[b]{0.68\linewidth}
+        \centering
+        \includemermaid[width=\linewidth]{images/sources/class-diagram-rdf.mmd}
+        \\[-0.2em]
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.28\linewidth}
+        \centering
+        \includemermaid[width=\linewidth]{images/sources/class-diagram-excerpt.mmd}
+        \\[-0.2em]
+    \end{minipage}
+  \caption{RDF/SOSA/SSN/P-PLAN model (left) and ODDToolkit-generated class diagram (right) for the IED ontology.}
   \label{fig:class-diagram}
 \end{figure}
 
