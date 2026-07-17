@@ -44,15 +44,17 @@ pipeline {
               steps {
                 container('node') {
                   dir('docs') {
-                    sh '''
-                      if [ -f package-lock.json ]; then
-                        npm ci
-                      else
-                        npm install
-                      fi
-                      npm run docs:build
-                      touch .vitepress/dist/.nojekyll
-                    '''
+                    withEnv(['GITHUB_PAGES=true']) {
+                      sh '''
+                        if [ -f package-lock.json ]; then
+                          npm ci
+                        else
+                          npm install
+                        fi
+                        npm run docs:build
+                        touch .vitepress/dist/.nojekyll
+                      '''
+                    }
                   }
                 }
               }

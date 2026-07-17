@@ -13,6 +13,11 @@ function detectBasePath() {
     return normalizeBasePath(process.env.DOCS_BASE)
   }
 
+  // For GitHub Pages: milieuinfo.github.io/oddtoolkit/
+  if (process.env.GITHUB_PAGES === 'true') {
+    return '/oddtoolkit/'
+  }
+
   if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REPOSITORY) {
     const repositoryName = process.env.GITHUB_REPOSITORY.split('/')[1]
     if (repositoryName) {
@@ -20,7 +25,8 @@ function detectBasePath() {
     }
   }
 
-  return '/'
+  // Default to /oddtoolkit/ for GitHub Pages deployment
+  return '/oddtoolkit/'
 }
 
 const base = detectBasePath()
