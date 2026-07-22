@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Flanders Art Sans Bold';
+  src: url('FlandersArtSans-Bold.eot'); /* IE9 Compat Modes */
+  src: url('FlandersArtSans-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('FlandersArtSans-Bold.woff') format('woff'), /* Modern Browsers */
+       url('FlandersArtSans-Bold.ttf')  format('truetype'), /* Safari, Android, iOS */
+       url('FlandersArtSans-Bold.svg#d0ebe09b8d309cd8a8986065f592a85e') format('svg'); /* Legacy iOS */
+       
+  font-style:   normal;
+  font-weight:  700;
+}
+

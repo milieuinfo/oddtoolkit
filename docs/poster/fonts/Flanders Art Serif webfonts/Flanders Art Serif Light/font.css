@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Flanders Art Serif Light';
+  src: url('FlandersArtSerif-Light.eot'); /* IE9 Compat Modes */
+  src: url('FlandersArtSerif-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('FlandersArtSerif-Light.woff') format('woff'), /* Modern Browsers */
+       url('FlandersArtSerif-Light.ttf')  format('truetype'), /* Safari, Android, iOS */
+       url('FlandersArtSerif-Light.svg#75741ca1c4b33697eafd6e685d23c69c') format('svg'); /* Legacy iOS */
+       
+  font-style:   normal;
+  font-weight:  200;
+}
+

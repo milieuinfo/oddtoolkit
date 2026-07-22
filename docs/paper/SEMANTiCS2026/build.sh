@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 cd "$(dirname "$0")"
-rm -f main.pdf main.aux main.bbl main.blg main.log main.fls main.fdb_latexmk build.log
+
+VERSION=20
+PAPER_NAME="paper_Poster_${VERSION}"
+AGREEMENT_NAME="AUTHOR-AGREEMENT_Poster_${VERSION}"
+
+rm -f main.pdf "${PAPER_NAME}.pdf" "${PAPER_NAME}.zip" main.aux main.bbl main.blg main.log main.fls main.fdb_latexmk build.log
 
 run_step() {
 	"$@" >> build.log 2>&1 || {
@@ -23,4 +28,8 @@ if grep -E '(Warning--|^I couldn|There (was|were) [1-9][0-9]* warning)' main.blg
 	exit 1
 fi
 
-echo "Build completed cleanly."
+cp main.pdf "${PAPER_NAME}.pdf"
+
+run_step zip -j "${PAPER_NAME}.zip" "${AGREEMENT_NAME}.pdf" "${PAPER_NAME}.pdf"
+
+echo "Build completed cleanly"
