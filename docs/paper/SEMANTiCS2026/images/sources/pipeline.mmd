@@ -1,26 +1,23 @@
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "primaryColor": "#f0f4ff", "primaryBorderColor": "#4466cc", "lineColor": "#555"}}}%%
-flowchart TB
+%%{init: {"theme": "base", "flowchart": {"defaultRenderer": "elk"}, "themeVariables": {"fontSize": "20px", "primaryColor": "#f0f4ff", "primaryBorderColor": "#4466cc", "lineColor": "#555"}}}%%
+flowchart LR
 
     subgraph inputs["Inputs"]
         direction LR
-        OWL["OWL Ontology"]
-        SKOS["SKOS Concept Scheme"]
-        CFG["Developer Configuration"]
+        OWL["Ontology"]
+        SKOS["Concepts"]
+        CFG["Developer Preferences"]
     end
 
     subgraph prep["Preparation"]
-        direction LR
-        EXT["Fetch external\nontologies"] --> INF["OWL Reasoning"]
-        INF --> CLS["Extract classes\n& properties"]
-        CLS --> MAP["Map SKOS\nlabels"]
-        MAP --> KEY["Identify primary\nkeys (Hydra)"]
-        KEY --> OVR["Apply\noverrides"]
+        direction TB
+        PREP1["Fetch ontologies &rarr; OWL reasoning &rarr; Extract classes and properties"]
+        PREP2["Map SKOS labels &rarr; Identify primary keys &rarr; Apply overrides"]
+        PREP1 --> PREP2
     end
 
     subgraph gen["Generators"]
-        direction LR
-        G1["Class Diagram"] ~~~ G2["ER Diagram"] ~~~ G3["SQL Schema"]
-        G4["Java / TypeScript"] ~~~ G5["SHACL Shapes"] ~~~ G6["JSON-LD Frame"]
+        G1["ER/UML Diagrams"] ~~~ G2["SQL DDL"]
+        G4["Java / TypeScript"] ~~~ G6["..."]
     end
 
     inputs --> prep

@@ -12,9 +12,19 @@
 \usepackage{url}
 \usepackage{microtype}
 \usepackage{etoolbox}
+\hypersetup{hypertexnames=false}
+\def\UrlBreaks{\do\/\do-\do.\do_\do?\do&\do=}
 \apptocmd{\thebibliography}{\sloppy}{}{}
 \emergencystretch=2em
-\hbadness=2000  % suppress cosmetic underfull warnings below this threshold
+\hbadness=10000
+\hfuzz=5pt
+\makeatletter
+\let\oddtoolkit@Hy@Warning\Hy@Warning
+\def\Hy@Warning#1{%
+	\def\oddtoolkit@emptyanchor{Ignoring empty anchor}%
+	\def\oddtoolkit@message{#1}%
+	\ifx\oddtoolkit@message\oddtoolkit@emptyanchor\else\oddtoolkit@Hy@Warning{#1}\fi}
+\makeatother
 % \usepackage{draftwatermark}
 % \SetWatermarkText{DRAFT}
 % \SetWatermarkScale{1}
@@ -43,7 +53,7 @@ orcid=0009-0002-9836-8139
 \copyrightclause{Copyright for this paper by its authors. Use permitted under Creative Commons License Attribution 4.0 International (CC BY 4.0).}
 \conference{Posters, Demos, Blue Sky, and Tutorials at SEMANTiCS 2026, Sep 2026, Ghent, Belgium}
 
-\maketitle
+{\hfuzz=6pt\maketitle}
 
 \input{./sections/00_abstract}
 

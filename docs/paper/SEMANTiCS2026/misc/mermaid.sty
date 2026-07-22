@@ -22,6 +22,7 @@
   \edef\mermaid@svg{\mermaidcachedir/\mermaid@basename.svg}%
   \edef\mermaid@output{\mermaidcachedir/\mermaid@basename.pdf}%
   \edef\mermaid@cropped{\mermaidcachedir/\mermaid@basename-crop.pdf}%
+  \edef\mermaid@raster{\mermaidcachedir/\mermaid@basename-crop.png}%
   \ifmermaid@usecache
     % Cache-only mode: use whatever is already in the cache directory.
   \else
@@ -29,9 +30,13 @@
     \immediate\write18{mkdir -p "\mermaidcachedir"}%
     \immediate\write18{if [ ! -f "\mermaid@output" ] || [ "\mermaid@input" -nt "\mermaid@output" ]; then mmdc -q -f -i "\mermaid@input" -o "\mermaid@output"; fi}%
     \immediate\write18{if command -v gs >/dev/null 2>&1; then if [ ! -f "\mermaid@cropped" ] || [ "\mermaid@output" -nt "\mermaid@cropped" ]; then pdfcrop --margins "\mermaidcroppadding" "\mermaid@output" "\mermaid@cropped" >/dev/null 2>&1; fi; fi}%
+    \immediate\write18{if command -v pdftocairo >/dev/null 2>&1; then if [ -f "\mermaid@cropped" ] && { [ ! -f "\mermaid@raster" ] || [ "\mermaid@cropped" -nt "\mermaid@raster" ]; }; then pdftocairo -singlefile -png -r 300 "\mermaid@cropped" "\mermaidcachedir/\mermaid@basename-crop" >/dev/null 2>&1; fi; fi}%
   \fi
-  \IfFileExists{\mermaid@cropped}{%
-    \includegraphics[#1]{\mermaid@cropped}%
+  \IfFileExists{\mermaid@raster}{%
+    \includegraphics[#1]{\mermaid@raster}%
+  }{%
+    \IfFileExists{\mermaid@cropped}{%
+      \includegraphics[#1]{\mermaid@cropped}%
   }{%
     \IfFileExists{\mermaid@output}{%
       \includegraphics[#1]{\mermaid@output}%
@@ -40,6 +45,7 @@
 In cached mode, ensure pre-generated PDFs exist in '\mermaidcachedir'.
 In live mode, install Mermaid CLI (mmdc) and compile with shell-escape enabled.}%
     }%
+  }%
   }%
   \endgroup
 }
