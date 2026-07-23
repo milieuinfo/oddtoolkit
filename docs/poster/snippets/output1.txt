@@ -1,0 +1,42 @@
+/**
+ * EmissionPoint
+ * <a href="https://.../ns/riepr#EmissionPoint">EmissionPoint</a>
+ **/
+@Getter
+@Setter
+@Entity(name = "EmissionPoint")
+@Table(name = "emissionpoint")
+public class EmissionPoint implements ISystem {
+  	@Id
+	@Column(name = "system_uuid", nullable = false)
+	@JsonProperty("uuid")
+	private String uuid;
+	/**
+	 * created
+	 * <a href="http://purl.org/dc/terms/created">created</a>
+	 */
+	@Column(name = "createdOn", nullable = false)
+	@JsonProperty("created")
+	private LocalDateTime createdOn;
+	/**
+	 * issued
+	 * <a href="http://purl.org/dc/terms/issued">issued</a>
+	 */
+	@Column(name = "valid_from", nullable = false)
+	@JsonProperty("issued")
+	private LocalDate validFrom;
+	/**
+	 * hasProperty
+	 * <a href="http://www.w3.org/ns/ssn/hasProperty">hasProperty</a>
+	 */
+	@ManyToMany
+	@JoinTable(
+		name = "emissionpoint_systemproperty",
+		joinColumns = @JoinColumn(name = "source_uuid"),
+		inverseJoinColumns = @JoinColumn(name = "target_uuid")
+	)
+	@JsonProperty("hasProperty")
+	private List<SystemProperty> systemProperties;
+  
+    // ...
+}

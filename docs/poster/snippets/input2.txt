@@ -1,0 +1,8 @@
+:validFrom a skos:Concept ;
+  skos:prefLabel "validFrom"@en ; owl:equivalentProperty dct:issued .
+
+:location a skos:Concept ;
+  skos:prefLabel "location"@en ; owl:equivalentProperty sosa:isHostedBy .
+
+:geometry a skos:Concept ;
+  skos:prefLabel "geometry"@en ; owl:equivalentProperty ogc:hasGeometry .

@@ -1,4 +1,4 @@
-%%{init: {"theme": "base", "flowchart": {"defaultRenderer": "elk"}, "themeVariables": {"fontSize": "20px", "primaryColor": "#f0f4ff", "primaryBorderColor": "#4466cc", "lineColor": "#555"}}}%%
+%%{init: {"theme": "base", "flowchart": {"defaultRenderer": "elk"}, "themeVariables": {"fontSize": "20px", "lineColor": "#898781"}}}%%
 flowchart LR
 
     subgraph inputs["Inputs"]
@@ -23,7 +23,13 @@ flowchart LR
     inputs --> prep
     prep --> gen
 
-    classDef inputNode fill:#ddeeff,stroke:#4466cc
-    classDef genNode fill:#eeffee,stroke:#33aa55
+    classDef inputNode fill:#eaf2fc,stroke:#2a78d6,stroke-width:1.5px,color:#0b0b0b
+    classDef prepNode fill:#fdeee7,stroke:#eb6834,stroke-width:1.5px,color:#0b0b0b
+    classDef genNode fill:#e6f7f0,stroke:#1baf7a,stroke-width:1.5px,color:#0b0b0b
     class OWL,SKOS,CFG inputNode
-    class G1,G2,G3,G4,G5,G6 genNode
+    class PREP1,PREP2 prepNode
+    class G1,G2,G4,G6 genNode
+
+    style inputs fill:#f9fbfe,stroke:#2a78d6,stroke-width:1px
+    style prep fill:#fffaf8,stroke:#eb6834,stroke-width:1px
+    style gen fill:#f6fdfa,stroke:#1baf7a,stroke-width:1px

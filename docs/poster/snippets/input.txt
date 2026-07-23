@@ -1,0 +1,14 @@
+:EmissionPoint a owl:Class ;
+  rdfs:subClassOf ssn:System, ogc:SpatialObject ;
+  hydra:search [
+    hydra:template "../{uuid}/{from}";
+    hydra:mapping
+      [ hydra:variable "uuid" ; hydra:property :localId ],
+      [ hydra:variable "from" ; hydra:property dct:issued ]
+  ] ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty adms:status ;
+    owl:minCardinality 1 ; owl:maxCardinality 1 ] ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ogc:hasGeometry ;
+    owl:minCardinality 0 ; owl:maxCardinality 1 ] ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ssn:hasSubSystem ;
+    owl:minCardinality 0 ] .
