@@ -12,6 +12,7 @@
 
 \newcommand{\mermaidcachedir}{.mermaid}
 \newcommand{\mermaidcroppadding}{2}
+\newcommand{\mermaidpngdpi}{600}
 
 \makeatletter
 \newcommand{\includemermaid}[2][]{%
@@ -28,9 +29,9 @@
   \else
     % Live mode: regenerate via mmdc when source is newer than cached output.
     \immediate\write18{mkdir -p "\mermaidcachedir"}%
-    \immediate\write18{if [ ! -f "\mermaid@output" ] || [ "\mermaid@input" -nt "\mermaid@output" ]; then mmdc -q -f -i "\mermaid@input" -o "\mermaid@output"; fi}%
+    \immediate\write18{if [ ! -f "\mermaid@output" ] || [ "\mermaid@input" -nt "\mermaid@output" ]; then mmdc -q -f -b transparent -i "\mermaid@input" -o "\mermaid@output"; fi}%
     \immediate\write18{if command -v gs >/dev/null 2>&1; then if [ ! -f "\mermaid@cropped" ] || [ "\mermaid@output" -nt "\mermaid@cropped" ]; then pdfcrop --margins "\mermaidcroppadding" "\mermaid@output" "\mermaid@cropped" >/dev/null 2>&1; fi; fi}%
-    \immediate\write18{if command -v pdftocairo >/dev/null 2>&1; then if [ -f "\mermaid@cropped" ] && { [ ! -f "\mermaid@raster" ] || [ "\mermaid@cropped" -nt "\mermaid@raster" ]; }; then pdftocairo -singlefile -png -r 300 "\mermaid@cropped" "\mermaidcachedir/\mermaid@basename-crop" >/dev/null 2>&1; fi; fi}%
+    \immediate\write18{if command -v pdftocairo >/dev/null 2>&1; then if [ -f "\mermaid@cropped" ] && { [ ! -f "\mermaid@raster" ] || [ "\mermaid@cropped" -nt "\mermaid@raster" ]; }; then pdftocairo -singlefile -png -transp -r \mermaidpngdpi "\mermaid@cropped" "\mermaidcachedir/\mermaid@basename-crop" >/dev/null 2>&1; fi; fi}%
   \fi
   \IfFileExists{\mermaid@raster}{%
     \includegraphics[#1]{\mermaid@raster}%

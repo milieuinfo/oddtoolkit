@@ -1,0 +1,9 @@
+Academic poster titled "ODDToolkit: An Open-Source Toolkit to Help Bridge the Developer Gap in Ontology Driven Design," by Maxim Van de Wynckel and Geert Van Haute.
+
+Problem statement: How can an ontology be engineered iteratively so developers unfamiliar with linked data can validate it without heavy documentation, while still becoming familiar with linked data over time?
+
+Pipeline diagram with four steps: (1) input consists of an OWL ontology, SKOS concepts, and developer preferences; (2) main classes and attributes are inferred; (3) SKOS concepts are mapped; (4) developer artefacts are generated as output, referencing the ontology. Example code snippets show generated Java classes with embedded links back to the linked data.
+
+Abstract: Linked open data is difficult for software teams to use when OWL models are documented for ontology engineers rather than implementers, and keeping implementer documentation current is time-consuming while an ontology is under development. ODDToolkit is an open-source Ontology Driven Design toolkit that generates developer-facing artefacts from three inputs: an OWL ontology, a SKOS concept scheme with business-specific names, and a configuration file for developer-specific design choices. It emits SQL DDL, Java and TypeScript models, SHACL shapes, diagrams, and documentation. Rather than fully automating translation of arbitrary vocabularies, the goal is repeatable regeneration of implementation artefacts as an ontology evolves. The pipeline is used in a Flemish government environmental reporting project, where generated artefacts support implementation, documentation, and validation around a shared, evolving ontology.
+
+Closing statement: ODDToolkit's philosophy is to bring linked data to the IDE.

@@ -1,0 +1,19 @@
+-- https://data.riepr.omgeving.vlaanderen.be/ns/riepr#EmissionPoint
+CREATE TABLE emissionpoint (
+  -- Foreign key referencing emissionpoint_identity(system_uuid)
+  system_uuid VARCHAR,
+  uri VARCHAR,
+  created TIMESTAMP,
+  valid_from DATE,
+  valid_till DATE,
+  -- ...
+  status VARCHAR,
+  PRIMARY KEY (systeem_uuid)
+);
+
+COMMENT ON TABLE emissiepunt IS 'https://data.riepr.omgeving.vlaanderen.be/ns/riepr#EmissionPoint';
+COMMENT ON COLUMN emissiepunt.created IS 'http://purl.org/dc/terms/created';
+COMMENT ON COLUMN emissiepunt.valid_from IS 'http://purl.org/dc/terms/issued';
+COMMENT ON COLUMN emissiepunt.valid_till IS 'http://purl.org/dc/terms/valid';
+-- ...
+COMMENT ON COLUMN emissiepunt.status IS 'http://www.w3.org/ns/adms#status';
