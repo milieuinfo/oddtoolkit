@@ -1,4 +1,4 @@
-Academic poster titled "ODDToolkit: An Open-Source Toolkit to Help Bridge the Developer Gap in Ontology Driven Design," by Maxim Van de Wynckel and Geert Van Haute.
+Academic poster titled "ODDToolkit: An Open-Source Toolkit to Help Bridge the Developer Gap in Ontology Driven Design", by Maxim Van de Wynckel and Geert Van Haute.
 
 Problem statement: How can an ontology be engineered iteratively so developers unfamiliar with linked data can validate it without heavy documentation, while still becoming familiar with linked data over time?
 

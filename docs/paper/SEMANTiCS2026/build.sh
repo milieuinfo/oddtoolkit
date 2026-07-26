@@ -30,6 +30,9 @@ fi
 
 cp main.pdf "${PAPER_NAME}.pdf"
 
-run_step zip -j "${PAPER_NAME}.zip" "${AGREEMENT_NAME}.pdf" "${PAPER_NAME}.pdf"
+POSTER_FILES=$(find ../../poster -maxdepth 1 -name 'POSTER_MEDIA_*.pdf' ! -name '*_Print.pdf')
+POSTER_ALT=$(find ../../poster -maxdepth 1 -name 'POSTER_MEDIA_*_ALT.txt')
+
+run_step zip -j "${PAPER_NAME}.zip" "${AGREEMENT_NAME}.pdf" "${PAPER_NAME}.pdf" ${POSTER_FILES} ${POSTER_ALT}
 
 echo "Build completed cleanly"
