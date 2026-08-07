@@ -37,6 +37,11 @@ public class ClassDiagramGenerator extends DiagramGenerator {
   }
 
   @Override
+  protected String getOutputFile() {
+    return generatorProperties != null ? generatorProperties.getOutputFile() : null;
+  }
+
+  @Override
   protected void renderContent(StringBuilder builder, String type) {
     for (Clazz classInfo : getClasses()) {
       generateClass(builder, classInfo, ClassType.CLASS);

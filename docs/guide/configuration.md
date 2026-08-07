@@ -1,28 +1,348 @@
 # Configuration
 
-ODDToolkit reads configuration from a YAML file and optional CLI overrides.
+ODDToolkit is configured from a single file that you pass with `--config-file`. This page is the
+reference for that file: how it is loaded, and what every key under `ontology:` means. The
+`generators:` and `adapters:` sections are summarised here and documented key by key on
+[Generators](./generators) and [Adapters](./adapters).
 
-## Resolution order
+## How configuration is loaded
 
-Highest to lowest priority:
+Point the CLI at a file:
 
-1. CLI flags (`--generator`, `--ontology-file`, `--concepts-file`, ...)
-2. Environment variables (`ODD_*`)  
-3. Config file (`--config-file`)
-4. Defaults in code (in-memory when no explicit configuration exists)
+```bash
+java -jar target/oddtoolkit.jar --generator=sql --config-file=application.yml
+```
 
-## Top-level sections
+The file extension decides the parser:
 
-- `ontology`: ontology inputs and model-specific behavior
-- `generators`: per-generator settings and adapter selection  
-- `adapters`: adapter enablement and adapter-specific settings
+| Extension | Format |
+|---|---|
+| `.yml`, `.yaml` | YAML |
+| `.json` | JSON |
 
-## Minimal example
+Any other extension is rejected with a warning and the run continues with defaults. A missing file
+is also only a warning, not an error — so check your path if a generator produces nothing.
+
+The file has three top-level sections, all optional:
+
+| Section | Purpose |
+|---|---|
+| `ontology` | Input files and how the ontology is interpreted |
+| `generators` | Per-generator output paths and settings |
+| `adapters` | Which pipeline steps run, and their settings |
+
+### Key naming
+
+Keys are **kebab-case**. Each configuration class carries a `@ConfigPrefix` naming its section, and
+`ConfigurationBinder` binds that section with Jackson using the `KEBAB_CASE` naming strategy. So the
+Java field `ontologyFilePath` is the YAML key `ontology-file-path`, and `trimClassNameFromValues` is
+`trim-class-name-from-values`.
+
+Unknown keys inside a bound section are not tolerated: a typo like `output-fil` aborts the run with
+an "unrecognized field" error rather than being ignored. Section *names* are a different matter —
+they are resolved by path, so a section at the wrong nesting level binds nothing at all and you
+silently get defaults. If a setting seems to have no effect, check its indentation first.
+
+### Precedence
+
+There are two configuration tiers plus the code defaults:
+
+1. **Command line** — `--ontology-file` and `--concepts-file` only. These overwrite
+   `ontology.ontology-file-path` and `ontology.concepts-file-path` after the file is bound.
+2. **Config file** — everything else.
+3. **Defaults in code.**
+
+No other option overrides configuration. There is no environment-variable tier: the only environment
+variable the toolkit reads is `ODD_LOG_LEVEL`, which sets the log level and nothing else. See
+[CLI](./cli) for the full option list.
+
+## The `ontology` section
+
+This section describes the inputs and how the RDF model is turned into classes, properties and
+datatypes. It binds to `OntologyConfiguration`.
+
+### Input files
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `ontology-file-path` | string | — | Path to the RDF file with classes and properties |
+| `concepts-file-path` | string | — | Path to the RDF file with SKOS concept schemes |
 
 ```yaml
 ontology:
-  ontology-file-path: "src/test/resources/examples/ns/riepr/riepr.ttl"
-  concepts-file-path: "src/test/resources/examples/id/concept/riepr/riepr.ttl"
+  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
+  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
+```
+
+Both can be overridden per run with `--ontology-file=` and `--concepts-file=`.
+
+### `enum-classes`
+
+An **object**, not a list. It names the classes whose individuals become enumeration values.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `classes` | list of URI strings | `[]` | Class URIs to treat as enumerations |
+| `trim-class-name-from-values` | boolean | `false` | Strip a redundant class-name prefix or suffix from value names (`TRANSPORT_PROCEDURE` becomes `TRANSPORT`) |
+
+```yaml
+ontology:
+  enum-classes:
+    classes:
+      - "http://www.w3.org/ns/sosa/Procedure"
+      - "http://www.w3.org/ns/adms#Status"
+    trim-class-name-from-values: true
+```
+
+### `temporal-properties`
+
+A flat list of property URIs that carry validity or versioning timestamps. Used when building
+identity tables and metadata classes.
+
+```yaml
+ontology:
+  temporal-properties:
+    - "http://purl.org/dc/terms/created"
+    - "http://purl.org/dc/terms/issued"
+    - "http://purl.org/dc/terms/valid"
+```
+
+### `extra-properties`
+
+A list of **objects**. Each one is injected into every extracted class that does not already have a
+property with that URI. Use it for fields the ontology does not model but your schema needs.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `uri` | string | — | Property URI; required, entries without it are skipped |
+| `name` | string | — | Attribute/column name in generated output |
+| `comment` | string | — | Documentation comment |
+| `range` | URI string | — | Datatype or class URI |
+| `identifier` | boolean | `false` | Treat as (part of) the primary key |
+| `cardinality.min` | integer | — | Minimum cardinality |
+| `cardinality.max` | integer | — | Maximum cardinality |
+
+The field is `identifier`. There is no `isIdentifier` key.
+
+```yaml
+ontology:
+  extra-properties:
+    # Keep the subject URI in the database for reference
+    - name: "uri"
+      uri: "http://example.org/vocab/uri"
+      comment: "URI"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        min: 1
+        max: 1
+```
+
+### `override-properties`
+
+A list of **objects**, each keyed by the property `uri` it patches. Every other key is optional; only
+the ones you set are applied, everywhere that property occurs.
+
+| Key | Type | Description |
+|---|---|---|
+| `uri` | string | Property URI to match; required |
+| `name` | string | Replacement attribute/column name |
+| `comment` | string | Replacement documentation comment |
+| `range` | URI string | Replacement range (datatype or class URI) |
+| `datatype` | URI string | Fallback for `range`; used only when `range` is absent |
+| `identifier` | boolean | Mark or unmark the property as an identifier |
+| `cardinality.min` | integer | Replacement minimum cardinality |
+| `cardinality.max` | integer | Replacement maximum cardinality |
+
+```yaml
+ontology:
+  override-properties:
+    - uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId"
+      name: "uuid"
+      comment: "UUID"
+      identifier: true
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        min: 1
+        max: 1
+    - uri: "http://www.w3.org/2000/01/rdf-schema#label"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        max: 1
+    # Setting the range to rdfs:Datatype creates a separate attribute for the datatype
+    - uri: "http://www.w3.org/2004/02/skos/core#notation"
+      range: "http://www.w3.org/2000/01/rdf-schema#Datatype"
+```
+
+### `override-datatypes`
+
+A list of `{uri, override}` pairs. Both sides are **RDF datatype URIs** — this rewrites the range of
+every property that uses `uri`, it does not map to SQL types. Entries with a blank `uri` or
+`override` are skipped.
+
+```yaml
+ontology:
+  override-datatypes:
+    - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"
+      override: "http://www.w3.org/2001/XMLSchema#string"
+```
+
+### `metadata-classes`
+
+Generates a companion key/value class next to each listed class, for properties that are modelled as
+free-form annotations rather than fixed columns. Nothing happens while `classes` is empty.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `suffix` | string | `"Metadata"` | Appended to the source class name to name the companion class |
+| `key` | URI string | — | Property URI used as the `key` attribute |
+| `value` | URI string | — | Property URI used as the `value` attribute |
+| `classes` | list of URI strings | `[]` | Class URIs that get a metadata companion |
+
+```yaml
+ontology:
+  metadata-classes:
+    suffix: "Metadata"
+    key: "http://www.w3.org/2004/02/skos/core#notation"
+    value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#value"
+    classes:
+      - "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Proces"
+```
+
+The companion class gets a `key` and a `value` attribute, a reference back to the source class, and
+a copy of every `temporal-properties` entry the source class actually has.
+
+### `surrogate-keys`
+
+When a class ends up with more than one identifier property — typically a natural key combined with
+a temporal or versioning property — replace the composite key with one generated key. Disabled by
+default.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | boolean | `false` | Turn surrogate keys on |
+| `name` | string | `"id"` | Name of the generated attribute/column |
+| `datatype` | URI string | `http://www.w3.org/2001/XMLSchema#string` | Datatype of the generated key |
+
+```yaml
+ontology:
+  surrogate-keys:
+    enabled: true
+    name: "id"
+    datatype: "http://www.w3.org/2001/XMLSchema#string"
+```
+
+## The `generators` section
+
+Each generator reads its own subsection. The key is the config prefix, which is not always the same
+as the generator name you pass to `--generator`: for example `--generator=sql` reads
+`generators.sql-generator`, while `--generator=class-diagram` reads `generators.class-diagram`.
+
+```yaml
+generators:
+  class-diagram:
+    output-file: "target/class-diagram.mmd"
+  er-diagram:
+    output-file: "target/er-diagram.mmd"
+  sql-generator:
+    output-file: "target/schema.sql"
+  java-generator:
+    output-directory: "target/java"
+    package-name: "com.example.model"
+
+  # Shared by every schema-based generator (sql, java, er-diagram, odcs)
+  schema-generator:
+    join-table-name-pattern: "{source_table}_{target_table}"
+
+  # Shared by every diagram-based generator
+  diagram-generator:
+    export-png: false
+```
+
+Two subsections are shared rather than owned by a single generator:
+
+- `generators.schema-generator` — join-table naming, join-table merging and identity tables, used by
+  `sql`, `java`, `er-diagram` and `odcs`.
+- `generators.diagram-generator` — PNG export and Mermaid styling, used by the diagram and schema
+  generators.
+
+### Restricting the pipeline per generator
+
+A generator can be limited to a subset of adapters with an `adapters` list. This list is looked up
+under the **generator name**, not under the settings prefix — so it goes in `generators.sql`, not in
+`generators.sql-generator`:
+
+```yaml
+generators:
+  sql-generator:
+    output-file: "target/schema.sql"
+  sql:
+    adapters:
+      - ontology-load
+      - ontology-class-extract
+      - ontology-property-extract
+```
+
+Leave the list out and the generator runs every enabled adapter, ordered by their declared
+dependencies. Names that are unknown or disabled are skipped with a warning.
+
+The lookup keys are `class`, `class-diagram`, `er-diagram`, `sql`, `shacl`, `java`, `typescript`,
+`bikeshed` and `odcs`. The `data-frame` generator has no key of its own; it reuses
+`generators.class.adapters`.
+
+::: warning
+For `class-diagram` and `er-diagram` the generator name and the settings prefix are the same key.
+Those two sections are bound to typed classes that reject unknown keys, so adding `adapters:` there
+aborts the run with an "unrecognized field" error. Only the generators whose settings live under a
+`-generator` prefix can take an `adapters` list.
+:::
+
+For the complete key list, defaults and output formats per generator, see
+[Generators](./generators).
+
+## The `adapters` section
+
+Adapters are the pipeline steps that load and shape the ontology model before generation. Every
+adapter is enabled by default and can be switched off individually:
+
+```yaml
+adapters:
+  ontology-reasoner:
+    enabled: false
+```
+
+The 13 adapters, in pipeline order, are `ontology-load`, `ontology-extract-external`,
+`ontology-reasoner`, `ontology-class-extract`, `ontology-uri-template`,
+`ontology-property-extract`, `ontology-property-override`, `ontology-property-extra`,
+`ontology-datatype-override`, `ontology-individuals-extract`, `concept-scheme-load`,
+`concept-scheme-extract` and `concept-class-extract`.
+
+Two of them have settings beyond `enabled`:
+
+```yaml
+adapters:
+  ontology-reasoner:
+    enabled: true
+    reasoner-type: "owl"
+    rules-file: "src/test/resources/examples/reasoner.rules"
+  ontology-extract-external:
+    cache-enabled: true
+    cache-dir: "target/cache/external"
+    mirrors:
+      - uri: "http://www.w3.org/ns/prov#"
+        mirrors:
+          - "https://www.w3.org/ns/prov-o"
+```
+
+See [Adapters](./adapters) for every key, its default, and what disabling each adapter costs you.
+
+## A minimal working config
+
+Copy this, change the two paths, and it runs:
+
+```yaml
+ontology:
+  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
+  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
 
 generators:
   class-diagram:
@@ -31,184 +351,17 @@ generators:
     output-file: "target/schema.sql"
 ```
 
-## `ontology` section
-
-Common keys:
-
-- `ontology-file-path`: Path to RDF (TTL) ontology file containing classes and properties  
-- `concepts-file-path`: Optional concepts/ttl definitions for custom property constraints  
-- `enum-classes`: Defines enumeration values in the Ontology specification metadata
-- `temporal-properties`: Properties representing creation/modification timestamps on entities
-- `extra-properties`: Marked as identifier columns when used with `isIdentifier: true` flag 
-- `override-datatypes`: Maps between XSD datatypes and SQL equivalents (string -> varchar etc)
-- `surrogate-keys`: Replaces composite primary keys (classes with more than one identifier
-  property, e.g. a natural key combined with temporal/versioning properties) with a single
-  generated surrogate key. Disabled by default.
-
-Example:
-
-```yaml
-ontology:
-  ontology-file-path: "path/to/ontology.ttl"  
-  concepts-file-path: "path/to/concepts.ttl"
-  temporal-properties:
-    - "http://purl.org/dc/terms/created"    # Creation timestamp property URI 
-                                      for datetime fields in generated database columns    
-    - "http://purl.org/dc/terms/modified"   # Modification timestamp tracking updates  
-  override-datatypes:                        # Custom datatype overrides per column definition
-    - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"      # Original OWL datatype URI 
-      override: "http://www.w3.org/2001/XMLSchema#string"       # SQL VARCHAR equivalent  
-  surrogate-keys:
-    enabled: true               # When a class has more than one identifier property, replace
-                                 # them with a single generated key instead of a composite one
-    name: "id"                  # Name of the generated surrogate key attribute/column
-    datatype: "http://www.w3.org/2001/XMLSchema#string"
+```bash
+java -jar target/oddtoolkit.jar --generator=sql --config-file=application.yml
 ```
 
-## `generators` section  
+## The full worked example
 
-Generators available and their names recognized by CLI flags:
+`src/test/resources/application.yml` in the repository is a real, working configuration that
+exercises nearly every feature on this page: enum classes, extra and override properties, datatype
+overrides, all ten generators, schema and diagram settings, the reasoner, and external ontology
+mirrors. Use it as the reference when you are unsure about nesting.
 
-| Generator Name | Description | Default Output Format |
-|---------------|-------------|----------------------|
-| class-diagram | Mermaid markdown format for UML-like diagrams | `.mmd` / stdout     |   
-| er-diagram    | ER diagram generator using PlantUML syntax       | `.pu`, .pp          | 
-| sql           | SQL schema generation with JOINs and FK constraints   | `.sql               `     
-| shacl         | SHACL constraint definitions for data validation  | `.shacl             `     
-| java          | Java POJO code generation from ontology classes      | `.java              `    
-| typescript    | TypeScript interfaces/models                          | `.ts                `      
-| bikeshed      W3C Bikeshed specification source with full HTML/ODT support       | **.bs** / stdout    |
-| all           Special mode for outputting multiple files at once   N/A                      |  
-
-Some generator-specific property blocks use `-generator` suffixes to configure behavior per type:  
-- `sql-generator`: SQL options, dialect selection and naming conventions used across database schemas  
-- `java-generator`, `typescript-generator`: Code generation settings (package name, file paths etc) 
-- `bikeshed-generator Bikeshed documentation configuration including metadata blocks, status codes for W3C workflow compliance
-- `schema-generator` - controls SQL join table generation and M:N relation handling  
-
-### Bikeshed Generator Support for HTML/ODT/EPUB Exports
-
-The **Bikeshed generator** produces a [tabatkins.github.io](https://tabatkins.github.io/bikeshed/) (`.bs`) specification source file documenting all ontology classes, properties and their cardinality constraints. The generated `.bs` file can be converted by the Bikeshed command-line tool or W3C online API into:
-
-  - **HTML** output with full CSS styling  
-  - **ODT** LiberoOffice documents from bikeshed ODT format libraries
-  - **EPUB** digital publications through standard EPub conversion workflows after HTML generation  
-
-#### Configuration Example
-
-```yaml
-generators:
-  bikeshed-generator:    
-    # Output file path (omit this when stdout is sufficient for piping or capturing logs)  
-    output-file: "target/ontology.bs"   
-    
-    ## Bibliographic Information as Required by W3C Standards Development Process
-    title: My Ontology Specification     Optional spec title parameter defaults to ontology label if present otherwise falls back to local name segment from URI path when empty string passed
-    
-    status: ED                          Working Group publication status code  
-                                        Valid values accepted at generation time for proper catalog submission compliance include LS Living Standard, Editor's Draft ED as default fallback WD working draft CR Proposed Recommendation PR Public Review REC Recommended Specification
-                                        
-                                            Defaults to "ED" if not explicitly configured
-
-    shortname: my-ontology              Short unique identifier slug used in TR URL construction example https://www.w3.org/TR/my-ontology/    
-                                         Optional parameter; defaults to lowercase sanitized ontology URI local name when omitted  
-                                          Sanitization replaces special characters beyond allowed a-z0-9 and hyphen for web-safe URLs
-                                            
-    editor-name: Jane Doe               Editor contact person information required in W3C publication documents 
-                                        For multi-stakeholder groups list primary contributor with email suffix optional parameter
-    
-    editor-email: jane@example.org      Required editorial contact per W3C TR requirements at https://www.w3.org/publish/topics/TR/  
-                                        
-                                        Without valid editor email address generated spec violates standards process compliance
-
-    editor-affiliation: Organization Name          Affiliated organization or consortium name backing this specification development work under their governance
-    
-    abstract-text: |                    Optional custom introduction text to appear in documentation metadata block
-      This specification describes how ODDToolkit enables ontology-driven code generation for environmental data modeling scenarios.  
-      
-                                      Falls back automatically to rdfs:comment property value from original Ontology file when left empty or not defined
-
-  # --- Markdown File Inclusion ---
-  # Include additional markdown documentation files in the Bikeshed output.
-  # This is useful for adding use cases, examples, or domain-specific content
-  # that is not part of the ontology model itself.
-  
-  # Option 1: Explicit list of markdown file paths (resolved relative to project root)
-  markdown-files:
-    - "docs/examples/riepr/documentation/afname/README.md"
-    - "docs/examples/riepr/documentation/afname/BASISAANNAME.md"
-    - "docs/examples/riepr/documentation/afname/GEBRUIKSSCENARIO.md"
-  
-  # Option 2: Directory scan (all .md files collected alphabetically, README.md excluded)
-  # markdown-directory: "docs/examples/riepr/documentation/afname/"
-  
-  # Section title for the combined markdown content (defaults to "Additional Documentation")
-  markdown-section-title: "Afname Use Cases"
-  
-  # Insert markdown section after Classes section (true) or at document end (false)
-  markdown-append-after-classes: true
-  
-  # Convert GFM pipe tables to <table class="data"> HTML for Bikeshed compatibility
-  # Uses flexmark-java (v0.64.8) with TablesExtension for robust GFM table parsing
-  markdown-convert-tables: true
-
-```
-
-### Markdown Inclusion Details
-
-The Bikeshed generator supports embedding external markdown files into the generated `.bs` specification. This feature uses **flexmark-java** (v0.64.8) — a mature CommonMark + GFM parser with full table support — to convert markdown to HTML before insertion.
-
-#### Supported Markdown Features
-
-| Feature | Support | Notes |
-|---------|---------|-------|
-| Headings (`#` through `######`) | ✅ | Converted to Bikeshed heading syntax with anchors |
-| GFM pipe tables | ✅ | Rendered as `<table class="data">` with `<thead>`/`<tbody>` |
-| Code blocks (fenced) | ✅ | Preserved with language hints |
-| Lists (ordered/unordered) | ✅ | Full nesting support via flexmark |
-| Bold / Italic | ✅ | Converted to `<strong>`/`<em>` |
-| Links | ✅ | Standard `[text](url)` syntax |
-| Strikethrough | ✅ | Via GFM extension (`~~text~~`) |
-| Blockquotes | ✅ | Rendered as `<blockquote>` |
-| Horizontal rules | ✅ | Converted to `<hr>` |
-
-#### Configuration Options
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `markdown-files` | `List<String>` | — | Explicit list of markdown file paths (resolved relative to project root) |
-| `markdown-directory` | `String` | — | Alternative: directory path whose `.md` files are collected alphabetically |
-| `markdown-section-title` | `String` | `"Additional Documentation"` | Section title for the combined markdown content |
-| `markdown-append-after-classes` | `Boolean` | `true` | Insert after Classes section (`true`) or at document end (`false`) |
-| `markdown-convert-tables` | `Boolean` | `true` | Convert GFM tables to Bikeshed-compatible HTML via flexmark-java |
-
-#### Usage Notes
-
-- **Mutual exclusivity**: When both `markdown-files` and `markdown-directory` are set, only `markdown-files` is used (a warning is logged).
-- **README.md exclusion**: When using `markdown-directory`, `README.md` files are automatically excluded to avoid duplication.
-- **Section titles**: Each included file's first `#` heading is extracted as the section title. If no heading exists, the filename (without extension) is used.
-- **Table rendering**: GFM pipe tables are converted to `<table class="data">` HTML because Bikeshed's native markdown shorthand does not fully support GFM tables. The conversion uses flexmark-java's `TablesExtension` for robust parsing.
-
-#### Example: RIE-IEPR Afname Documentation
-
-```yaml
-generators:
-  bikeshed-generator:
-    output-file: "target/riepr-ontology.bs"
-    title: "RIE-IEPR Ontology Specification"
-    
-    # Include afname documentation files
-    markdown-files:
-      - "docs/examples/riepr/documentation/afname/README.md"
-      - "docs/examples/riepr/documentation/afname/BASISAANNAME.md"
-      - "docs/examples/riepr/documentation/afname/GEBRUIKSSCENARIO.md"
-      - "docs/examples/riepr/documentation/afname/OBSERVATIES.md"
-      - "docs/examples/riepr/documentation/afname/SYSTEMEN.md"
-    
-    markdown-section-title: "Afname Use Cases and Scenarios"
-    markdown-append-after-classes: true
-    markdown-convert-tables: true
-```
-
-This produces a Bikeshed specification with the ontology classes followed by a section titled "Afname Use Cases and Scenarios" containing all the embedded markdown content with properly rendered tables, code blocks, and headings.
-```
+Next: [Generators](./generators) for output settings, [Adapters](./adapters) for the pipeline, and
+[Ontology metadata](./ontology-metadata) for the RDF annotations the toolkit reads from your
+ontology itself.

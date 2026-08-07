@@ -70,15 +70,4 @@ public class ConfigurationSourceResolver {
     return result;
   }
 
-  /**
-   * Get configuration value from environment or with default.
-   *
-   * @param envKey environment variable name
-   * @param defaultValue default value if not found
-   * @return configuration value
-   */
-  public static String getFromEnvOrDefault(String envKey, String defaultValue) {
-    String value = System.getenv(envKey);
-    return value != null ? value : defaultValue;
-  }
 }

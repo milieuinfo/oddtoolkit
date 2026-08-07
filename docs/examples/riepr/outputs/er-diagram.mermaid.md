@@ -1,3 +1,4 @@
+```mermaid
 ---
 config:
   theme: default
@@ -570,4 +571,4 @@ erDiagram
 	classDef procedure fill:#ccffcc,stroke:#000000
 	classDef result fill:#ccccff,stroke:#000000
 	classDef exploitant fill:#f6ff00,stroke:#000000
-	
+	```

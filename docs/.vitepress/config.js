@@ -1,4 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
+
+const ORG = 'milieuinfo'
+const REPO = 'oddtoolkit'
 
 function normalizeBasePath(value) {
   if (!value || value.trim() === '') {
@@ -8,14 +12,12 @@ function normalizeBasePath(value) {
   return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`
 }
 
+// Single source of truth for the deployed base path. CI sets DOCS_BASE explicitly;
+// GitHub Actions falls back to the repository name; local builds use the repo name
+// so `docs:preview` matches what GitHub Pages serves.
 function detectBasePath() {
   if (process.env.DOCS_BASE) {
     return normalizeBasePath(process.env.DOCS_BASE)
-  }
-
-  // For GitHub Pages: milieuinfo.github.io/oddtoolkit/
-  if (process.env.GITHUB_PAGES === 'true') {
-    return '/oddtoolkit/'
   }
 
   if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REPOSITORY) {
@@ -25,51 +27,77 @@ function detectBasePath() {
     }
   }
 
-  // Default to /oddtoolkit/ for GitHub Pages deployment
-  return '/oddtoolkit/'
+  return `/${REPO}/`
 }
 
-const base = detectBasePath()
-
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'ODDToolkit',
   description: 'Documentation for the Ontology Driven Design Toolkit',
-  base,
+  base: detectBasePath(),
   cleanUrls: true,
+  lastUpdated: true,
+
+  // paper/ and poster/ hold publication sources, examples/ holds generator fixtures
+  // and mermaid include-partials. None of them are pages.
+  srcExclude: ['**/README.md', 'paper/**', 'poster/**', 'examples/**/*.md'],
+
+  markdown: {
+    languageAlias: {
+      mmd: 'mermaid',
+      bs: 'markdown',
+      bikeshed: 'markdown',
+      ttl: 'turtle'
+    }
+  },
+
   themeConfig: {
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Guide', link: '/guide/usage' },
-      { text: 'Examples', link: '/guide/generated-examples' },
-      { text: 'CLI', link: '/cli-guide' },
-      { text: 'Extension', link: '/extension-guide' },
-      { text: 'Quickstart', link: '/QUICKSTART' }
+      { text: 'Guide', link: '/guide/introduction' },
+      { text: 'CLI', link: '/guide/cli' },
+      { text: 'Configuration', link: '/guide/configuration' },
+      { text: 'Examples', link: '/guide/examples' }
     ],
     sidebar: [
       {
-        text: 'Get Started',
+        text: 'Getting Started',
         items: [
-          { text: 'Overview', link: '/' },
-          { text: 'Usage', link: '/guide/usage' },
-          { text: 'Configuration', link: '/guide/configuration' },
-          { text: 'Generated Examples', link: '/guide/generated-examples' },
+          { text: 'Introduction', link: '/guide/introduction' },
+          { text: 'Installation', link: '/guide/installation' },
+          { text: 'Quick Start', link: '/guide/quickstart' },
+          { text: 'License', link: '/guide/license' }
+        ]
+      },
+      {
+        text: 'Using the toolkit',
+        items: [
+          { text: 'CLI Reference', link: '/guide/cli' },
+          { text: 'Configuration Reference', link: '/guide/configuration' },
+          { text: 'Generators', link: '/guide/generators' },
+          { text: 'Adapters', link: '/guide/adapters' },
           { text: 'Ontology & Metadata', link: '/guide/ontology-metadata' }
         ]
       },
       {
         text: 'Reference',
         items: [
-          { text: 'CLI Guide', link: '/cli-guide' },
-          { text: 'Extension Guide', link: '/extension-guide' },
-          { text: 'Quickstart', link: '/QUICKSTART' }
+          { text: 'Generated Examples', link: '/guide/examples' },
+          { text: 'Architecture', link: '/guide/architecture' },
+          { text: 'Extending', link: '/guide/extending' }
         ]
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/maximvdw/oddtoolkit' }
+      { icon: 'github', link: `https://github.com/${ORG}/${REPO}` }
     ],
     search: {
       provider: 'local'
+    },
+    editLink: {
+      pattern: `https://github.com/${ORG}/${REPO}/edit/main/docs/:path`,
+      text: 'Edit this page on GitHub'
+    },
+    footer: {
+      message: 'Released under the GNU General Public License v3.0.'
     }
   }
-})
+}))

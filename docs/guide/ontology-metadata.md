@@ -1,552 +1,469 @@
-# Ontology Metadata & OWL Support
+# Shaping Your Ontology
 
-ODDToolkit works with RDF/OWL ontologies and leverages semantic metadata to drive code generation. This guide explains the ontology features, supported metadata vocabularies, and how to structure your ontology for optimal generation.
+This page explains which RDF/OWL constructs ODDToolkit actually reads, and which `ontology:` config
+keys let you correct or augment an ontology you do not control.
 
-## Overview
+All examples come from the shipped RIE-IEPR example
+(`docs/examples/riepr/ontology/ns/riepr/riepr.ttl`) and the working configuration in
+`src/test/resources/application.yml`.
 
-ODDToolkit reads from Turtle (TTL) RDF files and extracts class, property, and constraint information to generate:
-- Class diagrams (Mermaid)
-- Database schemas (SQL)
-- Java POJOs and records
-- TypeScript interfaces
-- SHACL validation shapes
+For the plain key-by-key reference, see [Configuration](./configuration). For the pipeline stages
+that do this work, see [Adapters](./adapters).
 
-The toolkit respects OWL semantics and integrates with standard semantic web vocabularies for richer metadata.
+## What the toolkit reads
 
-## Supported Vocabularies
+The ontology is loaded with Apache Jena from `ontology.ontology-file-path`. An optional second file,
+`ontology.concepts-file-path`, holds a SKOS concept scheme used for naming.
 
-### Core OWL (Web Ontology Language)
+Only these RDF terms influence generation:
 
-ODDToolkit supports OWL 2 constructs for class definition:
+| Term | Effect |
+|---|---|
+| `rdf:type owl:Class` | Declares a class |
+| `rdfs:subClassOf` a named class | Superclass; drives inheritance and interface detection |
+| `rdfs:subClassOf [ a owl:Restriction ]` | Declares a property on the class |
+| `owl:onProperty` | The property a restriction applies to |
+| `owl:someValuesFrom`, `owl:allValuesFrom`, `owl:onClass`, `owl:onDataRange` | Range of the property |
+| `owl:unionOf`, RDF collections | Union ranges (multiple range classes) |
+| `owl:minCardinality`, `owl:maxCardinality`, `owl:cardinality` | Cardinality |
+| `owl:minQualifiedCardinality`, `owl:qualifiedCardinality` | Lower bound only |
+| `rdf:type owl:ObjectProperty` / `owl:DatatypeProperty` | Marks a resource as a property |
+| `rdfs:range` on a property | Range, when the property is declared directly |
+| `rdfs:label` | Label of a class or property |
+| `rdfs:comment` | Comment of a class, property, or restriction |
+| `owl:inverseOf` | Pairs inverse properties and merges their cardinalities |
+| `hydra:search` (and `hydra:template`, `hydra:mapping`, `hydra:variable`, `hydra:property`) | URI template and identifiers |
+| `owl:equivalentClass` / `owl:equivalentProperty` in the concepts file | Maps a `skos:Concept` onto an ontology term |
+| `rdf:type` pointing at an enum class | Individuals become enum values |
 
-- **Classes** (`owl:Class`) — Define entities and types
-- **Properties** (`owl:ObjectProperty`, `owl:DatatypeProperty`) — Relationships and attributes
-- **Restrictions** (`owl:Restriction`) — Cardinality, value constraints, etc.
-- **Class axioms** — Subclass relationships, equivalence, disjointness
-- **Data types** — Standard XSD types and custom ranges
+Anything else in your Turtle is carried along in the Jena model but does not reach the generators.
 
-Example OWL class definition:
+## Classes
+
+A class is any resource typed `owl:Class`. Classes in the ontology's own namespace get scope
+`ONTOLOGY` and become concrete classes. Superclasses in a different namespace get scope `EXTERNAL`
+and become interfaces.
 
 ```turtle
-@prefix ex: <http://example.org/model/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :      <https://data.riepr.omgeving.vlaanderen.be/ns/riepr#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
 
-ex:Person a owl:Class ;
-  rdfs:label "Person"@en ;
-  rdfs:comment "A human being." ;
-  rdfs:subClassOf ex:Agent .
-
-ex:name a owl:DatatypeProperty ;
-  rdfs:domain ex:Person ;
-  rdfs:range xsd:string ;
-  rdfs:label "Name"@en .
-
-ex:age a owl:DatatypeProperty ;
-  rdfs:domain ex:Person ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Age"@en .
+:Exploitant a owl:Class ;
+    rdfs:label "Exploitant"@nl ;
+    rdfs:comment "Een exploitant is een entiteit die een milieuimpact heeft."@nl ;
+    rdfs:subClassOf prov:Agent .
 ```
 
-### Hydra Vocabulary
+The class name is the local name of the URI (`Exploitant`), not the label. The label is used for
+display, the comment for documentation.
 
-**Hydra** (`https://www.w3.org/ns/hydra/core#`) provides API documentation and RDF-LD semantics. ODDToolkit extracts useful metadata from Hydra annotations:
+An interface is only kept if more than one concrete class implements it, or if it is the range of
+some property. Its properties are narrowed to those that every implementing class has. Superclasses
+that are themselves concrete classes become an `extends` relation instead, and the inherited
+properties are removed from the subclass.
 
-| Hydra Property | Use | Example |
-|---|---|---|
-| `hydra:title` | Human-readable class/property name | `hydra:title "User Profile"` |
-| `hydra:description` | Documentation string | `hydra:description "Represents a user..."` |
-| `hydra:required` | Property is mandatory | `hydra:required true` |
-| `hydra:readOnly` | Property is read-only | `hydra:readOnly false` |
-| `hydra:writeOnly` | Property is write-only | `hydra:writeOnly false` |
-| `hydra:memberAssertion` | Linked data collection semantics | (Advanced) |
+## Properties
 
-Example Hydra-enriched ontology:
+There are two ways a property lands on a class.
+
+**As an OWL restriction on the class.** This is the main mechanism, and the only one that carries
+cardinality:
 
 ```turtle
-@prefix hydra: <https://www.w3.org/ns/hydra/core#> .
-@prefix ex: <http://example.org/model/> .
-
-ex:User a owl:Class ;
-  hydra:title "User" ;
-  hydra:description "A registered user account." .
-
-ex:email a owl:DatatypeProperty ;
-  rdfs:domain ex:User ;
-  rdfs:range xsd:string ;
-  hydra:title "Email Address" ;
-  hydra:description "Primary contact email." ;
-  hydra:required true .
-
-ex:website a owl:DatatypeProperty ;
-  rdfs:domain ex:User ;
-  rdfs:range xsd:anyURI ;
-  hydra:title "Website" ;
-  hydra:required false ;
-  hydra:readOnly false .
+:Exploitant rdfs:subClassOf [ a owl:Restriction ;
+    rdfs:comment "Een exploitant moet overeenkomen met één organisatie (VKBO)"@nl ;
+    owl:onProperty prov:hadPrimarySource ;
+    owl:someValuesFrom org:Organization ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:maxCardinality "1"^^xsd:nonNegativeInteger
+] .
 ```
 
-### Dublin Core (dc/dcterms)
-
-Standard metadata for documenting resources:
-
-- `dc:title` — Title (maps to class/property names)
-- `dc:description` — Description/documentation
-- `dc:creator` — Author/creator
-- `dc:issued` — Publication/creation date
-- `dcterms:created` — Creation timestamp (useful for temporal tracking)
-- `dcterms:modified` — Last modification timestamp
-
-Example:
+**As a standalone property declaration**, when the resource is typed `owl:ObjectProperty` or
+`owl:DatatypeProperty`:
 
 ```turtle
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-
-ex:Article a owl:Class ;
-  dc:title "Article" ;
-  dc:description "A published article or blog post." ;
-  dc:creator "Content Team" .
-
-ex:publishedDate a owl:DatatypeProperty ;
-  rdfs:domain ex:Article ;
-  rdfs:range xsd:dateTime ;
-  dc:description "Publication timestamp." ;
-  dcterms:created "2025-06-01T00:00:00Z" .
+:localId a owl:DatatypeProperty ;
+    rdfs:label "Local Identifier"@en ;
+    rdfs:comment "Een local identifier is een unieke identificatie binnen de context van RIE-IEPR."@en ;
+    rdfs:range xsd:string .
 ```
 
-### SKOS (Simple Knowledge Organization System)
+Write several restrictions for the same `owl:onProperty` and they are merged into one property: the
+strongest lower bound, the strongest upper bound, the union of all ranges, and the first non-null
+name, comment and `owl:inverseOf` found.
 
-SKOS provides vocabulary management and concept definitions:
+Inverse properties are collapsed. When two properties are linked by `owl:inverseOf`, each side takes
+its `from` cardinality from the other side, and one of the two is dropped unless it carries a
+comment. If neither carries a comment, the toolkit writes a generated one (`Inverse property of …`)
+on the side with the lower URI.
 
-- `skos:prefLabel` — Preferred label for a concept
-- `skos:altLabel` — Alternative label
-- `skos:definition` — Formal definition
-- `skos:example` — Example usage
-- `skos:broader` / `skos:narrower` — Hierarchical relationships
+## Cardinality
 
-Example SKOS concept:
+Cardinality is read only from OWL restrictions:
+
+- `owl:cardinality N` sets both min and max to `N`.
+- `owl:minCardinality` / `owl:maxCardinality` set the bounds independently. These are ignored when
+  the restriction is a *qualified* one (it has `owl:onClass` or `owl:onDataRange`).
+- `owl:minQualifiedCardinality` and `owl:qualifiedCardinality` set the lower bound only. A qualified
+  maximum does not constrain the property globally, so it is not applied.
+
+A missing maximum means "many". The min/max pair on each side is turned into one of
+`ONE_TO_ONE`, `ONE_TO_MANY`, `MANY_TO_ONE`, `MANY_TO_MANY`. An attribute is nullable when it is not
+an identifier and its minimum is not 1.
+
+## Datatypes and ranges
+
+The range comes from `rdfs:range` on the property, or from `owl:someValuesFrom`, `owl:allValuesFrom`,
+`owl:onClass` or `owl:onDataRange` in the restriction. If the range object is a blank node with
+`owl:unionOf`, or a Turtle collection, every URI member becomes a range — that produces a union type.
+
+If a range URI matches a class in the model, the property becomes a relation. Otherwise the range URI
+is used as the attribute's datatype. When a property's range spans both a class and one of its own
+subclasses, only the most general class is kept.
+
+### Rewriting datatypes
+
+`ontology.override-datatypes` rewrites one RDF datatype URI into another, everywhere it appears as a
+range. It maps RDF datatype to RDF datatype — not to SQL or Java types.
+
+```yaml
+ontology:
+  override-datatypes:
+    - uri: "http://www.w3.org/2000/01/rdf-schema#Literal"
+      override: "http://www.w3.org/2001/XMLSchema#string"
+```
+
+### Preserving a typed literal's datatype
+
+If you give a property the range `rdfs:Datatype`, the toolkit stores the value as a string *and*
+synthesises a second attribute, the attribute name suffixed with `_datatype` and also a string, to
+hold the datatype IRI.
+The example config uses this for `skos:notation`:
+
+```yaml
+ontology:
+  override-properties:
+    # By setting the range to rdfs:Datatype, we create a new attribute for the datatype
+    - uri: "http://www.w3.org/2004/02/skos/core#notation"
+      range: "http://www.w3.org/2000/01/rdf-schema#Datatype"
+```
+
+## Identifiers and URI templates
+
+A property becomes an identifier (a primary key downstream) in exactly three ways: a `hydra:search`
+URI template, `ontology.extra-properties` with `identifier: true`, or `ontology.override-properties`
+with `identifier: true`.
+
+### hydra:search
+
+Attach a Hydra IRI template to a class to say how its instance URIs are built. The properties it maps
+are its identity:
 
 ```turtle
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+
+:Exploitatielocatie a owl:Class ;
+    rdfs:label "Exploitatielocatie"@nl ;
+    hydra:search [ a hydra:IriTemplate ;
+        hydra:template "https://data.mjv.omgeving.vlaanderen.be/id/exploitatielocatie/{uuid}/{issued}/{created}"^^hydra:Rfc6570Template ;
+        hydra:mapping [ hydra:variable "uuid" ;    hydra:property :localId ] ,
+                      [ hydra:variable "issued" ;  hydra:property dct:issued ] ,
+                      [ hydra:variable "created" ; hydra:property dct:created ]
+    ] .
+```
+
+What the toolkit does with it:
+
+- `hydra:template` is stored as the template string.
+- Every `hydra:mapping` contributes one `hydra:variable` → `hydra:property` pair. Mappings without
+  both, or whose `hydra:property` is not a resource, are skipped.
+- Every mapped property is marked as an identifier. If the class does not already have that property,
+  it is added with cardinality exactly 1.
+- Primary keys are ordered by where their variable appears left-to-right in the template string.
+  A mapped property whose variable is absent from the template is still an identifier, it just sorts
+  after the ones that appear.
+
+Those five terms — `hydra:search`, `hydra:template`, `hydra:mapping`, `hydra:variable`,
+`hydra:property` — are the only Hydra vocabulary the toolkit reads. Anything else on the template
+(including `hydra:required`, which the example ontology writes) is ignored.
+
+### The `uri` fallback
+
+If a class ends up with no identifier at all, the toolkit falls back to an attribute literally named
+`uri` and logs a warning. This is why the example config injects a `uri` extra property onto every
+class. If there is no `uri` attribute either, you get a warning and a table with no primary key.
+
+Run with `ODD_LOG_LEVEL=DEBUG` to see these warnings in context.
+
+### Surrogate keys
+
+When a class has more than one identifier — for example a natural key combined with temporal
+versioning properties — you can collapse them into a single generated key:
+
+```yaml
+ontology:
+  surrogate-keys:
+    enabled: true
+    name: "id"
+    datatype: "http://www.w3.org/2001/XMLSchema#string"
+```
+
+The original identifiers stay as regular, non-key attributes. Defaults: `enabled: false`,
+`name: "id"`, `datatype: xsd:string`. Classes with one or zero identifiers are untouched.
+
+## Enum classes
+
+List the class URIs you want turned into enumerations under `ontology.enum-classes.classes`. Both
+ontology and external classes are eligible, which is how ADMS and SOSA vocabulary classes qualify:
+
+```yaml
+ontology:
+  enum-classes:
+    classes:
+      - "http://www.w3.org/ns/sosa/Procedure"
+      - "http://www.w3.org/ns/adms#Status"
+    trim-class-name-from-values: true
+```
+
+Note the shape: `enum-classes` is an object with a `classes` list, not a bare list of URIs.
+
+Values are collected from two places:
+
+1. **Subclasses** of the enum class — but only those with no domain-specific properties. A subclass
+   is skipped if it has any property that is neither an identifier nor one of your
+   `extra-properties`.
+2. **Individuals**, meaning any resource whose `rdf:type` is the enum class itself.
+
+The RIE-IEPR ontology hard-codes its code lists as individuals that are also `skos:Concept`s:
+
+```turtle
+@prefix adms: <http://www.w3.org/ns/adms#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-ex:Status a skos:ConceptScheme ;
-  skos:prefLabel "Status Codes"@en ;
-  skos:definition "Valid states for order processing."@en .
+:inGebruik a adms:Status, skos:Concept ;
+    rdfs:label "In gebruik"@nl ;
+    rdfs:comment "De entiteit is in gebruik."@nl .
 
-ex:StatusActive a skos:Concept ;
-  skos:inScheme ex:Status ;
-  skos:prefLabel "Active"@en ;
-  skos:definition "The entity is currently active."@en ;
-  skos:example "An active user account."@en .
+:ontmanteld a adms:Status, skos:Concept ;
+    rdfs:label "Ontmanteld"@nl ;
+    rdfs:comment "De entiteit is ontmanteld."@nl .
 ```
 
-### SHACL (Shapes Constraint Language)
+Value names are the local name in `UPPER_SNAKE_CASE`, so these become `IN_GEBRUIK` and `ONTMANTELD`.
 
-SHACL defines validation constraints on RDF data. ODDToolkit can generate SHACL shapes from ontology definitions:
+With `trim-class-name-from-values: true`, a redundant class-name token is stripped from the start or
+end of the value name. For `sosa:Procedure` the class token is `PROCEDURE`, so `:verwerkingProcedure`
+becomes `VERWERKING` instead of `VERWERKING_PROCEDURE`. Trimming is skipped if it would leave an
+empty name.
 
-- `sh:class` — RDF type constraint
-- `sh:datatype` — Data type constraint
-- `sh:minCount` / `sh:maxCount` — Cardinality
-- `sh:minLength` / `sh:maxLength` — String length
-- `sh:minInclusive` / `sh:maxInclusive` — Numeric range
-- `sh:in` — Enumeration constraint
-- `sh:pattern` — Regular expression pattern
+Once a class is an enum, it and its harvested values are removed from the regular class and interface
+lists.
 
-Example SHACL shape:
+## Extra properties
 
-```turtle
-@prefix sh: <http://www.w3.org/ns/shacl#> .
+`ontology.extra-properties` injects a property onto **every** class that does not already have that
+URI. Use it for columns your ontology does not model but your storage needs.
 
-ex:UserShape a sh:NodeShape ;
-  sh:targetClass ex:User ;
-  sh:property [
-    sh:path ex:email ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    sh:pattern "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-  ] ;
-  sh:property [
-    sh:path ex:age ;
-    sh:datatype xsd:integer ;
-    sh:minInclusive 0 ;
-    sh:maxInclusive 150
-  ] .
+```yaml
+ontology:
+  extra-properties:
+    # We want to keep the URI in the database for reference
+    - name: "uri"
+      uri: "http://example.org/vocab/uri"
+      comment: "URI"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        max: 1
+        min: 1
 ```
 
-## Special Metadata Properties
+Each entry is an object, not a bare URI. Fields:
 
-### Temporal Properties
+| Field | Meaning |
+|---|---|
+| `uri` | Required. Entries without a URI are skipped |
+| `name` | Attribute name; also used as the label |
+| `comment` | Documentation string |
+| `range` | Range URI. Omit for an unconstrained range |
+| `identifier` | `true` marks it as a primary key. Default `false` |
+| `cardinality` | `{min, max}`. Defaults to unbounded |
 
-Some properties track temporal information (created, modified, deleted dates):
+Extra properties sort directly after the primary keys, in the order you list them.
+
+## Override properties
+
+`ontology.override-properties` patches a property wherever it appears, matched on its URI. Use it to
+correct a vocabulary you do not control.
+
+```yaml
+ontology:
+  override-properties:
+    - uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId"
+      comment: "UUID"
+      name: "uuid"
+      identifier: true
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        max: 1
+        min: 1
+    - uri: "http://www.w3.org/2000/01/rdf-schema#label"
+      cardinality:
+        max: 1
+      range: "http://www.w3.org/2001/XMLSchema#string"
+    - uri: "http://qudt.org/schema/qudt/numericValue"
+      cardinality:
+        max: 1
+      range: "http://www.w3.org/2001/XMLSchema#decimal"
+```
+
+This is a **list keyed on property URI**, not a map keyed on class URI. Fields:
+
+| Field | Meaning |
+|---|---|
+| `uri` | Required. The property to patch. Entries without it are skipped |
+| `name` | Replaces the attribute name |
+| `comment` | Replaces the comment |
+| `range` | Replaces the whole range with this single URI |
+| `datatype` | Fallback used as the range when `range` is absent |
+| `identifier` | `true` or `false`; overrides the identifier flag |
+| `cardinality` | `{min, max}`; replaces the cardinality outright |
+
+Blank and whitespace-only values are treated as absent, so a field you leave out never clears an
+existing value. There is no way to override a label here — use the concepts file for that.
+
+## Temporal properties
+
+`ontology.temporal-properties` is a plain list of property URIs:
 
 ```yaml
 ontology:
   temporal-properties:
     - "http://purl.org/dc/terms/created"
-    - "http://purl.org/dc/terms/modified"
-    - "http://example.org/deletedAt"
+    - "http://purl.org/dc/terms/issued"
+    - "http://purl.org/dc/terms/valid"
 ```
 
-These properties are often excluded from generated schemas (treated as metadata, not domain properties).
+These properties are **not** removed from the generated schema. They do two things:
 
-### Enum Classes
+1. They sort into their own block, after the primary keys and the extra properties, in the order you
+   list them.
+2. When a class also appears in `ontology.metadata-classes.classes`, its temporal properties are
+   copied onto the generated metadata class so each metadata row is versioned the same way as the
+   entity it describes.
 
-Mark certain classes as enumerations/code lists for special handling:
+## Metadata classes
+
+`ontology.metadata-classes` synthesises a key/value side table for the classes you name:
 
 ```yaml
 ontology:
-  enum-classes:
-    - "http://www.w3.org/ns/adms#Status"
-    - "http://example.org/OrderStatus"
+  metadata-classes:
+    suffix: "Metadata"
+    key: "http://example.org/vocab/metadataKey"
+    value: "http://example.org/vocab/metadataValue"
+    classes:
+      - "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Exploitatie"
 ```
 
-Enum classes generate as Java enums or TypeScript literal unions instead of regular classes.
+For each listed class that exists in the generated model, a new class is added named
+the class name followed by `suffix` (default `Metadata`), containing:
 
-### Extra Properties
+- a `key` string attribute backed by the `key` property URI,
+- a `value` string attribute backed by the `value` property URI,
+- a copy of every temporal property the source class has, and
+- a many-to-one reference attribute back to the source class, named after the source class in
+  lowerCamelCase.
 
-Add project-specific metadata not in standard vocabularies:
+Both `key` and `value` are property URIs and have no defaults, so set them explicitly. Class URIs
+that do not match a generated class are silently skipped.
 
-```yaml
-ontology:
-  extra-properties:
-    - "http://example.org/internalId"
-    - "http://example.org/department"
-    - "http://example.org/costCenter"
-```
+## Naming from a concept scheme
 
-These properties are included in generation even if not linked through standard RDF relationships.
-
-### Override Properties
-
-Override or supplement ontology definitions for generation purposes:
-
-```yaml
-ontology:
-  override-properties:
-    ex:Person:
-      label: "Human Individual"
-      description: "A registered human being in the system."
-      customAttribute: "customValue"
-```
-
-## Ontology Structure Best Practices
-
-### 1. Use Consistent Naming
-
-- Use URIs for all identifiers (classes, properties)
-- Use readable local names (`ex:Person`, not `ex:P001`)
-- Use PascalCase for classes, camelCase for properties
+The optional `ontology.concepts-file-path` file lets you rename generated classes and properties
+without touching the ontology. The toolkit looks for `skos:Concept` resources and links them to
+ontology terms through `owl:equivalentClass` and `owl:equivalentProperty`:
 
 ```turtle
-@prefix ex: <http://example.org/model/> .
+@prefix :      <https://data.riepr.omgeving.vlaanderen.be/id/concept/> .
+@prefix locn:  <http://www.w3.org/ns/locn#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 
-ex:Customer a owl:Class ;          # PascalCase for class
-  rdfs:label "Customer" .
+:Adres a skos:Concept ;
+    skos:prefLabel "adres"@nl ;
+    owl:equivalentClass locn:Address ;
+    skos:inScheme <> .
 
-ex:firstName a owl:DatatypeProperty ;  # camelCase for property
-  rdfs:label "First Name" .
+:straat a skos:Concept ;
+    skos:prefLabel "straat"@nl ;
+    owl:equivalentProperty locn:thoroughfare ;
+    skos:inScheme <> .
 ```
 
-### 2. Use Comprehensive Labels and Comments
+When a concept matches a class or property, the concept's **local name** replaces the generated name
+(`locn:Address` is emitted as `Adres`, `locn:thoroughfare` as `straat`), and the concept's
+`rdfs:label` replaces the label if it has one. `skos:prefLabel`, `skos:definition` and
+`skos:inScheme` are not read — they document the scheme for human readers.
 
-```turtle
-ex:Order a owl:Class ;
-  rdfs:label "Order"@en ;
-  rdfs:label "Commande"@fr ;
-  rdfs:comment "A purchase order placed by a customer."@en ;
-  hydra:description "Complete order details including items and payment." .
+A concept whose equivalent class is not yet in the ontology is added as a new class, with the
+properties that declare it as their `rdfs:domain`. Only properties that themselves have a matching
+concept are kept on such a class.
 
-ex:totalAmount a owl:DatatypeProperty ;
-  rdfs:label "Total Amount"@en ;
-  rdfs:comment "Sum of all items after discounts and tax."@en ;
-  rdfs:range xsd:decimal .
-```
+## What is not read
 
-### 3. Define Domains and Ranges
+To save you time when an annotation seems to have no effect:
 
-```turtle
-ex:email a owl:DatatypeProperty ;
-  rdfs:domain ex:User ;      # Applies to User
-  rdfs:range xsd:string .    # Must be string
+- **Dublin Core.** `dct:title`, `dct:description`, `dct:creator`, `dct:issued`, `dct:modified` and
+  friends are never read as metadata. `dct:` properties matter only when your restrictions reference
+  them as properties (as `dct:created` and `dct:issued` do in the example).
+- **SKOS labels.** `skos:prefLabel`, `skos:altLabel`, `skos:definition`, `skos:example`,
+  `skos:broader`, `skos:narrower`. Labels come from `rdfs:label`, comments from `rdfs:comment`.
+- **Hydra beyond templates.** Only `hydra:search`, `hydra:template`, `hydra:mapping`,
+  `hydra:variable` and `hydra:property` are read. `hydra:required` on a mapping is ignored — express
+  requiredness with an OWL cardinality restriction instead.
+- **SHACL in the input.** The `shacl` generator *writes* SHACL shapes; it does not read `sh:` shapes
+  from your ontology. See [Generators](./generators).
 
-ex:authored a owl:ObjectProperty ;
-  rdfs:domain ex:Person ;     # Applies to Person
-  rdfs:range ex:Document .    # References Document
-```
+## Checking your work
 
-### 4. Use Appropriate Data Types
-
-```turtle
-ex:birthDate a owl:DatatypeProperty ;
-  rdfs:range xsd:date .      # Date only, no time
-
-ex:createdAt a owl:DatatypeProperty ;
-  rdfs:range xsd:dateTime .  # Full timestamp
-
-ex:salary a owl:DatatypeProperty ;
-  rdfs:range xsd:decimal .   # Precise decimal for money
-
-ex:count a owl:DatatypeProperty ;
-  rdfs:range xsd:integer .   # Whole number
-```
-
-### 5. Document Cardinality with Restrictions
-
-```turtle
-ex:Person a owl:Class ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:onProperty ex:primaryEmail ;
-    owl:cardinality 1          # Exactly one
-  ] ;
-  rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:onProperty ex:nicknames ;
-    owl:minCardinality 0 ;     # Zero or more
-    owl:maxCardinality 5       # At most 5
-  ] .
-```
-
-### 6. Organize with Hierarchies
-
-```turtle
-ex:Agent a owl:Class ;
-  rdfs:label "Agent"@en .
-
-ex:Person a owl:Class ;
-  rdfs:subClassOf ex:Agent ;  # Person is an Agent
-  rdfs:label "Person"@en .
-
-ex:Organization a owl:Class ;
-  rdfs:subClassOf ex:Agent ;  # Organization is an Agent
-  rdfs:label "Organization"@en .
-```
-
-## Complete Example: E-Commerce Ontology
-
-```turtle
-@prefix ex: <http://example.org/ecommerce/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix hydra: <https://www.w3.org/ns/hydra/core#> .
-
-# Classes
-
-ex:Customer a owl:Class ;
-  rdfs:label "Customer"@en ;
-  dc:description "A registered customer account." ;
-  hydra:title "Customer Account" .
-
-ex:Order a owl:Class ;
-  rdfs:label "Order"@en ;
-  dc:description "A purchase order with items and payment." ;
-  hydra:title "Purchase Order" .
-
-ex:Product a owl:Class ;
-  rdfs:label "Product"@en ;
-  dc:description "A product available for purchase." ;
-  hydra:title "Product Listing" .
-
-ex:OrderStatus a owl:Class ;
-  rdfs:label "Order Status"@en ;
-  dc:description "Status enumeration for orders." .
-
-# Data Properties
-
-ex:customerId a owl:DatatypeProperty ;
-  rdfs:domain ex:Customer ;
-  rdfs:range xsd:string ;
-  rdfs:label "Customer ID"@en ;
-  hydra:required true ;
-  hydra:readOnly true .
-
-ex:customerName a owl:DatatypeProperty ;
-  rdfs:domain ex:Customer ;
-  rdfs:range xsd:string ;
-  rdfs:label "Full Name"@en ;
-  hydra:required true .
-
-ex:email a owl:DatatypeProperty ;
-  rdfs:domain ex:Customer ;
-  rdfs:range xsd:string ;
-  rdfs:label "Email Address"@en ;
-  hydra:required true ;
-  hydra:readOnly false .
-
-ex:orderDate a owl:DatatypeProperty ;
-  rdfs:domain ex:Order ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Order Date"@en ;
-  dcterms:created "2025-01-01T00:00:00Z" ;
-  hydra:required true ;
-  hydra:readOnly true .
-
-ex:totalAmount a owl:DatatypeProperty ;
-  rdfs:domain ex:Order ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Total Amount"@en ;
-  dc:description "Sum of all items, discounts, and tax."@en ;
-  hydra:required true ;
-  hydra:readOnly false .
-
-ex:productName a owl:DatatypeProperty ;
-  rdfs:domain ex:Product ;
-  rdfs:range xsd:string ;
-  rdfs:label "Product Name"@en ;
-  hydra:required true .
-
-ex:productPrice a owl:DatatypeProperty ;
-  rdfs:domain ex:Product ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Price"@en ;
-  dc:description "Retail price in USD."@en ;
-  hydra:required true .
-
-# Object Properties
-
-ex:placedBy a owl:ObjectProperty ;
-  rdfs:domain ex:Order ;
-  rdfs:range ex:Customer ;
-  rdfs:label "Placed By"@en ;
-  dc:description "The customer who placed this order." ;
-  hydra:required true ;
-  hydra:readOnly true .
-
-ex:contains a owl:ObjectProperty ;
-  rdfs:domain ex:Order ;
-  rdfs:range ex:Product ;
-  rdfs:label "Contains"@en ;
-  dc:description "Products included in this order."@en ;
-  hydra:required true .
-
-ex:hasStatus a owl:ObjectProperty ;
-  rdfs:domain ex:Order ;
-  rdfs:range ex:OrderStatus ;
-  rdfs:label "Status"@en ;
-  hydra:required true .
-```
-
-## Configuration for Ontology-Driven Generation
-
-```yaml
-ontology:
-  ontology-file-path: "src/main/resources/ontology.ttl"
-  concepts-file-path: "src/main/resources/concepts.ttl"
-  
-  # Mark these as enumerations in generated code
-  enum-classes:
-    - "http://example.org/ecommerce/OrderStatus"
-    - "http://www.w3.org/ns/adms#Status"
-  
-  # These properties track temporal info, exclude from domain model
-  temporal-properties:
-    - "http://purl.org/dc/terms/created"
-    - "http://purl.org/dc/terms/modified"
-  
-  # Include these properties even if not in main ontology
-  extra-properties:
-    - "http://example.org/internalId"
-  
-  # Override or supplement ontology definitions
-  override-properties:
-    "http://example.org/ecommerce/Customer":
-      description: "Registered customer with full account details."
-
-generators:
-  class-diagram:
-    output-file: "target/diagrams/ecommerce-classes.mmd"
-  
-  sql-generator:
-    output-file: "target/generated/ecommerce-schema.sql"
-  
-  java-generator:
-    output-directory: "target/generated-sources/java"
-    package-name: "com.example.ecommerce.model"
-  
-  typescript-generator:
-    output-directory: "target/generated-sources/typescript"
-```
-
-## Validation & SHACL
-
-ODDToolkit can generate SHACL shapes for validation:
+Generate everything against a config and inspect the result:
 
 ```bash
-java -jar oddtoolkit.jar \
+java -jar target/oddtoolkit.jar --generator=all --config-file=config.yml
+```
+
+Point the toolkit at a different ontology without editing the config:
+
+```bash
+java -jar target/oddtoolkit.jar \
   --generator=shacl \
   --config-file=config.yml \
-  --output-file=target/ecommerce-shapes.ttl
+  --ontology-file=path/to/ontology.ttl
 ```
 
-The generated SHACL can validate RDF data:
+If a class or property is missing, raise the log level to see which adapter dropped it:
 
 ```bash
-# Validate RDF data against generated shapes
-robot validate --input data.ttl --shapes target/ecommerce-shapes.ttl
+ODD_LOG_LEVEL=DEBUG java -jar target/oddtoolkit.jar --generator=class-diagram --config-file=config.yml
 ```
 
-## Tips & Troubleshooting
+Common causes:
 
-### Tip: Use Consistent Prefixes
+- The class is not typed `a owl:Class`.
+- The property is on the class but has no `owl:Restriction` and is not typed `owl:ObjectProperty` or
+  `owl:DatatypeProperty`.
+- The property is inherited from a concrete superclass, so it was removed from the subclass.
+- The property is one half of an `owl:inverseOf` pair with no `rdfs:comment`, so it was dropped in
+  favour of the other half.
+- The class is listed in `ontology.enum-classes.classes`, or is a value of a class that is.
 
-Define prefixes at the top of your ontology and reuse them consistently:
+## Related pages
 
-```turtle
-@prefix ex: <http://example.org/ecommerce/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix hydra: <https://www.w3.org/ns/hydra/core#> .
-```
-
-### Tip: Validate Your Ontology
-
-Use Apache Jena or similar tools to validate Turtle syntax:
-
-```bash
-# With Apache Jena (rdf tools)
-riot --validate ontology.ttl
-
-# Or with ROBOT (OBO tools)
-robot validate --input ontology.ttl
-```
-
-### Issue: Classes Not Appearing in Generated Code
-
-**Possible causes:**
-- Class URI is not declared with `a owl:Class`
-- Class is not reachable (missing `rdf:type` or `owl:subClassOf` declarations)
-- Class is marked as abstract/internal
-
-**Solution:**
-- Ensure explicit `a owl:Class` declarations
-- Check cardinality and domain/range restrictions
-- Review configuration for filtering
-
-### Issue: Properties Missing from Generated Schemas
-
-**Possible causes:**
-- Property domain/range not aligned with used classes
-- Property marked as temporary or metadata-only
-- Property in `temporal-properties` list
-
-**Solution:**
-- Define explicit `rdfs:domain` and `rdfs:range`
-- Review configuration overrides and filters
-- Remove from exclusion lists if needed
-
-## Further Reading
-
-- **OWL 2 Specification:** https://www.w3.org/TR/owl2-overview/
-- **Hydra Vocabulary:** https://www.hydra-cg.com/
-- **SHACL Specification:** https://www.w3.org/TR/shacl/
-- **Dublin Core Metadata:** https://dublincore.org/
-- **SKOS:** https://www.w3.org/TR/skos-reference/
-
+- [Configuration](./configuration) — every `ontology:` key with its default
+- [Adapters](./adapters) — the pipeline stages that perform this extraction
+- [Generators](./generators) — what each generator does with the extracted model
+- [Examples](./examples) — the full RIE-IEPR ontology and config

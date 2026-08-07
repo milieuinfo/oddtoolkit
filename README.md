@@ -1,44 +1,55 @@
 # ODDToolkit
 
-ODDToolkit (Ontology Driven Design Toolkit) generates diagrams and source artifacts from ontology-driven models.
+ODDToolkit (Ontology Driven Design Toolkit) turns an OWL/RDF ontology into concrete artifacts:
+Mermaid class and ER diagrams, a SQL schema, Java and TypeScript model classes, SHACL shapes,
+Bikeshed documentation, data frames and Open Data Contract Standard contracts.
 
-## Key Features
+It is a plain Java 21 application built on Apache Jena, driven by a configurable adapter pipeline.
 
-- Mermaid class and ER diagram generation
-- SQL schema generation
-- Java and TypeScript model generation
-- SHACL shape generation
-- Configurable adapter pipeline
+## Prerequisites
 
-## Quickstart
+- JDK 21
+- Maven is optional — the repository ships the wrapper (`./mvnw`, or `mvnw.cmd` on Windows)
+
+## Build
 
 ```bash
 ./mvnw clean package
+```
+
+The executable JAR lands at `target/oddtoolkit.jar`.
+
+```bash
 java -jar target/oddtoolkit.jar --help
 ```
 
-Run one generator:
+## Run
+
+Every invocation selects one generator (or `all`) and a configuration file. Options are
+`--key=value`; there are no subcommands and no positional arguments.
 
 ```bash
-java -jar target/oddtoolkit.jar --generator=class-diagram --config-file=src/test/resources/application.yml
+java -jar target/oddtoolkit.jar \
+  --generator=class-diagram \
+  --config-file=src/test/resources/application.yml
 ```
 
-Run all generators:
-
-```bash
-java -jar target/oddtoolkit.jar --generator=all --config-file=src/test/resources/application.yml
-```
+`src/test/resources/application.yml` is a working configuration for the bundled example ontology in
+`docs/examples/riepr/`. Set `ODD_LOG_LEVEL=DEBUG` for verbose logging.
 
 ## Project layout
 
-- `src/main/java` - application and generator code
-- `src/test/java` - unit tests
-- `src/test/resources/application.yml` - example configuration
-- `docs/` - VitePress documentation
+- `src/main/java` — application, generators and adapters
+- `src/test/java` — unit tests
+- `src/test/resources/application.yml` — example configuration
+- `docs/examples/riepr/` — example ontology and generated output
+- `docs/` — VitePress documentation site
 
 ## Documentation
 
-The docs site source is in `docs/`.
+Full documentation: <https://milieuinfo.github.io/oddtoolkit/>
+
+To build the site locally:
 
 ```bash
 cd docs
@@ -48,5 +59,5 @@ npm run docs:build
 
 ## License
 
-ODDToolkit is distributed under the **GNU General Public License v3.0**. See [License](./license) for details and the full license text.
-
+ODDToolkit is distributed under the GNU General Public License v3.0.
+See [LICENSE](./LICENSE) for the full text.

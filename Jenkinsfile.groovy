@@ -44,7 +44,7 @@ pipeline {
               steps {
                 container('node') {
                   dir('docs') {
-                    withEnv(['GITHUB_PAGES=true']) {
+                    withEnv(['DOCS_BASE=/oddtoolkit/']) {
                       sh '''
                         if [ -f package-lock.json ]; then
                           npm ci

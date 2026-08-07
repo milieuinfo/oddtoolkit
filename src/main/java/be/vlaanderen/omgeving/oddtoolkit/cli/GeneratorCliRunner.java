@@ -11,15 +11,17 @@ import org.slf4j.LoggerFactory;
  * CLI runner for executing generators from command line.
  *
  * Usage:
- *   java -jar oddtoolkit.jar --generator=class-diagram --output=/tmp/output
+ *   java -jar oddtoolkit.jar --generator=class-diagram --config-file=config.yml
  *   java -jar oddtoolkit.jar --generator=sql --config-file=custom-config.yml
  *   java -jar oddtoolkit.jar --help
  *
  * Supports:
  * - Generator selection via --generator flag
  * - Configuration file loading (YAML/JSON)
- * - Custom property overrides via --key=value
- * - Environment variable interpolation via ODD_* prefixed variables
+ * - Ontology and concept scheme path overrides via --ontology-file / --concepts-file
+ *
+ * Output locations are configured per generator via generators.&lt;name&gt;.output-file
+ * or generators.&lt;name&gt;.output-directory in the configuration file.
  */
 public class GeneratorCliRunner {
 
@@ -39,6 +41,9 @@ public class GeneratorCliRunner {
     }
 
     if (!cliConfig.isValid()) {
+      System.err.println("No generator specified. Use --generator=NAME or --generator=all.");
+      System.err.println();
+      printHelp();
       return;
     }
 
@@ -80,54 +85,53 @@ public class GeneratorCliRunner {
    * Print CLI help message.
    */
   private void printHelp() {
+    String available = String.join(", ", generatorRegistry.getAvailableGenerators().stream()
+        .sorted()
+        .toList());
+
     System.out.println("""
         ODD Toolkit - Ontology-Driven Development Generator
-        
-        Usage: java -jar oddtoolkit.jar [OPTIONS]
-        
+
+        Usage: java -jar oddtoolkit.jar --generator=NAME [OPTIONS]
+
         Options:
           --generator=NAME              Name of the generator to execute
-                                        Use --generator=all to execute all registered generators
-                                        Available: all, class, class-diagram, er-diagram, sql, shacl, java, typescript
-          
+                                        Use --generator=all to execute every registered generator
+                                        Available: all, %s
+
           --config-file=PATH            Path to configuration file (YAML or JSON)
                                         Example: --config-file=config.yml
-          
-          --output=PATH                 Output directory for generated files
-                                        Example: --output=/tmp/output
-          
+
           --ontology-file=PATH          Path to ontology file (overrides config file)
                                         Example: --ontology-file=ontology.ttl
-          
-          --concepts-file=PATH          Path to concepts file (overrides config file)
-                                        Example: --concepts-file=concepts.ttl
-          
-          --help, -h                    Show this help message
-        
-        Examples:
-          # Generate class diagram with default configuration
-          java -jar oddtoolkit.jar --generator=class-diagram
-          
-          # Generate all registered outputs
-          java -jar oddtoolkit.jar --generator=all
 
-          # Generate SQL with custom configuration file
-          java -jar oddtoolkit.jar --generator=sql --config-file=myconfig.yml
-          
-          # Generate with custom output directory
-          java -jar oddtoolkit.jar --generator=class-diagram --output=/home/user/output
-        
-        Environment Variables:
-          Configuration values can be set via ODD_* prefixed environment variables.
-          Example: ODD_GENERATOR_NAME=sql
-          
+          --concepts-file=PATH          Path to concept scheme file (overrides config file)
+                                        Example: --concepts-file=concepts.ttl
+
+          --help, -h                    Show this help message
+
+        Examples:
+          # Generate a class diagram
+          java -jar oddtoolkit.jar --generator=class-diagram --config-file=config.yml
+
+          # Generate every registered output
+          java -jar oddtoolkit.jar --generator=all --config-file=config.yml
+
+          # Override the ontology without editing the configuration file
+          java -jar oddtoolkit.jar --generator=sql --config-file=config.yml \\
+              --ontology-file=my-ontology.ttl
+
+        Output locations:
+          Each generator writes to the path configured under its own
+          generators.<name>.output-file or generators.<name>.output-directory key.
+          Generators that support it write to stdout when no output path is set.
+
         Configuration Files:
           Supported formats: YAML (.yml, .yaml) and JSON (.json)
           Configuration precedence (highest to lowest):
-            1. Command-line arguments (--key=value)
-            2. Environment variables (ODD_KEY)
-            3. Configuration file
-            4. Default values
-        """);
+            1. Command-line arguments (--ontology-file, --concepts-file)
+            2. Configuration file
+            3. Default values
+        """.formatted(available));
   }
 }

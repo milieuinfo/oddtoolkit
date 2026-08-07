@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Without this file Logback falls back to its no-configuration default, which logs
+  every DEBUG statement from every library to the console. Set ODD_LOG_LEVEL to
+  DEBUG or TRACE to raise the verbosity of the toolkit's own logging.
+-->
+<configuration>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="be.vlaanderen.omgeving" level="${ODD_LOG_LEVEL:-INFO}"/>
+
+  <root level="WARN">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+
+</configuration>
