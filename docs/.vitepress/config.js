@@ -1,8 +1,21 @@
+import { execSync } from 'node:child_process'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const ORG = 'milieuinfo'
 const REPO = 'oddtoolkit'
+
+// VitePress resolves the "last updated" timestamp by running `git log` per page.
+// The Jenkins node container (node:20-alpine) has no git, so only enable the
+// feature when git is actually available (local dev / GitHub Actions).
+function gitAvailable() {
+  try {
+    execSync('git --version', { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
 
 function normalizeBasePath(value) {
   if (!value || value.trim() === '') {
@@ -35,7 +48,7 @@ export default withMermaid(defineConfig({
   description: 'Documentation for the Ontology Driven Design Toolkit',
   base: detectBasePath(),
   cleanUrls: true,
-  lastUpdated: true,
+  lastUpdated: gitAvailable(),
 
   // paper/ and poster/ hold publication sources, examples/ holds generator fixtures
   // and mermaid include-partials. None of them are pages.
