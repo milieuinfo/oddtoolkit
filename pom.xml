@@ -10,6 +10,13 @@
   <name>oddtoolkit</name>
   <description>oddtoolkit</description>
 
+  <scm>
+    <connection>scm:git:https://github.com/milieuinfo/oddtoolkit.git</connection>
+    <developerConnection>scm:git:https://github.com/milieuinfo/oddtoolkit.git</developerConnection>
+    <url>https://github.com/milieuinfo/oddtoolkit</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <java.version>21</java.version>
     <main.class>be.vlaanderen.omgeving.oddtoolkit.OddtoolkitApplication</main.class>
@@ -264,6 +271,29 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <preparationGoals>clean verify</preparationGoals>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <distributionManagement>
+    <repository>
+      <id>repo.omgeving.vlaanderen.be</id>
+      <name>Omgeving Artifactory - releases</name>
+      <url>https://repo.omgeving.vlaanderen.be/artifactory/release/</url>
+    </repository>
+    <snapshotRepository>
+      <id>repo.omgeving.vlaanderen.be</id>
+      <name>Omgeving Artifactory - snapshots</name>
+      <url>https://repo.omgeving.vlaanderen.be/artifactory/snapshot/</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
