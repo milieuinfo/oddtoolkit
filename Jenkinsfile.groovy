@@ -166,9 +166,12 @@ pipeline {
         }
 
         stage('Maven deploy') {
+          when {
+            expression { !versions.isRelease() }
+          }
           steps {
             script {
-              maven.goal([goal: 'deploy'])
+              maven.goal([goal: 'deploy', skipTests: true])
             }
           }
         }
