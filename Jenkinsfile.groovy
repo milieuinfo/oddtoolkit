@@ -224,11 +224,12 @@ pipeline {
                     fi
 
                     AUTH="Authorization: token ${TOKEN}"
+                    JSON_BODY=$(printf '{"tag_name":"%s","name":"%s","body":"ODDToolkit release %s"}' "$TAG" "$TAG" "$VERSION")
                     if curl -fsS -H "${AUTH}" "https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${TAG}" >/dev/null 2>&1; then
                       echo "GitHub release ${TAG} already exists"
                     else
                       curl -fsS -X POST -H "${AUTH}" -H "Accept: application/vnd.github+json" \
-                        -d "{\"tag_name\":\"${TAG}\",\"name\":\"${TAG}\",\"body\":\"ODDToolkit release ${VERSION}\"}" \
+                        -d "${JSON_BODY}" \
                         "https://api.github.com/repos/${GITHUB_REPO}/releases"
                       echo "GitHub release ${TAG} created"
                     fi
