@@ -19,7 +19,7 @@
 *.dvi
 
 # Generated PDF output
-*.pdf
+main.pdf
 !.mermaid/*.pdf
 
 # Minted cache
