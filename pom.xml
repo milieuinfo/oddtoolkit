@@ -4,7 +4,7 @@
 
   <groupId>be.vlaanderen.omgeving</groupId>
   <artifactId>oddtoolkit</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>oddtoolkit</name>
   <description>oddtoolkit</description>
 
@@ -12,7 +12,7 @@
     <connection>scm:git:https://github.com/milieuinfo/oddtoolkit.git</connection>
     <developerConnection>scm:git:https://github.com/milieuinfo/oddtoolkit.git</developerConnection>
     <url>https://github.com/milieuinfo/oddtoolkit</url>
-    <tag>HEAD</tag>
+    <tag>v0.1.0</tag>
   </scm>
 
   <properties>
