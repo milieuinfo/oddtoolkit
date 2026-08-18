@@ -26,8 +26,8 @@ public class JavaGeneratorTest {
     String hasInputVarBlock = blockBetween(proces, "hasInputVar\">hasInputVar</a>", "heeftInvoer;");
     String hasOutputVarBlock = blockBetween(proces, "hasOutputVar\">hasOutputVar</a>", "heeftUitvoer;");
 
-    assertThat(hasInputVarBlock).contains("@ManyToMany").contains("proces_proces_variabele");
-    assertThat(hasOutputVarBlock).contains("@ManyToMany").contains("proces_proces_variabele");
+    assertThat(hasInputVarBlock).contains("@ManyToMany").contains("proces_procesvariabele");
+    assertThat(hasOutputVarBlock).contains("@ManyToMany").contains("proces_procesvariabele");
   }
 
   private static String blockBetween(String source, String startMarker, String endMarker) {

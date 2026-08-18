@@ -196,9 +196,28 @@ public class JavaGenerator extends SchemaGenerator {
           .append(extendsClause).append(implementsClause)
           .append(" {\n");
       if (clazz instanceof Enum enumClazz) {
-        enumClazz.getValues().forEach(value -> {
-          builder.append("\t").append(value.getName()).append(" = \"").append(value.getUri()).append("\"").append(",\n");
-        });
+        // Enum constants can't be assigned a value with "NAME = \"...\"" (that's not valid Java
+        // syntax, only e.g. TypeScript) -- this previously produced Java that never compiled
+        // (documentatie/datamodel/generated/java/{Status,Procedure}.java were only ever packaged
+        // as a plain classpath resource, never actually compiled, which is how this went
+        // unnoticed). Each constant instead gets its URI via a constructor argument, exposed
+        // through a getUri() accessor.
+        List<EnumValue> values = enumClazz.getValues();
+        for (int i = 0; i < values.size(); i++) {
+          EnumValue value = values.get(i);
+          boolean isLast = i == values.size() - 1;
+          builder.append("\t").append(value.getName()).append("(\"").append(value.getUri())
+              .append("\")").append(isLast ? ";\n" : ",\n");
+        }
+        if (!values.isEmpty()) {
+          builder.append("\n\tprivate final String uri;\n\n");
+          builder.append("\t").append(clazz.getName()).append("(String uri) {\n");
+          builder.append("\t\tthis.uri = uri;\n");
+          builder.append("\t}\n\n");
+          builder.append("\tpublic String getUri() {\n");
+          builder.append("\t\treturn uri;\n");
+          builder.append("\t}\n");
+        }
       }
       clazz.getAttributes().forEach(prop -> {
         builder.append("\t/**\n");
