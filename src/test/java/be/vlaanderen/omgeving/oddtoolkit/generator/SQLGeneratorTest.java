@@ -24,6 +24,5 @@ public class SQLGeneratorTest {
     assertTrue(generatedSql.contains("CREATE TABLE meetpunt_filter ("));
     assertTrue(generatedSql.contains("CREATE TABLE aangifte_exploitatie ("));
     assertTrue(generatedSql.contains("CREATE TABLE gebeurtenis ("));
-    assertTrue(generatedSql.contains("CREATE TABLE gebeurtenis_riepr ("));
   }
 }

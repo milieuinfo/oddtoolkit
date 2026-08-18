@@ -12,13 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test for union types support in ClassGenerator.
  * Verifies that properties with multiple range types (union types) are correctly identified
  * and stored in the rangeClasses list.
+ *
+ * <p>Uses a small, purpose-built ontology (src/test/resources/examples/union-types.ttl) rather
+ * than the RIE-IEPR example ontology, so this mechanism test doesn't break whenever the example
+ * domain model evolves.
  */
 public class ClassGeneratorUnionTypesTest {
   private final ClassGenerator generator = TestGeneratorFactory.generator("typescript",
-      TypescriptGenerator.class);
+      TypescriptGenerator.class, "src/test/resources/examples/union-types.ttl");
 
   @Test
-  void meetpuntHasUnionTypeForHasSubSystemProperty() {
+  void meetpuntHasUnionTypeForHeeftOnderdeelProperty() {
     generator.run();
 
     // Find the Meetpunt class
@@ -29,17 +33,17 @@ public class ClassGeneratorUnionTypesTest {
 
     assertNotNull(meetpunt, "Meetpunt class should exist");
 
-    // Find the heeftSubSysteem (hasSubSystem) attribute
-    ClassGenerator.Attribute heeftSubSysteem = meetpunt.getAttributes().stream()
-        .filter(a -> "heeftSubSysteem".equals(a.getName()))
+    // Find the heeftOnderdeel attribute
+    ClassGenerator.Attribute heeftOnderdeel = meetpunt.getAttributes().stream()
+        .filter(a -> "heeftOnderdeel".equals(a.getName()))
         .findFirst()
         .orElse(null);
 
-    assertNotNull(heeftSubSysteem, "heeftSubSysteem attribute should exist");
-    assertTrue(heeftSubSysteem.isUnionType(), "heeftSubSysteem should be a union type");
+    assertNotNull(heeftOnderdeel, "heeftOnderdeel attribute should exist");
+    assertTrue(heeftOnderdeel.isUnionType(), "heeftOnderdeel should be a union type");
 
-    // Verify that rangeClasses contains both MeetInstrument and Filter
-    List<ClassGenerator.Clazz> rangeClasses = heeftSubSysteem.getRangeClasses();
+    // Verify that rangeClasses contains both Filter and Sensor
+    List<ClassGenerator.Clazz> rangeClasses = heeftOnderdeel.getRangeClasses();
     assertNotNull(rangeClasses, "rangeClasses should not be null");
     assertTrue(rangeClasses.size() >= 2, "rangeClasses should contain at least 2 types");
 
@@ -47,7 +51,7 @@ public class ClassGeneratorUnionTypesTest {
         .map(ClassGenerator.Clazz::getName)
         .toList();
 
-    assertTrue(rangeClassNames.contains("MeetInstrument"), "rangeClasses should contain MeetInstrument");
     assertTrue(rangeClassNames.contains("Filter"), "rangeClasses should contain Filter");
+    assertTrue(rangeClassNames.contains("Sensor"), "rangeClasses should contain Sensor");
   }
 }

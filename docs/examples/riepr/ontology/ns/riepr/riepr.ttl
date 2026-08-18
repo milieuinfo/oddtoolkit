@@ -844,7 +844,7 @@
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een systeem eigenschap kan een waarde hebben"@nl ;
         owl:onProperty rdfs:value ;
-        owl:someValuesFrom rdfs:Literal ;
+        owl:someValuesFrom xsd:string ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
@@ -857,7 +857,7 @@
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een systeem eigenschap kan een referentie naar een parameter hebben"@nl ;
         owl:onProperty :parameter ;
-        owl:someValuesFrom rdfs:Literal ;
+        owl:someValuesFrom skos:Concept ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] .
@@ -1269,123 +1269,10 @@
         owl:disjointWith :Onttrekkingspunt
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        # *..* relation with the inverse of ssn:hasSubSystem
-        rdfs:comment "Een meetpunt kan meetinstrumenten hebben"@nl ;
-        owl:onProperty ssn:hasSubSystem ;
-        owl:someValuesFrom :Meetinstrument ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een meetpunt kan meerdere eigenschappen hebben"@nl ;
         owl:onProperty ssn:hasProperty ;
         owl:someValuesFrom :Systeemeigenschap ;
         owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] .
-
-:Meetinstrument a owl:Class ;
-    rdfs:label "Meetinstrument"@nl ;
-    rdfs:comment "Een meetinstrument is een specifiek apparaat of systeem dat wordt gebruikt om metingen uit te voeren op meetpunten."@nl ;
-    rdfs:subClassOf ssn:System, ogc:SpatialObject ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een datum in gebruik vanaf hebben"@nl ;
-        owl:onProperty :inGebruikVanaf ;
-        owl:someValuesFrom xsd:date ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument kan een datum in gebruik tot hebben"@nl ;
-        owl:onProperty :inGebruikTot ;
-        owl:someValuesFrom xsd:date ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument heeft externe identificaties (optioneel)"@nl ;
-        owl:onProperty adms:identifier ;
-        owl:someValuesFrom adms:Identifier ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een benaming hebben"@nl ;
-        owl:onProperty rdfs:label ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een modificatie datum hebben"@nl ;
-        owl:onProperty dct:modified ;
-        owl:someValuesFrom xsd:dateTime ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een creatie datum hebben"@nl ;
-        owl:onProperty dct:created ;
-        owl:someValuesFrom xsd:dateTime ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een geldigheid start hebben"@nl ;
-        owl:onProperty dct:issued ;
-        owl:someValuesFrom xsd:date ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument kan een geldigheid einde hebben"@nl ;
-        owl:onProperty dct:valid ;
-        owl:someValuesFrom xsd:date ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument kan verbonden zijn aan een enkele aangifte"@nl ;
-        owl:onProperty :aangifte ;
-        owl:someValuesFrom :Aangifte ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument moet een enkele status hebben"@nl ;
-        owl:onProperty adms:status ;
-        owl:someValuesFrom adms:Status ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument kan een revisie zijn van een andere systemen (optioneel)"@nl ;
-        owl:onProperty prov:wasRevisionOf ;
-        owl:someValuesFrom ssn:System ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        # *..* relation with ssn:deployedSystem
-        owl:onProperty ssn:hasDeployment ;
-        owl:someValuesFrom :Exploitatie ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        # *..* relation with ssn:hasSubSystem
-        owl:onProperty [ a owl:ObjectProperty ;
-            owl:inverseOf ssn:hasSubSystem
-        ] ;
-        owl:someValuesFrom ssn:System ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een meetinstrument kan een typering hebben via dct:type"@nl ;
-        # Codelijst: https://github.com/milieuinfo/codelijst-rie-iepr/blob/main/src/source/meetinstrument_type.csv
-        owl:onProperty dct:type ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
-        owl:maxCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    hydra:search [ a hydra:IriTemplate ;
-        hydra:template "https://data.mjv.omgeving.vlaanderen.be/id/meetinstrument/{uuid}/{issued}/{created}"^^hydra:Rfc6570Template ;
-        hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ] ,
-                      [ hydra:variable "issued" ; hydra:property dct:issued ; hydra:required true ] ,
-                      [ hydra:variable "created" ; hydra:property dct:created ; hydra:required true ]
     ] .
 
 :Filter a owl:Class ;
@@ -1539,27 +1426,6 @@
     ] .
 
 ## Feature of interests
-:Uitwisseling a owl:Class ;
-    rdfs:label "Uitwisseling"@nl ;
-    rdfs:comment "Een uitwisseling is een specifiek uitwisselingsgebeurtenis dat betrekking heeft op het overdragen of ontvangen van stoffen aan uitwisselpunt(en) over of op een bepaalde periode of momentopname."@nl ;
-    rdfs:subClassOf prov:Entity, sosa:FeatureOfInterest ;
-    hydra:search [ a hydra:IriTemplate ;
-        hydra:template "https://data.mjv.omgeving.vlaanderen.be/id/uitwisseling/{uuid}"^^hydra:Rfc6570Template ;
-        hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ]
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een uitwisseling moet gekoppeld zijn aan een proces"@nl ;
-        owl:onProperty sosa:hasFeatureOfInterest ;
-        owl:someValuesFrom :Proces ;
-        owl:minCardinality "1"^^xsd:nonNegativeInteger
-    ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-        # *..* relation with sosa:isFeatureOfInterestOf
-        owl:onProperty sosa:isFeatureOfInterestOf ;
-        owl:someValuesFrom sosa:Observation ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger
-    ] .
-
 :Onttrekking a owl:Class ;
     rdfs:label "Onttrekking"@nl ;
     rdfs:comment "Een onttrekking is een specifiek onttrekkingsevent dat betrekking heeft op het winnen of bemonsteren van grondstoffen aan onttrekkingspunten over of op een bepaalde periode of momentopname."@nl ;
@@ -1569,8 +1435,8 @@
         hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ]
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een uitwisseling moet gekoppeld zijn aan een proces"@nl ;
-        owl:onProperty sosa:hasFeatureOfInterest ;
+        rdfs:comment "Een onttrekking moet gekoppeld zijn aan een proces"@nl ;
+        owl:onProperty prov:wasDerivedFrom ;
         owl:someValuesFrom :Proces ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
@@ -1590,8 +1456,8 @@
         hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ]
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een uitwisseling moet gekoppeld zijn aan een proces"@nl ;
-        owl:onProperty sosa:hasFeatureOfInterest ;
+        rdfs:comment "Een emissie moet gekoppeld zijn aan een proces"@nl ;
+        owl:onProperty prov:wasDerivedFrom ;
         owl:someValuesFrom :Proces ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger
     ] ;
@@ -1605,11 +1471,12 @@
 ## Observaties
 :Observatie a owl:Class ;
     rdfs:label "Observatie"@nl ;
-    rdfs:comment "Een observatie is een waarneming of meting uitgevoerd op een emissie via een meetinstrument."@nl ;
+    rdfs:comment "Een observatie is een waarneming of meting uitgevoerd op een emissie of onttrekking."@nl ;
     rdfs:subClassOf sosa:Observation ;
     hydra:search [ a hydra:IriTemplate ;
-        hydra:template "https://data.mjv.omgeving.vlaanderen.be/id/observatie/{uuid}"^^hydra:Rfc6570Template ;
-        hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ]
+        hydra:template "https://data.mjv.omgeving.vlaanderen.be/id/observatie/{uuid}/{created}"^^hydra:Rfc6570Template ;
+        hydra:mapping [ hydra:variable "uuid" ; hydra:property :localId ; hydra:required true ] ;
+        hydra:mapping [ hydra:variable "created" ; hydra:property dct:created ; hydra:required true ]
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
         rdfs:comment "Een observatie is optioneel gekoppeld aan een aangifte tenzij het in concept staat."@nl ;
@@ -1619,17 +1486,17 @@
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een observatie is gekoppeld aan een Emissie, Onttrekking of Uitwisseling"@nl ;
-        owl:onProperty sosa:hasFeatureOfInterest ;
-        owl:someValuesFrom :Gebeurtenis ;
+        rdfs:comment "Een observatie moet een creatie datum hebben"@nl ;
+        owl:onProperty dct:created ;
+        owl:someValuesFrom xsd:dateTime ;
         owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
-        rdfs:comment "Een observatie kan gedaan zijn door een meetinstrument"@nl ;
-        owl:onProperty sosa:madeBySensor ;
-        owl:someValuesFrom :Meetinstrument ;
-        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        rdfs:comment "Een observatie is gekoppeld aan een Emissie of Onttrekking"@nl ;
+        owl:onProperty sosa:hasFeatureOfInterest ;
+        owl:someValuesFrom sosa:FeatureOfInterest ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
         owl:maxCardinality "1"^^xsd:nonNegativeInteger
     ] ;
     rdfs:subClassOf [ a owl:Restriction ;
@@ -1835,7 +1702,7 @@
     rdfs:label "Notatietype"@nl ;
     rdfs:comment "Het datatype-IRI van een skos:notation typed literal, opgeslagen als URI-string zodat het datatype en de notatie-waarde afzonderlijk bewaard worden."@nl ;
     rdfs:domain adms:Identifier ;
-    rdfs:range xsd:anyURI .
+    rdfs:range rdfs:Datatype .
 
 :inGebruikVanaf a owl:DatatypeProperty ;
     rdfs:label "in gebruik vanaf"@nl ;
@@ -1857,7 +1724,7 @@ adms:Identifier rdfs:subClassOf [ a owl:Restriction ;
 rdfs:subClassOf [ a owl:Restriction ;
     rdfs:comment "Een externe identificator heeft een notatie type (het datatype-IRI van de skos:notation typed literal)"@nl ;
     owl:onProperty :notatietype ;
-    owl:someValuesFrom xsd:anyURI ;
+    owl:someValuesFrom rdfs:Datatype ;
     owl:minCardinality "0"^^xsd:nonNegativeInteger ;
     owl:maxCardinality "1"^^xsd:nonNegativeInteger
 ] .

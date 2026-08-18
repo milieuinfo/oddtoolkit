@@ -40,6 +40,18 @@
     owl:equivalentProperty locn:address ;
     skos:inScheme <> .
 
+:Organisatie a skos:Concept ;
+    skos:prefLabel "organisatie"@nl ;
+    skos:definition "De juridische entiteit (VKBO-onderneming) die als primaire bron van een exploitant geldt."@nl ;
+    owl:equivalentClass org:Organization ;
+    skos:inScheme <> .
+
+:Vestiging a skos:Concept ;
+    skos:prefLabel "vestiging"@nl ;
+    skos:definition "De vestiging (VKBO) die als primaire bron van een exploitatielocatie geldt."@nl ;
+    owl:equivalentClass org:Site ;
+    skos:inScheme <> .
+
 :straat a skos:Concept ;
     skos:prefLabel "straat"@nl ;
     skos:definition "De eigenschap die de straatnaam van een adres beschrijft."@nl ;
@@ -339,12 +351,6 @@
 # ---------------------------------------- #
 # Observatie
 # ---------------------------------------- #
-:meetinstrument a skos:Concept ;
-    skos:prefLabel "meetinstrument"@nl ;
-    skos:definition "Een meetinstrument dat gebruikt wordt bij de uitvoering van een observatie."@nl ;
-    owl:equivalentProperty sosa:madeBySensor ;
-    skos:inScheme <> .
-
 :eigenschap a skos:Concept ;
     skos:prefLabel "eigenschap"@nl ;
     skos:definition "Een eigenschap die gemeten wordt bij de uitvoering van een observatie."@nl ;
