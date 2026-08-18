@@ -142,10 +142,10 @@ adapters:
     reasoner-materialize: true
     reasoner-timeout-ms: 0
     inferred-output-enabled: true
-    inferred-output-path: "target/test-cache/inferred/inferred.ttl"
+    inferred-output-path: ".cache/inferred/inferred.ttl"
     inferred-cache-enabled: true
     inferred-cache-ttl-ms: 3600000
-    inferred-cache-dir: "target/test-cache/inferred"
+    inferred-cache-dir: ".cache/inferred"
     inferred-cache-format: "TURTLE"
   ontology-extract-external:
     mirrors:
@@ -170,12 +170,18 @@ adapters:
       - uri: "http://www.w3.org/ns/adms#"
         mirrors:
           - "https://www.w3.org/ns/legacy_adms.ttl"
+      - uri: "http://www.w3.org/ns/org#"
+        mirrors:
+          - "https://www.w3.org/ns/org.ttl"
+      - uri: "http://data.europa.eu/ux2/nace2.1/"
+        mirrors:
+          - "https://publications.europa.eu/webapi/rdf/sparql?default-graph-uri=&query=prefix+skos%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0D%0A%0D%0ACONSTRUCT+%7B%0D%0A++%3Fs+%3Fp+%3Fo+.%0D%0A%7D%0D%0AWHERE+%7B%0D%0A++%3Fs+%3Fp+%3Fo+%3B%0D%0Askos%3AinScheme++%3Chttp%3A%2F%2Fdata.europa.eu%2Fux2%2Fnace2.1%2Fnace2.1%3E%0D%0A%7D&format=text%2Fturtle&should-sponge=&timeout=0&signal_void=on&signal_unconnected=on"
       - uri: "http://dbpedia.org/ontology/"
         mirrors:
           - "https://downloads.dbpedia.org/2016-10/dbpedia_2016-10.nt"
       - uri: "http://www.opengis.net/ont/geosparql#"
         mirrors:
           - "https://raw.githubusercontent.com/opengeospatial/ogc-geosparql/refs/heads/master/vocabularies/geo.ttl"
-    cache-dir: "target/test-cache/external"
+    cache-dir: ".cache/external"
     cache-ttl-ms: 3600000
     cache-enabled: true

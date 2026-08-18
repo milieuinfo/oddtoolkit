@@ -1,0 +1,40 @@
+@prefix :       <http://example.org/test/uniontypes#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# Minimal, self-contained ontology used only to exercise union-type detection
+# (a property with multiple OWL restrictions on the same class, each targeting a
+# different sibling class). Kept independent of the RIE-IEPR example ontology in
+# docs/examples/riepr so that domain-model changes there cannot silently break this
+# mechanism test.
+
+:heeftOnderdeel a owl:ObjectProperty ;
+    rdfs:label "heeftOnderdeel"@nl ;
+    rdfs:comment "Verwijst naar een onderdeel van het systeem."@nl .
+
+:Systeem a owl:Class ;
+    rdfs:label "Systeem"@nl .
+
+:Filter a owl:Class ;
+    rdfs:label "Filter"@nl ;
+    rdfs:subClassOf :Systeem .
+
+:Sensor a owl:Class ;
+    rdfs:label "Sensor"@nl ;
+    rdfs:subClassOf :Systeem .
+
+:Meetpunt a owl:Class ;
+    rdfs:label "Meetpunt"@nl ;
+    rdfs:subClassOf :Systeem ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :heeftOnderdeel ;
+        owl:someValuesFrom :Filter ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :heeftOnderdeel ;
+        owl:someValuesFrom :Sensor ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger
+    ] .
