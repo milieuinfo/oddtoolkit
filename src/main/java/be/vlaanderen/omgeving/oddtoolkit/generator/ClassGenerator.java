@@ -23,6 +23,7 @@ import lombok.Setter;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.SKOS;
 import org.apache.jena.vocabulary.XSD;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -879,7 +880,18 @@ public class ClassGenerator extends BaseGenerator {
           .forEach(subclasses::add);
       enumInfo.getClassInfo().getIndividuals()
           .stream()
-          .map(i -> new ClassInfo(enumInfo.getClassInfo().getScope(), i))
+          .map(i -> {
+            ClassInfo individualInfo = new ClassInfo(enumInfo.getClassInfo().getScope(), i);
+            // Codelist-backed individuals (e.g. Status/Procedure) declare their real, published
+            // identity via skos:related, distinct from their own ontology-namespace URI -- prefer
+            // that one so generated code (getUri()) points at the codelist concept instead of an
+            // internal-only ns/riepr# URI.
+            Resource relatedConcept = i.getPropertyResourceValue(SKOS.related);
+            if (relatedConcept != null && relatedConcept.getURI() != null) {
+              individualInfo.setUri(relatedConcept.getURI());
+            }
+            return individualInfo;
+          })
           .forEach(subclasses::add);
       enumInfo.setValues(subclasses
           .stream().map(clazz -> {
