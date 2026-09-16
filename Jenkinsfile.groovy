@@ -64,7 +64,10 @@ pipeline {
           parallel {
             stage('Docs (VitePress)') {
               steps {
-                container('node') {
+                // The inline `node` container has no credentials; only the Cumulus
+                // maven container mounts /root/.npmrc (js-settings secret) and the
+                // npm cache, so npm can authenticate against acd-npm from there.
+                container('maven') {
                   dir('docs') {
                     withEnv(['DOCS_BASE=/oddtoolkit/']) {
                       sh '''
