@@ -65,13 +65,13 @@ datatypes. It binds to `OntologyConfiguration`.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `ontology-file-path` | string | — | Path to the RDF file with classes and properties |
-| `concepts-file-path` | string | — | Path to the RDF file with SKOS concept schemes |
+| `ontology-file-path` | string | — | Path (or URL) to the RDF file with classes and properties |
+| `concepts-file-path` | string | — | Path (or URL) to the RDF file with SKOS concept schemes |
 
 ```yaml
 ontology:
-  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
-  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
+  ontology-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl"
+  concepts-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl"
 ```
 
 Both can be overridden per run with `--ontology-file=` and `--concepts-file=`.
@@ -341,8 +341,8 @@ Copy this, change the two paths, and it runs:
 
 ```yaml
 ontology:
-  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
-  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
+  ontology-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl"
+  concepts-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl"
 
 generators:
   class-diagram:

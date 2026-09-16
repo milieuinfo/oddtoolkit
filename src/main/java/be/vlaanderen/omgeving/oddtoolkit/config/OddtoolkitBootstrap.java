@@ -21,6 +21,7 @@ import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ERDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.JavaGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ODCSGenerator;
+import be.vlaanderen.omgeving.oddtoolkit.generator.OntologyDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.SQLGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ShaclGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.TypescriptGenerator;
@@ -56,6 +57,8 @@ public final class OddtoolkitBootstrap {
 
     ClassDiagramProperties classDiagramProperties = bindAnnotated(rootConfiguration,
         ClassDiagramProperties.class, new ClassDiagramProperties());
+    OntologyDiagramProperties ontologyDiagramProperties = bindAnnotated(rootConfiguration,
+        OntologyDiagramProperties.class, new OntologyDiagramProperties());
     DiagramGeneratorProperties diagramGeneratorProperties = bindAnnotated(rootConfiguration,
         DiagramGeneratorProperties.class, new DiagramGeneratorProperties());
     DataFrameGeneratorProperties dataFrameGeneratorProperties = bindAnnotated(rootConfiguration,
@@ -90,6 +93,9 @@ public final class OddtoolkitBootstrap {
     ClassDiagramGenerator classDiagramGenerator = generatorConfiguration.classDiagramGenerator(
         ontologyInfo, generatorProperties, classDiagramProperties, diagramGeneratorProperties,
         adapterBeans);
+    OntologyDiagramGenerator ontologyDiagramGenerator = generatorConfiguration
+        .ontologyDiagramGenerator(ontologyInfo, generatorProperties,
+            ontologyDiagramProperties, diagramGeneratorProperties, adapterBeans);
     ERDiagramGenerator erDiagramGenerator = generatorConfiguration.erDiagramGenerator(ontologyInfo,
         generatorProperties, diagramGeneratorProperties, schemaGeneratorProperties,
         erDiagramProperties, adapterBeans);
@@ -111,8 +117,9 @@ public final class OddtoolkitBootstrap {
      DefaultGeneratorRegistry registry = new DefaultGeneratorRegistry();
      registry.register(dataFrameGenerator.getName(), dataFrameGenerator);
      registry.register(classGenerator.getName(), classGenerator);
-     registry.register(classDiagramGenerator.getName(), classDiagramGenerator);
-     registry.register(erDiagramGenerator.getName(), erDiagramGenerator);
+      registry.register(classDiagramGenerator.getName(), classDiagramGenerator);
+      registry.register(ontologyDiagramGenerator.getName(), ontologyDiagramGenerator);
+      registry.register(erDiagramGenerator.getName(), erDiagramGenerator);
      registry.register(sqlGenerator.getName(), sqlGenerator);
      registry.register(shaclGenerator.getName(), shaclGenerator);
      registry.register(javaGenerator.getName(), javaGenerator);

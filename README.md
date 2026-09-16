@@ -34,15 +34,15 @@ java -jar target/oddtoolkit.jar \
   --config-file=src/test/resources/application.yml
 ```
 
-`src/test/resources/application.yml` is a working configuration for the bundled example ontology in
-`docs/examples/riepr/`. Set `ODD_LOG_LEVEL=DEBUG` for verbose logging.
+`src/test/resources/application.yml` is a working configuration for the RIE-IEPR example ontology,
+which is fetched from GitHub at run time. Set `ODD_LOG_LEVEL=DEBUG` for verbose logging.
 
 ## Project layout
 
 - `src/main/java` — application, generators and adapters
 - `src/test/java` — unit tests
 - `src/test/resources/application.yml` — example configuration
-- `docs/examples/riepr/` — example ontology and generated output
+- `docs/examples/riepr/` — generated example output (the ontology input is fetched from GitHub)
 - `docs/` — VitePress documentation site
 
 ## Documentation

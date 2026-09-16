@@ -1,6 +1,7 @@
 ontology:
-  ontology-file-path: "docs/examples/riepr/ontology/ns/riepr/riepr.ttl"
-  concepts-file-path: "docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl"
+  # Example ontology, loaded from the RIE-IEPR project on GitHub (not checked in)
+  ontology-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl"
+  concepts-file-path: "https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl"
   enum-classes:
     classes:
       - "http://www.w3.org/ns/sosa/Procedure"

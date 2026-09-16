@@ -3,8 +3,8 @@
 Every artefact on this page was produced by the generator tests from one ontology and one
 configuration file. Nothing here is hand-written, so it shows exactly what the toolkit emits.
 
-- **Ontology:** `docs/examples/riepr/ontology/ns/riepr/riepr.ttl`
-- **Concept scheme:** `docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl`
+- **Ontology:** <https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl> (fetched at run time)
+- **Concept scheme:** <https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl> (fetched at run time)
 - **Configuration:** `src/test/resources/application.yml`
 - **Outputs:** `docs/examples/riepr/outputs/`
 

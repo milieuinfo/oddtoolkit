@@ -8,6 +8,7 @@ import be.vlaanderen.omgeving.oddtoolkit.generator.DataFrameGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ERDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.JavaGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ODCSGenerator;
+import be.vlaanderen.omgeving.oddtoolkit.generator.OntologyDiagramGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.SQLGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.ShaclGenerator;
 import be.vlaanderen.omgeving.oddtoolkit.generator.TypescriptGenerator;
@@ -63,6 +64,17 @@ public class GeneratorConfiguration {
         generatorProperties.adaptersFor("er-diagram"));
     return new ERDiagramGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
         diagramGeneratorProperties, schemaGeneratorProperties, erDiagramProperties);
+  }
+
+  public OntologyDiagramGenerator ontologyDiagramGenerator(OntologyInfo ontologyInfo,
+      GeneratorProperties generatorProperties,
+      OntologyDiagramProperties ontologyDiagramProperties,
+      DiagramGeneratorProperties diagramGeneratorProperties,
+      Map<String, AbstractAdapter<?>> adapterBeans) {
+    List<AbstractAdapter<?>> adapters = selectAdapters(adapterBeans,
+        generatorProperties.adaptersFor("ontology-diagram"));
+    return new OntologyDiagramGenerator(ontologyInfo, ontologyInfo.getConcepts(), adapters,
+        ontologyDiagramProperties, diagramGeneratorProperties);
   }
 
   public SQLGenerator sqlGenerator(OntologyInfo ontologyInfo,

@@ -33,6 +33,9 @@ build/
 ### VS Code ###
 .vscode/
 
+# Example ontology inputs are fetched from GitHub at test time (see src/test/resources/application.yml)
+docs/examples/riepr/ontology/
+
 # VitePress docs artifacts
 docs/node_modules/
 docs/.vitepress/cache/

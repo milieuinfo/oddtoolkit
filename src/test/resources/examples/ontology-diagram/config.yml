@@ -1,0 +1,29 @@
+ontology:
+  ontology-file-path: "src/test/resources/examples/ontology-diagram/ontology.ttl"
+  concepts-file-path: "src/test/resources/examples/ontology-diagram/concepts.ttl"
+  extra-properties:
+    # Application-model artifact that must NOT appear in the ontology diagram
+    - name: "uuid"
+      uri: "https://example.org/mini#localId"
+      comment: "UUID"
+      identifier: true
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        max: 1
+        min: 1
+
+generators:
+  ontology-diagram:
+    output-file: "target/test-cache/ontology-diagram/ontology-diagram.mmd"
+    namespace-styles:
+      ssn:
+        fill: "#4bde2a"
+        stroke: "#000000"
+  diagram-generator:
+    export-png: false
+
+adapters:
+  ontology-reasoner:
+    enabled: false
+  ontology-extract-external:
+    enabled: false

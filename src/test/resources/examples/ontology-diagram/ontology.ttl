@@ -1,0 +1,63 @@
+@prefix :       <https://example.org/mini#> .
+@prefix rdf:    <http://www.w3.org/1999/02-22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix vann:   <http://purl.org/vocab/vann/> .
+@prefix ssn:    <http://www.w3.org/ns/ssn/> .
+@prefix sosa:   <http://www.w3.org/ns/sosa/> .
+@prefix pplan:  <http://purl.org/net/p-plan#> .
+@prefix qudt:   <http://qudt.org/schema/qudt/> .
+
+# Minimal, self-contained ontology to exercise the ontology-diagram generator:
+# prefixed class names, generalization arrows, object property relations, and a
+# class-like range that is not itself a declared class (qudt:Unit). Kept independent
+# of the RIE-IEPR example ontology so domain-model changes there cannot silently
+# break this mechanism test.
+
+<> a owl:Ontology ;
+    vann:preferredNamespacePrefix "mini" ;
+    vann:preferredNamespaceUri "https://example.org/mini#" .
+
+:Installatie a owl:Class ;
+    rdfs:label "Installatie"@nl ;
+    rdfs:subClassOf ssn:System ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        rdfs:comment "Minimaal één onderdeel (emissiepunt)"@nl ;
+        owl:onProperty :heeftOnderdeel ;
+        owl:someValuesFrom :Emissiepunt ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :geldigVan ;
+        owl:someValuesFrom xsd:date ;
+        owl:minCardinality "0"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :benaming ;
+        owl:someValuesFrom xsd:string ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger
+    ] .
+
+:Emissiepunt a owl:Class ;
+    rdfs:label "Emissiepunt"@nl ;
+    rdfs:subClassOf ssn:System .
+
+:Proces a owl:Class ;
+    rdfs:label "Proces"@nl ;
+    rdfs:subClassOf pplan:Plan, sosa:Procedure ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :implementeert ;
+        owl:someValuesFrom :Installatie ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+        owl:maxCardinality "1"^^xsd:nonNegativeInteger
+    ] .
+
+:Observatie a owl:Class ;
+    rdfs:label "Observatie"@nl ;
+    rdfs:subClassOf sosa:Observation ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty :heeftEenheid ;
+        owl:someValuesFrom qudt:Unit
+    ] .
