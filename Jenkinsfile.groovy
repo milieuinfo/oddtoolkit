@@ -14,6 +14,13 @@ spec:
           cpu: "250m"
         limits:
           memory: "2Gi"
+      # The js-settings secret volume is contributed by maven.podSpec(). Mounting its
+      # .npmrc here is what lets npm authenticate against acd-npm; without it every
+      # tarball fetch returns 403.
+      volumeMounts:
+        - name: js-settings
+          mountPath: /root/.npmrc
+          subPath: .npmrc
 '''
 
 pipeline {
@@ -64,10 +71,7 @@ pipeline {
           parallel {
             stage('Docs (VitePress)') {
               steps {
-                // The inline `node` container has no credentials; only the Cumulus
-                // maven container mounts /root/.npmrc (js-settings secret) and the
-                // npm cache, so npm can authenticate against acd-npm from there.
-                container('maven') {
+                container('node') {
                   dir('docs') {
                     withEnv(['DOCS_BASE=/oddtoolkit/']) {
                       sh '''
