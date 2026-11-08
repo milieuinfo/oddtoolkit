@@ -206,6 +206,25 @@ written as `I<Name>.java`. Imports for cross-package dependencies are generated,
 | `output-directory` | none — **required** | Target directory for the generated files |
 | `package-name` | `be.vlaanderen.omgeving.oddtoolkit.generated` | Package declared in every file |
 | `cleanup-stale-files` | `false` | Delete `.java` files in the directory that this run would not produce |
+| `json-ld` | `false` | Add Jackson annotations so the POJOs serialize to JSON-LD (see below) |
+| `date-time-type` | `local` | Java type for `xsd:dateTime`: `local` (`LocalDateTime`) or `offset` (`OffsetDateTime`, a timestamp with time zone) |
+
+With `json-ld: true`:
+
+- every class gets a read-only `@type` property with its class IRI (`getRdfType()`);
+- an attribute with a `<name>_datatype` companion (range `rdfs:Datatype`) serializes once, as a
+  plain string or, when the datatype is set, as a typed literal `{"@value": ..., "@type": ...}`;
+  both fields are `@JsonIgnore` and a `get<Name>JsonLd()`/`set<Name>JsonLd()` pair carries the
+  JSON property;
+- a reference to an entity (a class with a Hydra URI template, or an interface or superclass of
+  one) serializes as that entity's `uri` via the generated `IriReferentieSerializer`; classes
+  with a `uri` implement the generated `IriReferentie` interface. Helper objects without a URI
+  template (address, geometry, identifier) stay nested;
+- enum values serialize as their concept URI (`@JsonValue getUri()`, `@JsonCreator fromUri`).
+
+The JSON-LD context of the consumer maps the property names (and e.g. `uri` to `@id`); for
+`OffsetDateTime` the consumer registers Jackson's `JavaTimeModule` with
+`WRITE_DATES_AS_TIMESTAMPS` disabled.
 
 Also reads `generators.schema-generator` (it uses the table model to resolve column names and
 identifiers).
@@ -216,6 +235,8 @@ generators:
     package-name: "be.vlaanderen.omgeving.riepr.model.structuur"
     output-directory: "target/java"
     cleanup-stale-files: true
+    json-ld: true
+    date-time-type: offset
 ```
 
 ## `typescript`

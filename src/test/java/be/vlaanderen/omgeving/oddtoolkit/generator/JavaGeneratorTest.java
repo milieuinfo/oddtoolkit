@@ -30,6 +30,27 @@ public class JavaGeneratorTest {
     assertThat(hasOutputVarBlock).contains("@ManyToMany").contains("proces_procesvariabele");
   }
 
+  @Test
+  void jsonLdOptionsAreOffByDefault() throws Exception {
+    generator.run();
+
+    Path output = Path.of("target/test-cache/java");
+    String exploitatie = Files.readString(output.resolve("Exploitatie.java"));
+    assertThat(exploitatie).contains("private LocalDateTime aangemaaktOp;")
+        .doesNotContain("OffsetDateTime")
+        .doesNotContain("getRdfType")
+        .doesNotContain("@JsonSerialize")
+        .doesNotContain("IriReferentie");
+    assertThat(Files.readString(output.resolve("ExterneIdentificator.java")))
+        .doesNotContain("@JsonIgnore")
+        .doesNotContain("JsonLd");
+    assertThat(Files.readString(output.resolve("Status.java")))
+        .doesNotContain("@JsonValue")
+        .doesNotContain("fromUri");
+    assertThat(output.resolve("IriReferentie.java")).doesNotExist();
+    assertThat(output.resolve("IriReferentieSerializer.java")).doesNotExist();
+  }
+
   private static String blockBetween(String source, String startMarker, String endMarker) {
     int start = source.indexOf(startMarker);
     int end = source.indexOf(endMarker, start);

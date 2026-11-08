@@ -119,6 +119,13 @@
       <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- Only to compile the generated Java POJOs in JavaGeneratorJsonLdTest -->
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

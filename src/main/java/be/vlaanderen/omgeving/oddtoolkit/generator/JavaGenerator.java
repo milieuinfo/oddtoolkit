@@ -3,6 +3,7 @@ package be.vlaanderen.omgeving.oddtoolkit.generator;
 import be.vlaanderen.omgeving.oddtoolkit.adapter.AbstractAdapter;
 import be.vlaanderen.omgeving.oddtoolkit.config.DiagramGeneratorProperties;
 import be.vlaanderen.omgeving.oddtoolkit.config.JavaGeneratorProperties;
+import be.vlaanderen.omgeving.oddtoolkit.config.JavaGeneratorProperties.DateTimeType;
 import be.vlaanderen.omgeving.oddtoolkit.config.SchemaGeneratorProperties;
 import be.vlaanderen.omgeving.oddtoolkit.model.Cardinality;
 import be.vlaanderen.omgeving.oddtoolkit.model.ConceptSchemeInfo;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +33,10 @@ public class JavaGenerator extends SchemaGenerator {
           Comparator.nullsLast(String::compareTo))
       .thenComparing(p -> p != null ? p.getRight() : null,
           Comparator.nullsLast(String::compareTo));
+
+  // Generated with json-ld: true, so references to entities serialize as their URI.
+  private static final String IRI_REFERENCE = "IriReferentie";
+  private static final String IRI_REFERENCE_SERIALIZER = "IriReferentieSerializer";
 
   private final Map<Clazz, String> fileNames = new HashMap<>();
   private final Map<String, String> nameMapping = new HashMap<>();
@@ -56,10 +62,17 @@ public class JavaGenerator extends SchemaGenerator {
     generateFile(getClasses(), null);
     generateFile(getInterfaces(), "interface");
     generateFile(getEnums(), "enum");
+    if (isJsonLd()) {
+      generateIriReferenceFiles();
+    }
   }
 
   private String getPackageName() {
     return generatorProperties.getPackageName();
+  }
+
+  private boolean isJsonLd() {
+    return generatorProperties.isJsonLd();
   }
 
   private String getBasePath() {
@@ -83,6 +96,10 @@ public class JavaGenerator extends SchemaGenerator {
       fileNames.put(clazz, fileName);
       expectedJavaFileNames.add(fileName);
     });
+    if (isJsonLd()) {
+      expectedJavaFileNames.add(IRI_REFERENCE + ".java");
+      expectedJavaFileNames.add(IRI_REFERENCE_SERIALIZER + ".java");
+    }
     getClasses().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
     getInterfaces().forEach(clazz -> nameMapping.put(clazz.getName(), "I" + clazz.getName()));
     getEnums().forEach(clazz -> nameMapping.put(clazz.getName(), clazz.getName()));
@@ -126,8 +143,17 @@ public class JavaGenerator extends SchemaGenerator {
                   .append(";\n"));
       if (!isInterface) {
         boolean hasProperties = !clazz.getAttributes().isEmpty();
-        if (hasProperties) {
+        if (hasProperties || (isJsonLd() && !isEnum)) {
           builder.append("import com.fasterxml.jackson.annotation.JsonProperty;\n");
+        }
+        if (isJsonLd() && !isEnum) {
+          builder.append("import com.fasterxml.jackson.annotation.JsonIgnore;\n");
+          builder.append("import com.fasterxml.jackson.annotation.JsonSetter;\n");
+          builder.append("import com.fasterxml.jackson.databind.annotation.JsonSerialize;\n");
+        }
+        if (isJsonLd() && isEnum) {
+          builder.append("import com.fasterxml.jackson.annotation.JsonCreator;\n");
+          builder.append("import com.fasterxml.jackson.annotation.JsonValue;\n");
         }
         builder.append("import lombok.Getter;\n");
         builder.append("import lombok.Setter;\n");
@@ -191,6 +217,11 @@ public class JavaGenerator extends SchemaGenerator {
             .reduce((a, b) -> a + ", " + b)
             .orElse("");
       }
+      if (isJsonLd() && !isInterface && !isEnum && hasUriAttribute(clazz)) {
+        implementsClause = implementsClause.isEmpty()
+            ? " implements " + IRI_REFERENCE
+            : implementsClause + ", " + IRI_REFERENCE;
+      }
 
       builder.append("public ").append(typeDeclaration).append(" ").append(clazz.getName())
           .append(extendsClause).append(implementsClause)
@@ -214,11 +245,19 @@ public class JavaGenerator extends SchemaGenerator {
           builder.append("\t").append(clazz.getName()).append("(String uri) {\n");
           builder.append("\t\tthis.uri = uri;\n");
           builder.append("\t}\n\n");
+          if (isJsonLd()) {
+            builder.append("\t@JsonValue\n");
+          }
           builder.append("\tpublic String getUri() {\n");
           builder.append("\t\treturn uri;\n");
           builder.append("\t}\n");
+          if (isJsonLd()) {
+            appendEnumFromUri(builder, clazz.getName());
+          }
         }
       }
+      // Methods emitted after the fields (json-ld only).
+      StringBuilder methods = new StringBuilder();
       clazz.getAttributes().forEach(prop -> {
         builder.append("\t/**\n");
         builder.append("\t * ").append(prop.getPropertyInfo().getName()).append("\n");
@@ -316,14 +355,32 @@ public class JavaGenerator extends SchemaGenerator {
             }
           }
 
-          builder.append("\t@JsonProperty(\"").append(prop.getPropertyInfo().getName())
-              .append("\")\n");
+          Attribute datatypeCompanion = isJsonLd() ? findDatatypeCompanion(clazz, prop) : null;
+          if (isJsonLd() && datatypeCompanion != null && !isArray) {
+            // Value and datatype serialize together as one typed literal, see appendTypedLiteralAccessors.
+            builder.append("\t@JsonIgnore\n");
+            appendTypedLiteralAccessors(methods, prop, datatypeCompanion);
+          } else if (isJsonLd() && isDatatypeCompanion(clazz, prop)) {
+            builder.append("\t@JsonIgnore\n");
+          } else {
+            if (isJsonLd() && isEntityReference(prop.getRange())) {
+              builder.append("\t@JsonSerialize(").append(isArray ? "contentUsing" : "using")
+                  .append(" = ").append(IRI_REFERENCE_SERIALIZER).append(".class)\n");
+            }
+            builder.append("\t@JsonProperty(\"").append(prop.getPropertyInfo().getName())
+                .append("\")\n");
+          }
 
           builder.append("\t").append("private ")
               .append(dataType)
               .append(" ").append(prop.getName()).append(";\n");
         }
       });
+
+      if (isJsonLd() && !isInterface && !isEnum) {
+        appendRdfTypeGetter(methods, clazz);
+        builder.append(methods);
+      }
 
       // Emit composite Id as a static inner class — keeps it scoped to its owner.
       if (!isInterface && !isEnum) {
@@ -386,10 +443,172 @@ public class JavaGenerator extends SchemaGenerator {
       builder.append("\t\tjoinColumns = @JoinColumn(name = \"source_uuid\"),\n");
       builder.append("\t\tinverseJoinColumns = @JoinColumn(name = \"target_uuid\")\n");
       builder.append("\t)\n");
+      if (isJsonLd() && isEntityReference(rangeClazz)) {
+        builder.append("\t@JsonSerialize(contentUsing = ").append(IRI_REFERENCE_SERIALIZER)
+            .append(".class)\n");
+      }
       builder.append("\t@JsonProperty(\"").append(jsonName).append("\")\n");
       builder.append("\tprivate List<").append(targetType).append("> ")
           .append(fieldName).append(";\n");
     }
+  }
+
+  /** Returns the {@code <name>_datatype} companion of an attribute with an rdfs:Datatype range. */
+  private @Nullable Attribute findDatatypeCompanion(Clazz clazz, Attribute attribute) {
+    String companionName = attribute.getName() + "_datatype";
+    return clazz.getAttributes().stream()
+        .filter(other -> other != attribute && companionName.equals(other.getName())
+            && other.getPropertyInfo() == attribute.getPropertyInfo())
+        .findFirst()
+        .orElse(null);
+  }
+
+  private boolean isDatatypeCompanion(Clazz clazz, Attribute attribute) {
+    return clazz.getAttributes().stream()
+        .anyMatch(other -> findDatatypeCompanion(clazz, other) == attribute);
+  }
+
+  /**
+   * An entity is a class with a Hydra URI template, or an interface/superclass that such a class
+   * implements or extends. References to it serialize as its URI; anything else stays nested.
+   */
+  private boolean isEntityReference(@Nullable Clazz range) {
+    if (range == null || range instanceof Enum) {
+      return false;
+    }
+    if (hasUriTemplate(range)) {
+      return true;
+    }
+    String rangeUri = range.getUri();
+    return rangeUri != null && getClasses().stream()
+        .filter(this::hasUriTemplate)
+        .anyMatch(candidate -> isSubtypeOf(candidate, rangeUri));
+  }
+
+  private boolean hasUriTemplate(Clazz clazz) {
+    return clazz.getClassInfo() != null && clazz.getClassInfo().getUriTemplate() != null;
+  }
+
+  private static boolean isSubtypeOf(Clazz clazz, String uri) {
+    for (Clazz current = clazz; current != null; current = current.getExtendsClass()) {
+      if (uri.equals(current.getUri())
+          || current.getInterfaces().stream().anyMatch(i -> uri.equals(i.getUri()))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean hasUriAttribute(Clazz clazz) {
+    return clazz.getAttributes().stream()
+        .anyMatch(attribute -> "uri".equals(attribute.getName()) && attribute.getRange() == null);
+  }
+
+  private static String capitalize(String name) {
+    return name.substring(0, 1).toUpperCase() + name.substring(1);
+  }
+
+  /**
+   * A JSON-LD getter/setter pair for a value with a {@code _datatype} companion: a plain string
+   * without datatype, otherwise a typed literal {@code {"@value": ..., "@type": ...}}.
+   */
+  private void appendTypedLiteralAccessors(StringBuilder methods, Attribute value,
+      Attribute datatype) {
+    String jsonName = value.getPropertyInfo().getName();
+    String valueField = value.getName();
+    String datatypeField = datatype.getName();
+    String accessor = capitalize(valueField) + "JsonLd";
+    methods.append("\n");
+    methods.append("\t/** ").append(jsonName)
+        .append(" as JSON-LD: a typed literal when the datatype is set. */\n");
+    methods.append("\t@jakarta.persistence.Transient\n");
+    methods.append("\t@JsonProperty(\"").append(jsonName).append("\")\n");
+    methods.append("\tpublic Object get").append(accessor).append("() {\n");
+    methods.append("\t\tif (").append(valueField).append(" == null || ").append(datatypeField)
+        .append(" == null) {\n");
+    methods.append("\t\t\treturn ").append(valueField).append(";\n");
+    methods.append("\t\t}\n");
+    methods.append("\t\tjava.util.Map<String, Object> literal = new java.util.LinkedHashMap<>();\n");
+    methods.append("\t\tliteral.put(\"@value\", ").append(valueField).append(");\n");
+    methods.append("\t\tliteral.put(\"@type\", ").append(datatypeField).append(");\n");
+    methods.append("\t\treturn literal;\n");
+    methods.append("\t}\n\n");
+    methods.append("\t@JsonSetter(\"").append(jsonName).append("\")\n");
+    methods.append("\tpublic void set").append(accessor).append("(Object value) {\n");
+    methods.append("\t\tif (value instanceof java.util.Map<?, ?> literal) {\n");
+    methods.append("\t\t\tObject literalValue = literal.get(\"@value\");\n");
+    methods.append("\t\t\tObject literalType = literal.get(\"@type\");\n");
+    methods.append("\t\t\tthis.").append(valueField)
+        .append(" = literalValue != null ? literalValue.toString() : null;\n");
+    methods.append("\t\t\tthis.").append(datatypeField)
+        .append(" = literalType != null ? literalType.toString() : null;\n");
+    methods.append("\t\t} else {\n");
+    methods.append("\t\t\tthis.").append(valueField)
+        .append(" = value != null ? value.toString() : null;\n");
+    methods.append("\t\t\tthis.").append(datatypeField).append(" = null;\n");
+    methods.append("\t\t}\n");
+    methods.append("\t}\n");
+  }
+
+  /** {@code @type} with the class IRI; read-only, so an incoming {@code @type} is ignored. */
+  private void appendRdfTypeGetter(StringBuilder methods, Clazz clazz) {
+    methods.append("\n");
+    methods.append("\t@jakarta.persistence.Transient\n");
+    methods.append("\t@JsonProperty(value = \"@type\", access = JsonProperty.Access.READ_ONLY)\n");
+    methods.append("\tpublic String getRdfType() {\n");
+    methods.append("\t\treturn \"").append(clazz.getUri()).append("\";\n");
+    methods.append("\t}\n");
+  }
+
+  private void appendEnumFromUri(StringBuilder builder, String enumName) {
+    builder.append("\n");
+    builder.append("\t@JsonCreator\n");
+    builder.append("\tpublic static ").append(enumName).append(" fromUri(String uri) {\n");
+    builder.append("\t\tfor (").append(enumName).append(" value : values()) {\n");
+    builder.append("\t\t\tif (value.uri.equals(uri)) {\n");
+    builder.append("\t\t\t\treturn value;\n");
+    builder.append("\t\t\t}\n");
+    builder.append("\t\t}\n");
+    builder.append("\t\tthrow new IllegalArgumentException(\"Unknown ").append(enumName)
+        .append(" URI: \" + uri);\n");
+    builder.append("\t}\n");
+  }
+
+  /** The {@code IriReferentie} interface and the Jackson serializer that writes it as its URI. */
+  private void generateIriReferenceFiles() {
+    String reference = "package " + getPackageName() + ";\n\n"
+        + "/**\n"
+        + " * Implemented by every generated class with a URI, so that a reference to it can be\n"
+        + " * serialized as that URI (see " + IRI_REFERENCE_SERIALIZER + ").\n"
+        + " **/\n"
+        + "public interface " + IRI_REFERENCE + " {\n"
+        + "\tString getUri();\n"
+        + "}\n";
+    saveToFile(IRI_REFERENCE + ".java", reference);
+
+    String serializer = "package " + getPackageName() + ";\n\n"
+        + "import com.fasterxml.jackson.core.JsonGenerator;\n"
+        + "import com.fasterxml.jackson.databind.SerializerProvider;\n"
+        + "import com.fasterxml.jackson.databind.ser.std.StdSerializer;\n"
+        + "import java.io.IOException;\n\n"
+        + "/**\n"
+        + " * Serializes a reference to an entity as its URI instead of as a nested object.\n"
+        + " **/\n"
+        + "public class " + IRI_REFERENCE_SERIALIZER + " extends StdSerializer<Object> {\n\n"
+        + "\tpublic " + IRI_REFERENCE_SERIALIZER + "() {\n"
+        + "\t\tsuper(Object.class);\n"
+        + "\t}\n\n"
+        + "\t@Override\n"
+        + "\tpublic void serialize(Object value, JsonGenerator gen, SerializerProvider provider)\n"
+        + "\t\t\tthrows IOException {\n"
+        + "\t\tif (value instanceof " + IRI_REFERENCE + " reference) {\n"
+        + "\t\t\tgen.writeString(reference.getUri());\n"
+        + "\t\t} else {\n"
+        + "\t\t\tprovider.defaultSerializeValue(value, gen);\n"
+        + "\t\t}\n"
+        + "\t}\n"
+        + "}\n";
+    saveToFile(IRI_REFERENCE_SERIALIZER + ".java", serializer);
   }
 
   protected List<Pair<String, String>> getDependencies(Clazz clazz) {
@@ -463,7 +682,8 @@ public class JavaGenerator extends SchemaGenerator {
       case "http://www.w3.org/2001/XMLSchema#boolean" -> getJavaPackageAndClassName(Boolean.class);
       case "http://www.w3.org/2001/XMLSchema#date" -> getJavaPackageAndClassName(LocalDate.class);
       case "http://www.w3.org/2001/XMLSchema#dateTime" ->
-          getJavaPackageAndClassName(LocalDateTime.class);
+          getJavaPackageAndClassName(generatorProperties.getDateTimeType() == DateTimeType.OFFSET
+              ? OffsetDateTime.class : LocalDateTime.class);
       default -> {
         String name = nameMapping.get(dataType.getName());
         if (name == null) {

@@ -13,6 +13,8 @@ public final class TestGeneratorFactory {
 
   private static final Map<String, GeneratorRegistry> REGISTRIES_BY_ONTOLOGY = new ConcurrentHashMap<>();
 
+  private static final Map<String, GeneratorRegistry> REGISTRIES_BY_CONFIG = new ConcurrentHashMap<>();
+
   private TestGeneratorFactory() {
   }
 
@@ -35,6 +37,19 @@ public final class TestGeneratorFactory {
             "--config-file=src/test/resources/application.yml",
             "--ontology-file=" + path
         }));
+    return (T) registry.get(name)
+        .orElseThrow(() -> new IllegalStateException("Missing generator in test registry: " + name));
+  }
+
+  /**
+   * Bootstraps (once per path, then cached) a registry from a different configuration file, e.g.
+   * a copy of the standard test configuration with some generator options switched on.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T extends BaseGenerator> T generatorWithConfig(String name, Class<T> type,
+      String configFilePath) {
+    GeneratorRegistry registry = REGISTRIES_BY_CONFIG.computeIfAbsent(configFilePath, path ->
+        OddtoolkitBootstrap.bootstrap(new String[]{"--config-file=" + path}));
     return (T) registry.get(name)
         .orElseThrow(() -> new IllegalStateException("Missing generator in test registry: " + name));
   }
