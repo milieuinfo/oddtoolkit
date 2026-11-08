@@ -170,9 +170,11 @@ public class ShaclGenerator extends BaseGenerator {
     return m.createProperty(SH + local);
   }
 
-  private boolean isDatatype(Resource res) {
-    return res != null && res.isURIResource() && res.getURI()
-        .startsWith("http://www.w3.org/2001/XMLSchema#");
+  /** XSD-datatypes en elke resource die in het model als rdfs:Datatype getypeerd is (bv. geo:wktLiteral). */
+  static boolean isDatatype(Resource res) {
+    return res != null && res.isURIResource()
+        && (res.getURI().startsWith("http://www.w3.org/2001/XMLSchema#")
+            || res.hasProperty(org.apache.jena.vocabulary.RDF.type, org.apache.jena.vocabulary.RDFS.Datatype));
   }
 
   private RDFNode createPath(Resource prop, Model shacl) {
