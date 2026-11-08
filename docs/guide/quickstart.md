@@ -22,12 +22,13 @@ java -jar target/oddtoolkit.jar --help
 
 ## 2. Know your inputs
 
-The repository ships a complete working example, the RIE-IEPR ontology:
+The repository ships a complete working example, the RIE-IEPR ontology, fetched from GitHub at run
+time (not checked in):
 
-| File | Role |
+| Source | Role |
 |---|---|
-| `docs/examples/riepr/ontology/ns/riepr/riepr.ttl` | The ontology |
-| `docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl` | The SKOS concept scheme |
+| <https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl> | The ontology |
+| <https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl> | The SKOS concept scheme |
 | `src/test/resources/application.yml` | A ready-made configuration that points at both |
 
 You always need a configuration file. The ontology and concept-scheme paths have no defaults, so a

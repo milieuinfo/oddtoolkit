@@ -103,8 +103,8 @@ configuration at a different ontology version.
 java -jar target/oddtoolkit.jar \
   --generator=class-diagram \
   --config-file=src/test/resources/application.yml \
-  --ontology-file=docs/examples/riepr/ontology/ns/riepr/riepr.ttl \
-  --concepts-file=docs/examples/riepr/ontology/id/concept/riepr/riepr.ttl
+  --ontology-file=https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl \
+  --concepts-file=https://raw.githubusercontent.com/milieuinfo/RIE-IEPR/main/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl
 ```
 
 Blank values are ignored, so passing `--ontology-file=` leaves the configured value alone.

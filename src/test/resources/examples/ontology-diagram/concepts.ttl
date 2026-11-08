@@ -1,0 +1,6 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Deliberately empty concept scheme: the ontology diagram uses ontology-level
+# (prefixed) names, not concept names.
+
+[] a skos:ConceptScheme .

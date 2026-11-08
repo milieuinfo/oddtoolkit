@@ -8,8 +8,8 @@
 # ShaclGeneratorTest,JavaGeneratorTest,TypescriptGeneratorTest,DataFrameGeneratorTest,\
 # BikeshedGeneratorTest,ODCSGeneratorTest' test
 #
-# then run this script. The ontology under docs/examples/riepr/ontology is the *input*
-# to those tests (see src/test/resources/application.yml); it is never overwritten here.
+# then run this script. The ontology input to those tests is fetched from GitHub at run time
+# (see src/test/resources/application.yml); it is never checked in or overwritten here.
 #
 set -euo pipefail
 

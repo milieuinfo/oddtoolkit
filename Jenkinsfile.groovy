@@ -14,6 +14,13 @@ spec:
           cpu: "250m"
         limits:
           memory: "2Gi"
+      # The js-settings secret volume is contributed by maven.podSpec(). Mounting its
+      # .npmrc here is what lets npm authenticate against acd-npm; without it every
+      # tarball fetch returns 403.
+      volumeMounts:
+        - name: js-settings
+          mountPath: /root/.npmrc
+          subPath: .npmrc
 '''
 
 pipeline {

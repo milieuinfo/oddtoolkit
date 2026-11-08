@@ -2,6 +2,7 @@ package be.vlaanderen.omgeving.oddtoolkit.adapter;
 
 import be.vlaanderen.omgeving.oddtoolkit.config.ConditionalOnConfigProperty;
 import be.vlaanderen.omgeving.oddtoolkit.model.OntologyInfo;
+import be.vlaanderen.omgeving.oddtoolkit.util.RdfFormat;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
@@ -14,9 +15,10 @@ public class OntologyLoadAdapter extends AbstractAdapter<OntologyInfo> {
 
   @Override
   public OntologyInfo adapt(OntologyInfo info) {
-    // Load the ontology from the source
+    // Load the ontology from the source (local path or URL)
+    String path = info.getConfig().getOntologyFilePath();
     Model model = ModelFactory.createDefaultModel();
-    model.read(info.getConfig().getOntologyFilePath());
+    RdfFormat.read(model, path);
     info.setModel(model);
     return info;
   }

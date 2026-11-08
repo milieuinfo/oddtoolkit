@@ -3,8 +3,8 @@
 This page explains which RDF/OWL constructs ODDToolkit actually reads, and which `ontology:` config
 keys let you correct or augment an ontology you do not control.
 
-All examples come from the shipped RIE-IEPR example
-(`docs/examples/riepr/ontology/ns/riepr/riepr.ttl`) and the working configuration in
+All examples come from the RIE-IEPR example ontology (fetched from GitHub at run time, see
+`src/test/resources/application.yml`) and the working configuration in
 `src/test/resources/application.yml`.
 
 For the plain key-by-key reference, see [Configuration](./configuration). For the pipeline stages

@@ -6,6 +6,7 @@ import { computed, onMounted, ref } from 'vue'
 const { Layout } = DefaultTheme
 
 const GITHUB_REPO = 'https://github.com/milieuinfo/oddtoolkit'
+const PAPER_PDF = 'https://solid.maximvdw.be/publications/2026/paper_semantics2026_oddtoolkit.pdf'
 
 // VitePress does not expose the query string on `useRoute()`, so we read it from
 // the URL once the page has mounted (client-only, avoids SSR/hydration mismatch).
@@ -37,7 +38,24 @@ const showLanding = computed(() => isMounted.value && hasSemantics2026.value)
           View source on GitHub
         </a>
         <a class="btn" :href="withBase('/POSTER_MEDIA_20.pdf')" target="_blank" rel="noopener">
+          <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="8" y1="13" x2="14" y2="13" />
+            <line x1="8" y1="17" x2="14" y2="17" />
+          </svg>
           Poster (PDF)
+        </a>
+        <a class="btn paper" :href="PAPER_PDF" target="_blank" rel="noopener">
+          <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="8" y1="13" x2="14" y2="13" />
+            <line x1="8" y1="17" x2="14" y2="17" />
+          </svg>
+          Paper (PDF)
         </a>
         <a class="btn" :href="withBase('/')">Full documentation</a>
       </div>
@@ -157,6 +175,24 @@ h1 {
 
 .btn.primary:hover {
   background: #4338ca;
+}
+
+.btn.paper {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn.paper:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.pdf-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .authors {

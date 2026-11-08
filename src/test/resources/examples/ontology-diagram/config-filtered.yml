@@ -1,0 +1,20 @@
+# Same fixture ontology as config.yml, but with a namespace filter: only ssn (and the
+# ontology's own mini namespace) are included besides qudt, which is used as a range.
+ontology:
+  ontology-file-path: "src/test/resources/examples/ontology-diagram/ontology.ttl"
+  concepts-file-path: "src/test/resources/examples/ontology-diagram/concepts.ttl"
+
+generators:
+  ontology-diagram:
+    output-file: "target/test-cache/ontology-diagram/ontology-diagram-filtered.mmd"
+    namespaces:
+      - ssn
+      - qudt
+  diagram-generator:
+    export-png: false
+
+adapters:
+  ontology-reasoner:
+    enabled: false
+  ontology-extract-external:
+    enabled: false
