@@ -457,6 +457,10 @@ public abstract class SchemaGenerator extends DiagramGenerator {
               relation.getFrom().getName(), relation.getTo().getName(),
               toIdentifierColumn.getName()),
           fromIdentityColumn.getName(), relation.getName(), relation.getTo().getName()));
+      // Both sides key a *..* join table, whether or not they are the primary key of their own table
+      // (with surrogate keys the identifier column no longer is).
+      fromIdentityColumn.setPrimaryKey(true);
+      toIdentityColumn.setPrimaryKey(true);
       joinColumns.add(fromIdentityColumn);
       joinColumns.add(toIdentityColumn);
 
