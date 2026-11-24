@@ -8,6 +8,10 @@
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
+  "overrides": {
+    "vite": "^6.4.4",
+    "katex": "^0.18.2"
+  },
   "devDependencies": {
     "mermaid": "^11.16.1",
     "vitepress": "^1.0.0",

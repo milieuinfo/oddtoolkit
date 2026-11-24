@@ -1,4 +1,4 @@
-@Library('Cumulus@1.2-stable') _
+@Library('Cumulus@1.3-stable') _
 
 def nodePodSpec = '''
 spec:
@@ -28,7 +28,7 @@ pipeline {
   agent {
     kubernetes {
       inheritFrom 'jenkins-jenkins-agent'
-      yaml podBuilder.from([maven.podSpec(25), nodePodSpec])
+      yaml podBuilder.from([maven.podSpec(25), dind.podSpec(), trivy.podSpec(), nodePodSpec])
     }
   }
 
@@ -56,6 +56,32 @@ pipeline {
               env.VERSION = version
             }
           }
+        }
+      }
+    }
+
+    stage('Gitleaks scan') {
+      when {
+        expression { git.notSkipCi() }
+      }
+      steps {
+        container('maven') {
+          sh '''
+            docker run --rm -v "$(pwd):/workspace:ro" \
+              acd-docker.repository.milieuinfo.be/zricethezav/gitleaks:v8.24.2 \
+              dir --redact --no-banner /workspace
+          '''
+        }
+      }
+    }
+
+    stage('Trivy scan') {
+      when {
+        expression { git.notSkipCi() }
+      }
+      steps {
+        script {
+          trivy.scanFilesystem([ignoreFile: '.trivyignore.yaml'])
         }
       }
     }
