@@ -1,0 +1,19 @@
+ontology:
+  ontology-file-path: "src/test/resources/examples/rdf-metadata/ontology.ttl"
+  concepts-file-path: "src/test/resources/examples/ontology-diagram/concepts.ttl"
+  extra-properties:
+    - name: "uri"
+      uri: "https://example.org/ontology#uri"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality: { min: 1, max: 1 }
+generators:
+  sql-generator:
+    output-file: "target/test-cache/rdf-metadata/composite.sql"
+  schema-generator:
+    identity-tables:
+      enabled: false
+adapters:
+  ontology-extract-external:
+    enabled: false
+  ontology-reasoner:
+    enabled: false

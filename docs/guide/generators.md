@@ -151,6 +151,7 @@ unless you disable [PNG export](#png-export).
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `output-file` | none (stdout) | Path of the `.mmd` file |
+| `include-tables` | `[]` | Render only these generated table names and relations between them; unknown names are errors |
 
 Also reads `generators.diagram-generator` and `generators.schema-generator`. Do not add an
 `adapters` key here — it aborts the run. See

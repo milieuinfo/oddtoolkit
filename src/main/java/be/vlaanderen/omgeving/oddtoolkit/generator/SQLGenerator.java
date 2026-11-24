@@ -97,6 +97,9 @@ public class SQLGenerator extends SchemaGenerator {
               .append(")").append("\n");
         }
         sb.append("  ").append(column.getName()).append(" ").append(column.getDataType());
+        if (isRdfMetadataTable(table) && !column.isNullable()) {
+          sb.append(" NOT NULL");
+        }
       }
       // Create constraints for primary keys and foreign keys
       List<Column> primaryKeys = table.getColumns().stream().filter(Column::isPrimaryKey).toList();
@@ -110,6 +113,21 @@ public class SQLGenerator extends SchemaGenerator {
           sb.append(pk.getName());
         }
         sb.append(")");
+      }
+      if (isRdfMetadataTable(table)) {
+        String objectKind = table.getColumnByUri(table.getUri() + "/objectKind").getName();
+        String datatype = table.getColumnByUri(table.getUri() + "/datatype").getName();
+        String language = table.getColumnByUri(table.getUri() + "/language").getName();
+        sb.append(",\n  CHECK (").append(objectKind).append(" IN ('IRI', 'LITERAL'))")
+            .append(",\n  CHECK (").append(objectKind).append(" <> 'IRI' OR (")
+            .append(datatype).append(" IS NULL AND ").append(language).append(" IS NULL))")
+            .append(",\n  CHECK (").append(language).append(" IS NULL OR (")
+            .append(language).append(" <> '' AND (").append(datatype).append(" IS NULL OR ")
+            .append(datatype).append(" = '")
+            .append("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')))")
+            .append(",\n  CHECK (").append(datatype).append(" IS NULL OR ").append(datatype)
+            .append(" <> 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString' OR ")
+            .append(language).append(" IS NOT NULL)");
       }
       sb.append("\n);\n\n");
 
@@ -132,11 +150,15 @@ public class SQLGenerator extends SchemaGenerator {
     getTables().stream()
         .sorted(TABLE_ORDER)
         .forEach(table -> {
+      if (table.getTableType() == TableType.JOIN) {
+        generateJoinForeignKeys(sb, table);
+        return;
+      }
       List<Column> foreignKeys = table.getColumns().stream().filter(Column::isForeignKey).toList();
       for (Column fk : foreignKeys) {
         table.getRelations()
             .stream()
-            .filter(relation -> relation.getFromColumn().equals(fk))
+            .filter(relation -> relation.getFromColumn() == fk)
             .sorted(RELATION_ORDER)
             .forEach(relation -> sb.append("ALTER TABLE ").append(table.getName())
               .append(" ADD FOREIGN KEY (").append(fk.getName()).append(") REFERENCES ")
@@ -144,6 +166,52 @@ public class SQLGenerator extends SchemaGenerator {
               .append(relation.getToColumn().getName()).append(");\n"));
       }
     });
+  }
+
+  private void generateJoinForeignKeys(StringBuilder sb, Table table) {
+    List<Column> columns = table.getColumns().stream().filter(Column::isForeignKey).toList();
+    int index = 0;
+    while (index < columns.size()) {
+      Column first = columns.get(index);
+      Relation firstRelation = table.getRelations().stream()
+          .filter(relation -> relation.getFromColumn() == first)
+          .findFirst().orElseThrow(() -> new IllegalStateException(
+              "Missing join relation for " + table.getName() + "." + first.getName()));
+      Table target = firstRelation.getTo();
+      List<Column> targetKeys = target.getColumns().stream().filter(Column::isPrimaryKey).toList();
+      if (targetKeys.isEmpty() || index + targetKeys.size() > columns.size()) {
+        throw new IllegalStateException("Incomplete join foreign key from " + table.getName()
+            + " to " + target.getName());
+      }
+      List<Column> sourceKeys = columns.subList(index, index + targetKeys.size());
+      for (int i = 0; i < sourceKeys.size(); i++) {
+        Column source = sourceKeys.get(i);
+        Column targetKey = targetKeys.get(i);
+        boolean matches = table.getRelations().stream()
+            .anyMatch(relation -> relation.getFromColumn() == source
+                && relation.getTo().getName().equals(target.getName())
+                && relation.getToColumn().getName().equals(targetKey.getName()));
+        if (!matches) {
+          throw new IllegalStateException("Incomplete join foreign key from " + table.getName()
+              + " to " + target.getName() + ": " + source.getName() + " -> "
+              + targetKey.getName() + ", relations: "
+              + table.getRelations().stream().map(relation -> relation.getFromColumn().getName()
+                  + "->" + relation.getTo().getName() + "." + relation.getToColumn().getName()).toList());
+        }
+      }
+      sb.append("ALTER TABLE ").append(table.getName()).append(" ADD FOREIGN KEY (")
+          .append(String.join(", ", sourceKeys.stream().map(Column::getName).toList()))
+          .append(") REFERENCES ").append(target.getName()).append("(")
+          .append(String.join(", ", targetKeys.stream().map(Column::getName).toList()))
+          .append(");\n");
+      index += targetKeys.size();
+    }
+  }
+
+  private boolean isRdfMetadataTable(Table table) {
+    var config = getOntologyConfiguration().getMetadataClasses();
+    return config != null && config.isRdfValues() && config.getClasses().stream()
+        .anyMatch(uri -> (uri + "/" + config.getSuffix()).equals(table.getUri()));
   }
 
   private void generateEnumTypes(StringBuilder sb) {

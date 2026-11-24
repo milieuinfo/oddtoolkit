@@ -50,7 +50,18 @@ public class ERDiagramGenerator extends SchemaGenerator {
   }
 
   private void generateTables(StringBuilder builder) {
-    getTables().forEach(table -> {
+    List<String> included = generatorProperties.getIncludeTables();
+    if (included != null && !included.isEmpty()) {
+      List<String> missing = included.stream()
+          .filter(name -> getTables().stream().noneMatch(table -> name.equals(table.getName())))
+          .toList();
+      if (!missing.isEmpty()) {
+        throw new IllegalStateException("ER diagram tables not found: " + missing);
+      }
+    }
+    getTables().stream()
+        .filter(table -> included == null || included.isEmpty() || included.contains(table.getName()))
+        .forEach(table -> {
       builder.append("%% ").append(table.getUri()).append("\n");
       builder.append(table.getName()).append(" {\n");
       table.getColumns().forEach(column -> {
@@ -79,6 +90,10 @@ public class ERDiagramGenerator extends SchemaGenerator {
 
   private void generateRelations(StringBuilder builder, Table table) {
     table.getRelations().forEach(relation -> {
+      List<String> included = generatorProperties.getIncludeTables();
+      if (included != null && !included.isEmpty() && !included.contains(relation.getTo().getName())) {
+        return;
+      }
       PropertyInfo relationProperty = (PropertyInfo) relation.getFromColumn().getPropertyInfo();
       Cardinality cardinality = relation.getCardinality();
       if (relationProperty != null) {

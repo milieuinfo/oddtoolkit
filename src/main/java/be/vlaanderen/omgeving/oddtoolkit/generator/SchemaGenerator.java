@@ -52,9 +52,26 @@ public abstract class SchemaGenerator extends DiagramGenerator {
     tables.clear();
     updateEnums();
     extractTables();
+    validateRdfMetadataOwners();
     extractTableRelations();
     stabilizeSchemaOrdering();
     validateSchema();
+  }
+
+  private void validateRdfMetadataOwners() {
+    var config = ontologyConfiguration.getMetadataClasses();
+    if (config == null || !config.isRdfValues()) {
+      return;
+    }
+    for (String uri : config.getClasses()) {
+      Table owner = tables.stream().filter(table -> uri.equals(table.getUri())).findFirst()
+          .orElseThrow(() -> new IllegalStateException("RDF metadata owner not found: " + uri));
+      long primaryKeys = owner.getColumns().stream().filter(Column::isPrimaryKey).count();
+      if (primaryKeys != 1) {
+        throw new IllegalStateException("RDF metadata owner " + uri
+            + " must have one version-specific primary key; configure a surrogate key");
+      }
+    }
   }
 
   /**
@@ -150,6 +167,16 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       return null;
     }
 
+    List<Column> primaryKeys = table.getColumns().stream()
+        .filter(Column::isPrimaryKey)
+        .toList();
+    List<Column> preferredPrimaryKeys = preferNonForeignKey
+        ? primaryKeys.stream().filter(column -> !column.isForeignKey()).toList()
+        : primaryKeys;
+    if (preferredPrimaryKeys.size() == 1) {
+      return preferredPrimaryKeys.getFirst();
+    }
+
     for (String identifierUri : getIdentifierColumnUris()) {
       Column column = table.getColumnByUri(identifierUri);
       if (column != null && (!preferNonForeignKey || !column.isForeignKey())) {
@@ -165,16 +192,6 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       }
     }
 
-    List<Column> primaryKeys = table.getColumns().stream()
-        .filter(Column::isPrimaryKey)
-        .toList();
-    List<Column> preferredPrimaryKeys = preferNonForeignKey
-        ? primaryKeys.stream().filter(column -> !column.isForeignKey()).toList()
-        : primaryKeys;
-
-    if (preferredPrimaryKeys.size() == 1) {
-      return preferredPrimaryKeys.getFirst();
-    }
     if (preferNonForeignKey && preferredPrimaryKeys.isEmpty() && primaryKeys.size() == 1) {
       return primaryKeys.getFirst();
     }
@@ -281,6 +298,7 @@ public abstract class SchemaGenerator extends DiagramGenerator {
             "creating an identity table for '" + table.getName() + "'");
         Column identityColumnCopy = identifierColumn.copy();
         identityColumnCopy.setDomain(identityTable);
+        identityColumnCopy.setPrimaryKey(true);
         identityTable.addColumn(identityColumnCopy);
         identityTables.add(identityTable);
         // Update the original table to reference the identity table
@@ -1012,7 +1030,8 @@ public abstract class SchemaGenerator extends DiagramGenerator {
       return null;
     }
     List<Table> candidateTables = tables.stream()
-        .filter(t -> t.getClassInfo().equals(clazz.getClassInfo()))
+        .filter(t -> t.getTableType() != TableType.JOIN
+            && t.getClassInfo().equals(clazz.getClassInfo()))
         .toList();
     return candidateTables.stream()
         .filter(t -> !identifier || isPreferredIdentifierTable(t))

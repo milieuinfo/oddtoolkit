@@ -1,0 +1,15 @@
+@prefix : <https://example.org/concept/> .
+@prefix ex: <https://example.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+<> a skos:ConceptScheme .
+:waargenomenMet a skos:Concept ; owl:equivalentProperty sosa:madeBySensor ; skos:inScheme <> .
+:verschijnseltijd a skos:Concept ; owl:equivalentProperty sosa:phenomenonTime ; skos:inScheme <> .
+:predicaat a skos:Concept ; owl:equivalentProperty rdf:predicate ; skos:inScheme <> .
+:objectwaarde a skos:Concept ; owl:equivalentProperty rdf:object ; skos:inScheme <> .
+:objectsoort a skos:Concept ; owl:equivalentProperty <https://example.org/ontology#Resultaat/Eigenschap/objectKind> ; skos:inScheme <> .
+:taal a skos:Concept ; owl:equivalentProperty <https://example.org/ontology#Resultaat/Eigenschap/language> ; skos:inScheme <> .
+:resultaatEigenschappen a skos:Concept ; owl:equivalentProperty <https://example.org/ontology#Resultaat/metadata-properties> ; skos:inScheme <> .

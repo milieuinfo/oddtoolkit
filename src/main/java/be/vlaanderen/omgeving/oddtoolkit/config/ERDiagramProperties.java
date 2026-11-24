@@ -1,5 +1,7 @@
 package be.vlaanderen.omgeving.oddtoolkit.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +13,5 @@ import lombok.Setter;
 @ConfigPrefix("generators.er-diagram")
 public class ERDiagramProperties {
   private String outputFile;
+  private List<String> includeTables = new ArrayList<>();
 }

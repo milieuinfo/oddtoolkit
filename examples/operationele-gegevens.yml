@@ -1,0 +1,67 @@
+ontology:
+  ontology-file-path: "../RIE-IEPR/src/main/resources/be/vlaanderen/omgeving/riepr/data/ns/riepr/riepr.ttl"
+  concepts-file-path: "../RIE-IEPR/src/main/resources/be/vlaanderen/omgeving/riepr/data/id/concept/riepr/riepr.ttl"
+  extra-properties:
+    - name: "uri"
+      uri: "http://example.org/vocab/uri"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality:
+        min: 1
+        max: 1
+  override-properties:
+    - uri: "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#localId"
+      name: "uuid"
+      identifier: true
+      range: "http://www.w3.org/2001/XMLSchema#string"
+    - uri: "http://qudt.org/schema/qudt/numericValue"
+      range: "http://www.w3.org/2001/XMLSchema#decimal"
+  override-datatypes:
+    - uri: "http://www.opengis.net/ont/geosparql#wktLiteral"
+      override: "http://www.w3.org/2001/XMLSchema#string"
+  surrogate-keys:
+    enabled: true
+    name: "id"
+    datatype: "http://www.w3.org/2001/XMLSchema#string"
+  metadata-classes:
+    suffix: "Eigenschap"
+    key: "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"
+    value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#object"
+    rdf-values: true
+    classes:
+      - "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Resultaat"
+
+generators:
+  er-diagram:
+    output-file: "target/operationele-gegevens/er-diagram.mmd"
+    include-tables:
+      - "observatie"
+      - "observatie_verzameling"
+      - "resultaat"
+      - "resultaat_eigenschap"
+      - "uitvoerder"
+      - "aangifte"
+      - "gebeurtenis"
+      - "systeem"
+      - "rel_observatie_uitvoerder"
+      - "rel_observatie_verzameling_observatie"
+      - "rel_observatie_verzameling_observatie_verzameling"
+  sql-generator:
+    output-file: "target/operationele-gegevens/schema.sql"
+  java-generator:
+    package-name: "be.vlaanderen.omgeving.riepr.model.operationeel"
+    output-directory: "target/operationele-gegevens/java"
+  typescript-generator:
+    output-directory: "target/operationele-gegevens/typescript"
+  diagram-generator:
+    export-png: false
+  schema-generator:
+    merge-join-tables:
+      enabled: false
+    identity-tables:
+      enabled: false
+
+adapters:
+  ontology-extract-external:
+    enabled: false
+  ontology-reasoner:
+    enabled: false

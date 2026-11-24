@@ -1,0 +1,50 @@
+@prefix : <https://example.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+:Resultaat a owl:Class ;
+    hydra:search [
+        hydra:template "https://example.org/result/{id}/{version}" ;
+        hydra:mapping [ hydra:variable "id" ; hydra:property :localId ],
+                      [ hydra:variable "version" ; hydra:property :version ]
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty :executors ;
+        owl:allValuesFrom :Uitvoerder ;
+        owl:minCardinality 0
+    ] .
+
+:Observatie a owl:Class ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty :hasResult ;
+        owl:someValuesFrom :Resultaat ;
+        owl:minCardinality 1 ;
+        owl:maxCardinality 1
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty :executor ;
+        owl:allValuesFrom :Uitvoerder ;
+        owl:minCardinality 0
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty sosa:madeBySensor ;
+        owl:allValuesFrom :Sensor ;
+        owl:minCardinality 0 ;
+        owl:maxCardinality 1
+    ] ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty sosa:phenomenonTime ;
+        owl:minCardinality 0 ;
+        owl:maxCardinality 1
+    ] .
+
+:Uitvoerder a owl:Class .
+:Sensor a owl:Class .

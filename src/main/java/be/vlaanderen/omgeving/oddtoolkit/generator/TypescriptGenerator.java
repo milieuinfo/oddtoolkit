@@ -116,10 +116,18 @@ public class TypescriptGenerator extends ClassGenerator {
 
       // Begin with imports
       Set<String> imports = new HashSet<>();
+      Clazz rdfMetadata = rdfMetadataFor(clazz);
+      if (rdfMetadata != null && finalFileName != null) {
+        String metadataFileName = fileNames.get(rdfMetadata);
+        if (metadataFileName != null) {
+          imports.add("import { " + rdfMetadata.getName() + " } from './"
+              + metadataFileName.replace(".ts", "") + "';");
+        }
+      }
 
       // Add typed-json imports if not enum
       if (!isEnum) {
-        boolean hasProperties = !clazz.getAttributes().isEmpty();
+        boolean hasProperties = !clazz.getAttributes().isEmpty() || rdfMetadata != null;
         if (hasProperties && !isInterface) {
           imports.add("import { jsonObject, jsonMember, jsonArrayMember } from 'typedjson';");
         }
@@ -258,8 +266,7 @@ public class TypescriptGenerator extends ClassGenerator {
           }
 
           // Check if property is optional (not required)
-          boolean isOptional = !prop.getCardinality().equals(Cardinality.ONE_TO_ONE) &&
-              !prop.getCardinality().equals(Cardinality.ONE_TO_MANY) && !prop.isPrimaryKey();
+          boolean isOptional = prop.isNullable() && !prop.isPrimaryKey();
 
           if (isInterface) {
             // Interface: just declare the property
@@ -270,7 +277,9 @@ public class TypescriptGenerator extends ClassGenerator {
             builder.append(": ").append(dataType).append(";\n");
           } else {
             // Class: add @jsonMember or @jsonArrayMember decorator and property
-            if (isArray) {
+            if (isRdfMetadataOwnerReference(clazz, prop)) {
+              // The owning result serializes the entries; avoid a circular JSON object graph.
+            } else if (isArray) {
               // Use @jsonArrayMember for arrays
               builder.append("\t@jsonArrayMember(() => ").append(tsType.jsonType())
                   .append(", { name: '")
@@ -292,6 +301,13 @@ public class TypescriptGenerator extends ClassGenerator {
           }
           builder.append("\n");
         });
+        if (rdfMetadata != null) {
+          String collectionName = rdfMetadataCollectionName(clazz);
+          builder.append("\t@jsonArrayMember(() => ").append(rdfMetadata.getName())
+              .append(", { name: '").append(collectionName).append("' })\n")
+              .append("\t").append(collectionName).append("?: ")
+              .append(rdfMetadata.getName()).append("[];\n");
+        }
       }
       builder.append("}\n");
 

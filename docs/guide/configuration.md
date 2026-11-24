@@ -197,6 +197,7 @@ free-form annotations rather than fixed columns. Nothing happens while `classes`
 | `key` | URI string | — | Property URI used as the `key` attribute |
 | `value` | URI string | — | Property URI used as the `value` attribute |
 | `classes` | list of URI strings | `[]` | Class URIs that get a metadata companion |
+| `rdf-values` | boolean | `false` | Store RDF predicate/object values instead of plain metadata |
 
 ```yaml
 ontology:
@@ -210,6 +211,43 @@ ontology:
 
 The companion class gets a `key` and a `value` attribute, a reference back to the source class, and
 a copy of every `temporal-properties` entry the source class actually has.
+
+With `rdf-values: true`, the companion instead contains an application-assigned `id`, `predicate`,
+`value`, `objectKind` (`IRI` or `LITERAL`), optional `datatype` and `language`, and a reference to
+the source version. The source gets an `rdfProperties` collection. The owner must have a single
+version-specific primary key; use `surrogate-keys` for composite Hydra identifiers. The application
+must assign the entry's `id` and set its owner when adding it to the collection.
+
+For example:
+
+```yaml
+ontology:
+  surrogate-keys:
+    enabled: true
+  metadata-classes:
+    suffix: "Eigenschap"
+    key: "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"
+    value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#object"
+    rdf-values: true
+    classes:
+      - "https://data.riepr.omgeving.vlaanderen.be/ns/riepr#Resultaat"
+```
+
+These are default names. SKOS `owl:equivalentProperty` concepts can rename the configured `key`
+and `value`, `<class-uri>/<suffix>/objectKind`, `<class-uri>/<suffix>/datatype`,
+`<class-uri>/<suffix>/language`, and the collection `<class-uri>/metadata-properties`. The SQL
+constraints use the resulting column names. The stored object-kind codes remain `IRI` and `LITERAL`.
+
+These are storage/DTO fields, not RDF reification. `RdfPropertyValue.fromStatement` and
+`toStatement` convert individual direct triples, including typed and language-tagged literals and
+IRI objects. Blank nodes are rejected. The consumer must choose which predicates are dynamic
+(excluding fields already handled separately), copy between the generated DTO and
+`RdfPropertyValue`, and invoke the conversion; the collection is not automatically expanded to
+dynamic JSON-LD predicates.
+
+See `examples/operationele-gegevens.yml` for a focused RIE-IEPR configuration. Its ontology and
+concept paths expect a sibling `RIE-IEPR` checkout. Only the ER diagram is filtered; the SQL and
+class generators still output the full model.
 
 ### `surrogate-keys`
 

@@ -1,0 +1,42 @@
+ontology:
+  ontology-file-path: "src/test/resources/examples/rdf-metadata/ontology.ttl"
+  concepts-file-path: "src/test/resources/examples/ontology-diagram/concepts.ttl"
+  extra-properties:
+    - name: "uri"
+      uri: "https://example.org/ontology#uri"
+      range: "http://www.w3.org/2001/XMLSchema#string"
+      cardinality: { min: 1, max: 1 }
+  override-properties:
+    - uri: "https://example.org/ontology#localId"
+      identifier: true
+  surrogate-keys:
+    enabled: true
+  metadata-classes:
+    suffix: "Eigenschap"
+    key: "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"
+    value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#object"
+    rdf-values: true
+    classes:
+      - "https://example.org/ontology#Resultaat"
+
+generators:
+  er-diagram:
+    output-file: "target/test-cache/rdf-metadata/er.mmd"
+    include-tables: ["resultaat", "resultaat_eigenschap"]
+  diagram-generator:
+    export-png: false
+  sql-generator:
+    output-file: "target/test-cache/rdf-metadata/schema.sql"
+  java-generator:
+    output-directory: "target/test-cache/rdf-metadata/java"
+  typescript-generator:
+    output-directory: "target/test-cache/rdf-metadata/typescript"
+  schema-generator:
+    identity-tables:
+      enabled: false
+
+adapters:
+  ontology-extract-external:
+    enabled: false
+  ontology-reasoner:
+    enabled: false

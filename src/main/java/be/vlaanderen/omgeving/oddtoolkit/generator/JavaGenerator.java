@@ -142,12 +142,15 @@ public class JavaGenerator extends SchemaGenerator {
                   .append(dep.getRight())
                   .append(";\n"));
       if (!isInterface) {
-        boolean hasProperties = !clazz.getAttributes().isEmpty();
+        boolean hasProperties = !clazz.getAttributes().isEmpty() || rdfMetadataFor(clazz) != null;
         if (hasProperties || (isJsonLd() && !isEnum)) {
           builder.append("import com.fasterxml.jackson.annotation.JsonProperty;\n");
         }
-        if (isJsonLd() && !isEnum) {
+        if (!isEnum && (isJsonLd() || clazz.getAttributes().stream()
+            .anyMatch(attribute -> isRdfMetadataOwnerReference(clazz, attribute)))) {
           builder.append("import com.fasterxml.jackson.annotation.JsonIgnore;\n");
+        }
+        if (isJsonLd() && !isEnum) {
           builder.append("import com.fasterxml.jackson.annotation.JsonSetter;\n");
           builder.append("import com.fasterxml.jackson.databind.annotation.JsonSerialize;\n");
         }
@@ -307,11 +310,7 @@ public class JavaGenerator extends SchemaGenerator {
                 String joinTableName = resolveJoinTableName(equivalentTable.getName(),
                     targetTable.getName(), prop.getName(), appendRelationName);
 
-                builder.append("\t@JoinTable(\n");
-                builder.append("\t\tname = \"").append(joinTableName).append("\",\n");
-                builder.append("\t\tjoinColumns = @JoinColumn(name = \"source_uuid\"),\n");
-                builder.append("\t\tinverseJoinColumns = @JoinColumn(name = \"target_uuid\")\n");
-                builder.append("\t)\n");
+                appendJoinTable(builder, joinTableName, prop.getName(), equivalentTable, targetTable);
               }
             } else {
               // Other relationships (one-to-one, one-to-many, many-to-one)
@@ -349,14 +348,22 @@ public class JavaGenerator extends SchemaGenerator {
               }
               Relation relation = equivalentTable.getRelationByAttribute(prop);
               if (relation != null && relation.getToColumn() != null) {
-                builder.append("\t@JoinColumn(name = \"").append(relation.getToColumn().getName())
+                if (prop.getCardinality() == Cardinality.ONE_TO_ONE) {
+                  builder.append("\t@OneToOne\n");
+                } else {
+                  builder.append("\t@ManyToOne\n");
+                }
+                builder.append("\t@JoinColumn(name = \"").append(equivalentColumn.getName())
+                    .append("\", referencedColumnName = \"").append(relation.getToColumn().getName())
                     .append("\", nullable = ").append(equivalentColumn.isNullable()).append(")\n");
               }
             }
           }
 
           Attribute datatypeCompanion = isJsonLd() ? findDatatypeCompanion(clazz, prop) : null;
-          if (isJsonLd() && datatypeCompanion != null && !isArray) {
+          if (isRdfMetadataOwnerReference(clazz, prop)) {
+            builder.append("\t@JsonIgnore\n");
+          } else if (isJsonLd() && datatypeCompanion != null && !isArray) {
             // Value and datatype serialize together as one typed literal, see appendTypedLiteralAccessors.
             builder.append("\t@JsonIgnore\n");
             appendTypedLiteralAccessors(methods, prop, datatypeCompanion);
@@ -376,6 +383,17 @@ public class JavaGenerator extends SchemaGenerator {
               .append(" ").append(prop.getName()).append(";\n");
         }
       });
+
+      Clazz rdfMetadata = rdfMetadataFor(clazz);
+      if (!isInterface && !isEnum && rdfMetadata != null) {
+        String ownerName = clazz.getName().substring(0, 1).toLowerCase()
+            + clazz.getName().substring(1);
+        String collectionName = rdfMetadataCollectionName(clazz);
+        builder.append("\t@OneToMany(mappedBy = \"").append(ownerName).append("\")\n")
+            .append("\t@JsonProperty(\"").append(collectionName).append("\")\n")
+            .append("\tprivate List<").append(rdfMetadata.getName())
+            .append("> ").append(collectionName).append(";\n");
+      }
 
       if (isJsonLd() && !isInterface && !isEnum) {
         appendRdfTypeGetter(methods, clazz);
@@ -438,11 +456,7 @@ public class JavaGenerator extends SchemaGenerator {
           targetTable.getName(), prop.getName(), appendRelationName);
 
       builder.append("\t@ManyToMany\n");
-      builder.append("\t@JoinTable(\n");
-      builder.append("\t\tname = \"").append(joinTableName).append("\",\n");
-      builder.append("\t\tjoinColumns = @JoinColumn(name = \"source_uuid\"),\n");
-      builder.append("\t\tinverseJoinColumns = @JoinColumn(name = \"target_uuid\")\n");
-      builder.append("\t)\n");
+      appendJoinTable(builder, joinTableName, prop.getName(), ownerTable, targetTable);
       if (isJsonLd() && isEntityReference(rangeClazz)) {
         builder.append("\t@JsonSerialize(contentUsing = ").append(IRI_REFERENCE_SERIALIZER)
             .append(".class)\n");
@@ -450,6 +464,60 @@ public class JavaGenerator extends SchemaGenerator {
       builder.append("\t@JsonProperty(\"").append(jsonName).append("\")\n");
       builder.append("\tprivate List<").append(targetType).append("> ")
           .append(fieldName).append(";\n");
+    }
+  }
+
+  private void appendJoinTable(StringBuilder builder, String joinTableName, String propertyName,
+      Table ownerTable, Table targetTable) {
+    String qualifiedName = joinTableName + "_" + toSnakeCase(propertyName).toLowerCase();
+    Table joinTable = getTables().stream()
+        .filter(table -> table.getTableType() == TableType.JOIN
+            && (joinTableName.equals(table.getName()) || qualifiedName.equals(table.getName())))
+        .sorted(Comparator.comparing(table -> !joinTableName.equals(table.getName())))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Join table not found: " + joinTableName
+            + "; available: " + getTables().stream().filter(table -> table.getTableType() == TableType.JOIN)
+                .map(Table::getName).toList()));
+    List<Column> columns = joinTable.getColumns().stream().filter(Column::isForeignKey).toList();
+    int sourceCount = ownerTable.getName().equals(targetTable.getName())
+        ? columns.size() / 2
+        : (int) columns.stream().filter(column -> joinTable.getRelations().stream()
+            .anyMatch(relation -> relation.getFromColumn() == column
+                && ownerTable.getClassInfo().equals(relation.getTo().getClassInfo()))).count();
+    if (sourceCount < 1 || sourceCount >= columns.size()
+        || (ownerTable.getName().equals(targetTable.getName()) && columns.size() % 2 != 0)) {
+      throw new IllegalStateException("Cannot resolve join columns for " + joinTableName
+          + " from " + ownerTable.getName() + " to " + targetTable.getName() + ": "
+          + joinTable.getRelations().stream().map(relation -> relation.getFromColumn().getName()
+              + "->" + relation.getTo().getName()).toList());
+    }
+    builder.append("\t@JoinTable(\n")
+        .append("\t\tname = \"").append(joinTable.getName()).append("\",\n")
+        .append("\t\tjoinColumns = ");
+    appendJoinColumns(builder, joinTable, columns.subList(0, sourceCount));
+    builder.append(",\n\t\tinverseJoinColumns = ");
+    appendJoinColumns(builder, joinTable, columns.subList(sourceCount, columns.size()));
+    builder.append("\n\t)\n");
+  }
+
+  private void appendJoinColumns(StringBuilder builder, Table table, List<Column> columns) {
+    if (columns.size() > 1) {
+      builder.append("{ ");
+    }
+    for (int i = 0; i < columns.size(); i++) {
+      Column column = columns.get(i);
+      Relation relation = table.getRelations().stream()
+          .filter(candidate -> candidate.getFromColumn() == column)
+          .findFirst().orElseThrow();
+      if (i > 0) {
+        builder.append(", ");
+      }
+      builder.append("@JoinColumn(name = \"").append(column.getName())
+          .append("\", referencedColumnName = \"").append(relation.getToColumn().getName())
+          .append("\")");
+    }
+    if (columns.size() > 1) {
+      builder.append(" }");
     }
   }
 

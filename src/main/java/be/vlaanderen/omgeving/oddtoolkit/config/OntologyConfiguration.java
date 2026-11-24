@@ -52,6 +52,7 @@ public class OntologyConfiguration {
     private String key;
     private String value;
     private List<String> classes = new ArrayList<>();
+    private boolean rdfValues = false;
   }
 
   @Getter

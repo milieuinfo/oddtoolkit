@@ -408,8 +408,8 @@ public class ClassGenerator extends BaseGenerator {
           attribute.setCardinality(getCardinality(p));
           attribute.setDomain(clazz);
           attribute.setPrimaryKey(p.isIdentifier());
-          attribute.setNullable(!p.isIdentifier() && (attribute.getCardinality() == null || !attribute.getCardinality()
-              .isMinOne()));
+          attribute.setNullable(!p.isIdentifier()
+              && (p.getCardinalityTo().getMin() == null || p.getCardinalityTo().getMin() == 0));
           // Check if the property is a relation to another class
           if (!p.getRange().isEmpty() && p.getRange().getFirst().equals(RDFS.Datatype.getURI())) {
             // Set datatype to string
@@ -603,34 +603,89 @@ public class ClassGenerator extends BaseGenerator {
     List<String> temporalProperties = getOntologyConfiguration().getTemporalProperties();
 
     for (String classUri : metadataConfig.getClasses()) {
-      // Find the corresponding class
-      classes.stream()
+      Clazz sourceClass = classes.stream()
           .filter(c -> c.getUri().equals(classUri))
-          .findFirst().ifPresent(
-              sourceClass -> createMetadataClass(sourceClass, suffix, keyProperty, valueProperty,
-                  temporalProperties));
-
+          .findFirst().orElse(null);
+      if (sourceClass == null) {
+        if (metadataConfig.isRdfValues()) {
+          throw new IllegalStateException("RDF metadata owner not found: " + classUri);
+        }
+        continue;
+      }
+      String collectionName = metadataConfig.isRdfValues()
+          ? rdfMetadataCollectionName(sourceClass) : null;
+      if (collectionName != null && sourceClass.getAttributes().stream()
+          .anyMatch(attribute -> collectionName.equals(attribute.getName()))) {
+        throw new IllegalStateException("RDF metadata field " + collectionName
+            + " already exists on " + classUri);
+      }
+      createMetadataClass(sourceClass, suffix, keyProperty, valueProperty, temporalProperties,
+          metadataConfig.isRdfValues());
     }
   }
 
+  protected Clazz rdfMetadataFor(Clazz sourceClass) {
+    var config = getOntologyConfiguration().getMetadataClasses();
+    if (config == null || !config.isRdfValues()
+        || !config.getClasses().contains(sourceClass.getUri())) {
+      return null;
+    }
+    String metadataUri = sourceClass.getUri() + "/" + config.getSuffix();
+    return classes.stream().filter(c -> metadataUri.equals(c.getUri())).findFirst().orElse(null);
+  }
+
+  protected String rdfMetadataCollectionName(Clazz sourceClass) {
+    PropertyInfo property = new PropertyInfo(sourceClass.getClassInfo().getScope(),
+        getOntologyInfo().getModel().createResource(sourceClass.getUri() + "/metadata-properties"));
+    property.setName("rdfProperties");
+    return getPropertyNameAndLabel(property).getLeft();
+  }
+
+  protected boolean isRdfMetadataOwnerReference(Clazz clazz, Attribute attribute) {
+    var config = getOntologyConfiguration().getMetadataClasses();
+    return config != null && config.isRdfValues() && config.getClasses().stream()
+        .anyMatch(uri -> (uri + "/" + config.getSuffix()).equals(clazz.getUri())
+            && (uri + "/metadata-reference").equals(attribute.getUri()));
+  }
+
   private void createMetadataClass(Clazz sourceClass, String suffix, String keyProperty,
-                                    String valueProperty, List<String> temporalProperties) {
+                                    String valueProperty, List<String> temporalProperties,
+                                    boolean rdfValues) {
     Clazz metadataClass = new Clazz();
     metadataClass.setName(sourceClass.getName() + suffix);
-    metadataClass.setClassInfo(sourceClass.getClassInfo());
+    if (rdfValues) {
+      if (keyProperty == null || valueProperty == null) {
+        throw new IllegalArgumentException("RDF metadata requires key and value property URIs");
+      }
+      String classUri = sourceClass.getUri() + "/" + suffix;
+      metadataClass.setClassInfo(new ClassInfo(sourceClass.getClassInfo().getScope(),
+          getOntologyInfo().getModel().createResource(classUri)));
+    } else {
+      metadataClass.setClassInfo(sourceClass.getClassInfo());
+    }
 
     List<Attribute> metadataAttributes = new ArrayList<>();
 
+    if (rdfValues) {
+      Attribute id = createMetadataStringAttribute(metadataClass, "id",
+          metadataClass.getUri() + "/id", true, true);
+      metadataAttributes.add(id);
+    }
+
     // Add key attribute
     Attribute keyAttr = new Attribute();
-    keyAttr.setName("key");
+    keyAttr.setName(rdfValues ? "predicate" : "key");
     PropertyInfo keyPropInfo = new PropertyInfo(sourceClass.getClassInfo().getScope(),
         getOntologyInfo().getModel().createResource(keyProperty));
-    keyPropInfo.setName("key");
+    keyPropInfo.setName(rdfValues ? "predicate" : "key");
     keyPropInfo.setCardinalityTo(new PropertyInfo.Cardinality());
     keyPropInfo.getCardinalityTo().setMin(1);
     keyPropInfo.getCardinalityTo().setMax(1);
     keyPropInfo.setCardinalityFrom(new PropertyInfo.Cardinality());
+    if (rdfValues) {
+      keyPropInfo.setName(getPropertyNameAndLabel(keyPropInfo).getLeft());
+      keyAttr.setName(keyPropInfo.getName());
+    }
     keyAttr.setPropertyInfo(keyPropInfo);
     keyAttr.setCardinality(Cardinality.ONE_TO_ONE);
     keyAttr.setDomain(metadataClass);
@@ -647,14 +702,27 @@ public class ClassGenerator extends BaseGenerator {
     valuePropInfo.getCardinalityTo().setMin(1);
     valuePropInfo.getCardinalityTo().setMax(1);
     valuePropInfo.setCardinalityFrom(new PropertyInfo.Cardinality());
+    if (rdfValues) {
+      valuePropInfo.setName(getPropertyNameAndLabel(valuePropInfo).getLeft());
+      valueAttr.setName(valuePropInfo.getName());
+    }
     valueAttr.setPropertyInfo(valuePropInfo);
     valueAttr.setCardinality(Cardinality.ONE_TO_ONE);
     valueAttr.setDomain(metadataClass);
     valueAttr.setDataType(new DataType("String", XSD.xstring.getURI()));
     metadataAttributes.add(valueAttr);
 
+    if (rdfValues) {
+      metadataAttributes.add(createMetadataStringAttribute(metadataClass, "objectKind",
+          metadataClass.getUri() + "/objectKind", true, false));
+      metadataAttributes.add(createMetadataStringAttribute(metadataClass, "datatype",
+          metadataClass.getUri() + "/datatype", false, false));
+      metadataAttributes.add(createMetadataStringAttribute(metadataClass, "language",
+          metadataClass.getUri() + "/language", false, false));
+    }
+
     // Add temporal properties
-    if (temporalProperties != null && !temporalProperties.isEmpty()) {
+    if (!rdfValues && temporalProperties != null && !temporalProperties.isEmpty()) {
       for (String temporalPropUri : temporalProperties) {
         // Find if source class has this temporal property
         sourceClass.getAttributes().stream()
@@ -698,6 +766,26 @@ public class ClassGenerator extends BaseGenerator {
 
     metadataClass.setAttributes(metadataAttributes);
     this.classes.add(metadataClass);
+  }
+
+  private Attribute createMetadataStringAttribute(Clazz domain, String name, String uri,
+      boolean required, boolean identifier) {
+    PropertyInfo property = new PropertyInfo(domain.getClassInfo().getScope(),
+        getOntologyInfo().getModel().createResource(uri));
+    property.setName(name);
+    property.setName(getPropertyNameAndLabel(property).getLeft());
+    property.setIdentifier(identifier);
+    property.getCardinalityTo().setMin(required ? 1 : 0);
+    property.getCardinalityTo().setMax(1);
+    Attribute attribute = new Attribute();
+    attribute.setName(property.getName());
+    attribute.setPropertyInfo(property);
+    attribute.setCardinality(required ? Cardinality.ONE_TO_ONE : Cardinality.MANY_TO_ONE);
+    attribute.setDomain(domain);
+    attribute.setDataType(new DataType("String", XSD.xstring.getURI()));
+    attribute.setPrimaryKey(identifier);
+    attribute.setNullable(!required);
+    return attribute;
   }
 
   protected void filterInverseProperties(Clazz clazz) {
